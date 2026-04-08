@@ -1,7 +1,7 @@
-package Backend.controller;
+package Backend.controller.facilitymanagement;
 
-import Backend.model.Resource;
-import Backend.service.ResourceService;
+import Backend.model.facilitymanagement.Resource;
+import Backend.service.facilitymanagement.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

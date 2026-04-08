@@ -1,4 +1,4 @@
-package Backend.model;
+package Backend.model.facilitymanagement;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

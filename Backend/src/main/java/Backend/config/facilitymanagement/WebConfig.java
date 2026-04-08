@@ -1,4 +1,4 @@
-package Backend.config;
+package Backend.config.facilitymanagement;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

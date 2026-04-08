@@ -1,7 +1,7 @@
-package Backend.service;
+package Backend.service.facilitymanagement;
 
-import Backend.model.Resource;
-import Backend.repository.ResourceRepository;
+import Backend.model.facilitymanagement.Resource;
+import Backend.repository.facilitymanagement.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
