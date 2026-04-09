@@ -198,9 +198,9 @@ const AdminDashboard = () => {
             <tbody>
               {filteredResources.map((res) => (
                 <tr key={res.id}>
-                  <td style={{ fontWeight: 600, color: '#4f46e5' }}>{res.id}</td>
+                  <td style={{ fontWeight: 600, color: '#c084fc' }}>{res.id}</td>
                   <td>{res.name}</td>
-                  <td><span style={{ background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{res.type}</span></td>
+                  <td><span style={{ background: 'rgba(255,255,255,0.06)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.8rem', color: '#c8c7cc', border: '1px solid rgba(255,255,255,0.08)' }}>{res.type}</span></td>
                   <td>{res.capacity} Seats</td>
                   <td>{res.location}</td>
                   <td>
