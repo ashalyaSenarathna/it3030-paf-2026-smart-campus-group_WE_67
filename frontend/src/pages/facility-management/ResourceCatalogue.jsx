@@ -86,9 +86,7 @@ function ResourceCatalogue() {
         <Link to="/" className="back-btn">
           <span>&larr;</span> Back to Overview
         </Link>
-        <Link to="/facility-management/admin" className="admin-link-btn">
-          ⚙️ Manage Resources
-        </Link>
+
       </div>
 
       {/* ---- HEADER ---- */}
