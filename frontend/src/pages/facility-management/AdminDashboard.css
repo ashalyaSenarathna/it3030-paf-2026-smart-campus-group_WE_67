@@ -87,6 +87,26 @@
   gap: 4px;
 }
 
+.sidebar-logout-btn {
+  margin-top: auto;
+  width: 100%;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
 .nav-item {
   display: flex;
   align-items: center;

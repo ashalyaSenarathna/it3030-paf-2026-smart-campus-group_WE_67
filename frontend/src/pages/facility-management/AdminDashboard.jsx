@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { resourceApi } from '../../api/api';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
 import './AdminDashboard.css';
 
@@ -13,6 +14,7 @@ const TABS = {
 
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(TABS.RESOURCES); // Defaulting to Resources for this task
   const [resources, setResources] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -114,6 +116,19 @@ const AdminDashboard = () => {
     total: resources.length,
     available: resources.filter(r => r.status === 'Available').length,
     maintenance: resources.filter(r => r.status === 'Maintenance').length
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:8085/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout request failed:', error);
+    } finally {
+      navigate('/');
+    }
   };
 
   const renderResourcesTab = () => (
@@ -249,6 +264,9 @@ const AdminDashboard = () => {
             </li>
           ))}
         </ul>
+        <button className="sidebar-logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </aside>
 
       <main className="main-content">

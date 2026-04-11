@@ -1,8 +1,20 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 
-function Home() {
+function Home({ onLogout }) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      if (onLogout) {
+        await onLogout();
+      }
+    } finally {
+      navigate('/login');
+    }
+  };
+
   const modules = [
     {
       id: 'facility',
@@ -19,9 +31,8 @@ function Home() {
       title: 'Student Portal',
       description: 'Access course materials, exam schedules, and academic records conveniently.',
       icon: '🎓',
-      link: '#',
-      action: 'Explore Portal',
-      placeholder: true,
+      link: '/home',
+      action: 'Open Portal',
       gradient: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
       accentColor: '#0ea5e9',
     },
@@ -53,6 +64,12 @@ function Home() {
         <ul className="nav-links">
           <li><Link to="/" className="nav-item active">Home</Link></li>
           <li><Link to="/facility-management/resource-catalogue" className="nav-item">Resources</Link></li>
+          <li><Link to="/profile/student" className="nav-item">Student Profile</Link></li>
+          <li>
+            <button type="button" className="nav-item nav-logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </li>
           <li><a href="#" className="nav-item">Support</a></li>
         </ul>
       </nav>
