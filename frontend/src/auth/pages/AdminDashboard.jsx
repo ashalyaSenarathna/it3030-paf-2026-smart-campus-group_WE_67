@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { resourceApi, bookingApi } from '../../api/api';
+import { resourceApi, bookingApi, adminApi } from '../../api/api';
 import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
 
 const TABS = {
   DASHBOARD: 'Dashboard',
   RESOURCES: 'Manage Resources',
   BOOKINGS: 'Booking Management',
+  USERS: 'User Management',
   MAINTENANCE: 'Maintenance & Support'
 };
 
@@ -17,11 +18,13 @@ const AdminDashboard = ({ user, onLogout }) => {
   // State for data
   const [resources, setResources] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({
     totalResources: 0,
     pendingBookings: 0,
     totalBookings: 0,
-    availableResources: 0
+    availableResources: 0,
+    totalUsers: 0
   });
 
   // State for UI controls
@@ -30,6 +33,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [resourceFilter, setResourceFilter] = useState('All');
   const [resourceStatusFilter, setResourceStatusFilter] = useState('All');
   const [bookingFilter, setBookingFilter] = useState('All');
+  const [userSearch, setUserSearch] = useState('');
   const [toast, setToast] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -74,6 +78,7 @@ const AdminDashboard = ({ user, onLogout }) => {
 
     let resData = [];
     let bookData = [];
+    let userData = [];
     let syncError = null;
 
     try {
@@ -99,17 +104,32 @@ const AdminDashboard = ({ user, onLogout }) => {
       else setDebugMessage(`Booking error: ${err.message}`);
     }
 
+    try {
+      const userResponse = await adminApi.getUsers();
+      userData = userResponse.data;
+      setUsers(userData);
+      console.log("Users fetched successfully:", userData.length);
+    } catch (err) {
+      console.error("User Sync Error:", err);
+      if (err.status === 401) {
+        setDebugMessage(prev => prev + " | User list access unauthorized (401)");
+      } else {
+        setDebugMessage(prev => prev + ` | User error: ${err.message}`);
+      }
+    }
+
     if (syncError) {
       setDebugMessage(`Sync issue: ${syncError}`);
     } else {
-      setDebugMessage(`Synced ${resData.length} facilities and ${bookData.length} reservations.`);
+      setDebugMessage(`Synced ${resData.length} facilities, ${bookData.length} reservations, and ${userData.length} users.`);
     }
 
     setStats({
       totalResources: resData.length,
       totalBookings: bookData.length,
       pendingBookings: bookData.filter(b => (b.status || '').toUpperCase() === 'PENDING').length,
-      availableResources: resData.filter(r => (r.status || '').toLowerCase() === 'available').length
+      availableResources: resData.filter(r => (r.status || '').toLowerCase() === 'available').length,
+      totalUsers: userData.length
     });
 
     setIsLoading(false);
@@ -263,11 +283,9 @@ const AdminDashboard = ({ user, onLogout }) => {
           <div className="stat-meta">Units ready for use</div>
         </div>
         <div className="stat-card">
-          <div className="label">Pending Requests</div>
-          <div className="value" style={{ color: stats.pendingBookings > 0 ? '#fbbf24' : '#fff' }}>
-            {stats.pendingBookings}
-          </div>
-          <div className="stat-meta">Awaiting review</div>
+          <div className="label">Registered Users</div>
+          <div className="value" style={{ color: '#a855f7' }}>{stats.totalUsers}</div>
+          <div className="stat-meta">Unified community</div>
         </div>
       </div>
 
@@ -297,7 +315,6 @@ const AdminDashboard = ({ user, onLogout }) => {
         </section>
 
         <section className="shortcuts-section">
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem' }}>Shortcuts</h2>
           <div className="shortcut-grid">
             <div className="shortcut-card-glass" onClick={() => setActiveTab(TABS.RESOURCES)}>
               <span className="sc-icon">🏢</span>
@@ -306,6 +323,10 @@ const AdminDashboard = ({ user, onLogout }) => {
             <div className="shortcut-card-glass" onClick={() => setActiveTab(TABS.BOOKINGS)}>
               <span className="sc-icon">📅</span>
               <div className="sc-text">Review Bookings</div>
+            </div>
+            <div className="shortcut-card-glass" onClick={() => setActiveTab(TABS.USERS)}>
+              <span className="sc-icon">👥</span>
+              <div className="sc-text">User Directory</div>
             </div>
           </div>
           <div className="shortcut-card-glass" style={{ marginTop: '1rem', width: '100%', opacity: 0.5 }} onClick={() => navigate('/profile/admin')}>
@@ -494,6 +515,120 @@ const AdminDashboard = ({ user, onLogout }) => {
     </div>
   );
 
+  const renderUsers = () => {
+    const filteredUsers = users.filter(u => 
+      u.name?.toLowerCase().includes(userSearch.toLowerCase()) || 
+      u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.username?.toLowerCase().includes(userSearch.toLowerCase())
+    );
+
+    const userStats = {
+      admin: users.filter(u => u.roles?.some(r => r.name === 'ROLE_ADMIN' || r.name === 'ADMIN')).length,
+      student: users.filter(u => u.roles?.some(r => r.name === 'ROLE_STUDENT' || r.name === 'STUDENT')).length,
+      tech: users.filter(u => u.roles?.some(r => r.name === 'ROLE_TECHNICIAN' || r.name === 'TECHNICIAN')).length,
+    };
+    
+    // Corrected stats logic
+    const studentCount = userStats.student;
+
+    return (
+      <div className="tab-pane animate-in">
+        <header className="tab-header">
+          <div className="hero-badge" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', border: '1px solid rgba(168, 85, 247, 0.2)' }}>User Directory</div>
+          <h1>Community Management</h1>
+          <p>View and manage all members of the Smart Campus.</p>
+        </header>
+
+        <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
+          <div className="stat-card">
+            <div className="label">Total Members</div>
+            <div className="value">{users.length}</div>
+          </div>
+          <div className="stat-card">
+            <div className="label">Students</div>
+            <div className="value" style={{ color: '#34d399' }}>{studentCount}</div>
+          </div>
+          <div className="stat-card">
+            <div className="label">Technicians</div>
+            <div className="value" style={{ color: '#fbbf24' }}>{userStats.tech}</div>
+          </div>
+          <div className="stat-card">
+            <div className="label">Administrators</div>
+            <div className="value" style={{ color: '#a855f7' }}>{userStats.admin}</div>
+          </div>
+        </div>
+
+        <div className="action-bar-premium">
+          <div className="action-left-group" style={{ maxWidth: '400px' }}>
+            <div className="search-box-wrap">
+              <span className="search-icon-glass">🔍</span>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="action-right-group">
+            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Showing {filteredUsers.length} users</p>
+          </div>
+        </div>
+
+        <div className="table-responsive-glass">
+          {filteredUsers.length === 0 ? (
+            <div className="empty-table-state">
+              <div className="empty-icon">👥</div>
+              <h3>No users found</h3>
+            </div>
+          ) : (
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  <th>Person</th>
+                  <th>Digital Identity</th>
+                  <th>Roles</th>
+                  <th>Provider</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map(u => (
+                  <tr key={u.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{u.name || 'Anonymous'}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{u.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div>{u.username}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.email}</div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        {u.roles?.map(r => (
+                          <span key={r.id} className={`status-dot-pill role-badge role-${r.name?.toLowerCase().replace('role_', '')}`}>
+                            {r.name?.replace('ROLE_', '')}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="type-tag">{u.authProvider || 'Local'}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="admin-loading-screen">
@@ -515,6 +650,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             { id: TABS.DASHBOARD, icon: '📊', label: 'Dashboard' },
             { id: TABS.RESOURCES, icon: '🏢', label: 'Resources' },
             { id: TABS.BOOKINGS, icon: '📅', label: 'Bookings' },
+            { id: TABS.USERS, icon: '👥', label: 'Users' },
             { id: TABS.MAINTENANCE, icon: '🛠️', label: 'Support' }
           ].map((tab) => (
             <div
@@ -536,6 +672,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         {activeTab === TABS.DASHBOARD && renderDashboard()}
         {activeTab === TABS.RESOURCES && renderResources()}
         {activeTab === TABS.BOOKINGS && renderBookings()}
+        {activeTab === TABS.USERS && renderUsers()}
         {activeTab === TABS.MAINTENANCE && (
           <div className="tab-pane animate-in">
             <header className="tab-header">
@@ -674,6 +811,11 @@ const AdminDashboard = ({ user, onLogout }) => {
         .status-rejected { background: rgba(248, 113, 113, 0.1); color: #f87171; }
         .status-approved { background: rgba(52, 211, 153, 0.1); color: #34d399; }
         .status-cancelled { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+
+        .role-badge { border: 1px solid rgba(255,255,255,0.05); }
+        .role-admin { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+        .role-student { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+        .role-technician { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
 
         .action-row { display: flex; gap: 8px; }
         .tab-icon-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }

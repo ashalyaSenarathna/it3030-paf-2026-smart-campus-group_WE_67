@@ -62,6 +62,10 @@ export const bookingApi = {
   }),
 };
 
+export const adminApi = {
+  getUsers: () => fetchWithCredentials('/admin/users'),
+};
+
 const api = {
   get: (url) => fetchWithCredentials(url),
   post: (url, data) => fetchWithCredentials(url, { method: 'POST', body: JSON.stringify(data) }),
