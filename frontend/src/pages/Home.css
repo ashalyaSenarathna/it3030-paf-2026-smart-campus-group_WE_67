@@ -10,7 +10,7 @@
 
 .home-page {
   min-height: 100vh;
-  background: #0f0e17 url('../assets/Background.png') no-repeat center center fixed;
+  background: #0f0e17 url('../assets/background2.png') no-repeat center center fixed;
   background-size: cover;
   display: flex;
   flex-direction: column;
