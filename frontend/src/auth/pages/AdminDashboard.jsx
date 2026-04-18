@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { resourceApi, bookingApi } from '../../api/api';
+import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
 
 const TABS = {
   DASHBOARD: 'Dashboard',
@@ -27,7 +28,9 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [bookingSearch, setBookingSearch] = useState('');
   const [resourceFilter, setResourceFilter] = useState('All');
+  const [resourceStatusFilter, setResourceStatusFilter] = useState('All');
   const [bookingFilter, setBookingFilter] = useState('All');
+  const [toast, setToast] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
@@ -39,6 +42,11 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [debugMessage, setDebugMessage] = useState('Initializing...');
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [dbStatus, setDbStatus] = useState(null);
+
+  const showNotification = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const formatTime = (time) => {
     if (!time) return '--:--';
@@ -63,7 +71,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const fetchAllData = async () => {
     setIsLoading(true);
     setDebugMessage('Syncing with backend...');
-    
+
     let resData = [];
     let bookData = [];
     let syncError = null;
@@ -155,13 +163,15 @@ const AdminDashboard = ({ user, onLogout }) => {
     try {
       if (editingResource) {
         await resourceApi.update(editingResource.id, formData);
+        showNotification('Facility updated successfully!');
       } else {
         await resourceApi.create(formData);
+        showNotification('New facility registered!');
       }
       setIsModalOpen(false);
       fetchAllData();
     } catch (err) {
-      alert("Failed to save resource");
+      showNotification('Error saving facility');
     }
   };
 
@@ -169,9 +179,10 @@ const AdminDashboard = ({ user, onLogout }) => {
     if (window.confirm("Delete this resource?")) {
       try {
         await resourceApi.delete(id);
+        showNotification('Resource deleted.');
         fetchAllData();
       } catch (err) {
-        alert("Delete failed");
+        showNotification('Delete failed');
       }
     }
   };
@@ -184,8 +195,9 @@ const AdminDashboard = ({ user, onLogout }) => {
       } else if (action === 'REJECT') {
         await bookingApi.reject(id, reason);
       } else if (action === 'CANCEL') {
-        if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+        if (!window.confirm("Are you sure you want to permanently DELETE this booking?")) return;
         await bookingApi.cancel(id);
+        showNotification('Booking deleted from database.');
       }
       fetchAllData();
     } catch (err) {
@@ -306,9 +318,10 @@ const AdminDashboard = ({ user, onLogout }) => {
   );
 
   const filteredResources = resources.filter(r => {
-    const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.id?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = resourceFilter === 'All' || r.type === resourceFilter;
-    return matchesSearch && matchesType;
+    const matchesStatus = resourceStatusFilter === 'All' || r.status === resourceStatusFilter;
+    return matchesSearch && matchesType && matchesStatus;
   });
 
   const renderResources = () => (
@@ -319,25 +332,54 @@ const AdminDashboard = ({ user, onLogout }) => {
         <p>Update, delete or register new campus facilities.</p>
       </header>
 
-      <div className="table-controls-glass">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search by name or id..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
+        <div className="stat-card">
+          <div className="label">Total Facilities</div>
+          <div className="value">{stats.totalResources}</div>
         </div>
-        <div className="category-select-glass">
-          <select value={resourceFilter} onChange={(e) => setResourceFilter(e.target.value)}>
-            <option value="All">All Categories</option>
-            <option value="Lecture Hall">Lecture Halls</option>
-            <option value="Lab">Laboratories</option>
-            <option value="Meeting Room">Meeting Rooms</option>
-            <option value="Sports Facility">Sports Facilities</option>
-          </select>
+        <div className="stat-card">
+          <div className="label">Available</div>
+          <div className="value" style={{ color: '#34d399' }}>{stats.availableResources}</div>
         </div>
-        <button className="btn-add-glow" onClick={() => handleOpenModal()}>+ Register Resource</button>
+        <div className="stat-card">
+          <div className="label">Under Maintenance</div>
+          <div className="value" style={{ color: '#fbbf24' }}>{resources.filter(r => r.status === 'Maintenance').length}</div>
+        </div>
+        <div className="stat-card">
+          <div className="label">Occupied/Other</div>
+          <div className="value" style={{ color: '#64748b' }}>{resources.length - stats.availableResources - resources.filter(r => r.status === 'Maintenance').length}</div>
+        </div>
+      </div>
+
+      <div className="action-bar-premium">
+        <div className="action-left-group">
+          <div className="search-box-wrap">
+            <span className="search-icon-glass">🔍</span>
+            <input
+              type="text"
+              placeholder="Search by name or id..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="filter-select-wrap">
+            <select value={resourceFilter} onChange={(e) => setResourceFilter(e.target.value)}>
+              <option value="All">All Categories</option>
+              {RESOURCE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className="filter-select-wrap">
+            <select value={resourceStatusFilter} onChange={(e) => setResourceStatusFilter(e.target.value)}>
+              <option value="All">All Statuses</option>
+              {RESOURCE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="action-right-group">
+          <button className="btn-add-premium" onClick={() => handleOpenModal()}>
+            <span className="plus-icon">+</span> Register Facility
+          </button>
+        </div>
       </div>
 
       <div className="table-responsive-glass">
@@ -440,7 +482,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                       </div>
                     )}
                     {(b.status === 'APPROVED' || b.status === 'PENDING') && (
-                      <button title="Cancel Booking" className="tab-icon-btn delete" onClick={() => handleBookingAction(b.id, 'CANCEL')}>🚫</button>
+                      <button title="Delete Booking" className="tab-icon-btn delete" onClick={() => handleBookingAction(b.id, 'CANCEL')}>🗑️</button>
                     )}
                   </td>
                 </tr>
@@ -508,6 +550,9 @@ const AdminDashboard = ({ user, onLogout }) => {
         )}
       </main>
 
+      {/* Success/Error Toast */}
+      {toast && <div className="toast-premium animate-in">✅ {toast}</div>}
+
       {isModalOpen && (
         <div className="modal-root-glass" onClick={() => setIsModalOpen(false)}>
           <div className="modal-box-premium" onClick={e => e.stopPropagation()}>
@@ -523,10 +568,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <div className="f-group">
                 <label>Category</label>
                 <select value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}>
-                  <option value="Lecture Hall">Lecture Hall</option>
-                  <option value="Lab">Laboratory</option>
-                  <option value="Meeting Room">Meeting Room</option>
-                  <option value="Sports Facility">Sports</option>
+                  {RESOURCE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div className="f-group">
@@ -537,9 +579,17 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <label>Location</label>
                 <input type="text" required value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} placeholder="Building 02, Floor 03" />
               </div>
+              <div className="f-group full">
+                <label>Status</label>
+                <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                  {RESOURCE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
               <div className="modal-f-actions">
                 <button type="button" className="m-btn-sec" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className="m-btn-pri" disabled={isLoading}>Confirm Changes</button>
+                <button type="submit" className="btn-add-premium" style={{ flex: 1, justifyContent: 'center' }} disabled={isLoading}>
+                  {isLoading ? 'Processing...' : (editingResource ? 'Update Facility' : 'Register Facility')}
+                </button>
               </div>
             </form>
           </div>
@@ -600,6 +650,16 @@ const AdminDashboard = ({ user, onLogout }) => {
         .filter-pill.active { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border-color: #8b5cf6; }
         .filter-pill:hover:not(.active) { background: rgba(255,255,255,0.05); color: #fff; }
 
+        .action-bar-premium { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; gap: 1rem; }
+        .action-left-group { display: flex; gap: 1rem; flex: 1; }
+        .search-box-wrap { flex: 1; position: relative; }
+        .search-icon-glass { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 0.8rem; }
+        .search-box-wrap input { width: 100%; padding: 12px 15px 12px 40px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #fff; }
+        .filter-select-wrap select { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #fff; padding: 12px 15px; cursor: pointer; min-width: 150px; }
+        .btn-add-premium { background: #8b5cf6; color: #fff; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2); transition: all 0.3s; }
+        .btn-add-premium:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4); }
+        .toast-premium { position: fixed; bottom: 30px; right: 30px; background: #0d0c14; border: 1px solid #8b5cf6; padding: 12px 24px; border-radius: 14px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 5000; }
+
         .premium-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
         .premium-table th { text-align: left; padding: 1rem; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.1em; }
         .premium-table td { background: rgba(255,255,255,0.02); padding: 1.25rem 1rem; border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); }
@@ -632,14 +692,15 @@ const AdminDashboard = ({ user, onLogout }) => {
         .modal-root-glass { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-box-premium { background: #0d0c14; border: 1px solid rgba(255,255,255,0.06); padding: 3rem; border-radius: 32px; width: 95%; max-width: 550px; box-shadow: 0 40px 100px rgba(0,0,0,0.8); }
         .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
-        .modal-head h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
+        .modal-head h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
         .modal-close-x { background: none; border: none; color: #64748b; font-size: 2rem; cursor: pointer; }
 
         .modal-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
         .f-group.full { grid-column: span 2; }
         .f-group label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
-        .f-group input, .f-group select { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; }
-        .f-group input:focus { outline: none; border-color: #8b5cf6; background: rgba(255,255,255,0.05); }
+        .f-group input, .f-group select { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; appearance: none; }
+        .f-group select option { background: #0d0c14; color: #fff; }
+        .f-group input:focus, .f-group select:focus { outline: none; border-color: #8b5cf6; background: rgba(255,255,255,0.05); }
 
         .modal-f-actions { grid-column: span 2; display: flex; gap: 1rem; margin-top: 2rem; }
         .m-btn-pri { flex: 1; background: #8b5cf6; color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; }

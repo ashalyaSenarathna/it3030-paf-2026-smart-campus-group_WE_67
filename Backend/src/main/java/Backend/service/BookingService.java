@@ -46,16 +46,11 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    public Booking cancelBooking(String bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-        
-        if (booking.getStatus() == BookingStatus.APPROVED || booking.getStatus() == BookingStatus.PENDING) {
-            booking.setStatus(BookingStatus.CANCELLED);
-        } else {
-            throw new RuntimeException("Cannot cancel booking with status: " + booking.getStatus());
+    public void cancelBooking(String bookingId) {
+        if (!bookingRepository.existsById(bookingId)) {
+            throw new RuntimeException("Booking not found");
         }
-        return bookingRepository.save(booking);
+        bookingRepository.deleteById(bookingId);
     }
 
     public List<Booking> getBookingsByUser(String userId) {

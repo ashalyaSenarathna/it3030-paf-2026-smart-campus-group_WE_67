@@ -68,7 +68,7 @@ function Home({ user, onLogout }) {
         <ul className="nav-links">
           <li><Link to="/" className="nav-item active">Home</Link></li>
           <li><Link to="/facility-management/resource-catalogue" className="nav-item">Resources</Link></li>
-          
+
           {user ? (
             <>
               <li><Link to="/bookings/my-bookings" className="nav-item">My Bookings</Link></li>
@@ -84,7 +84,7 @@ function Home({ user, onLogout }) {
           ) : (
             <li><Link to="/login" className="nav-item">Login</Link></li>
           )}
-          
+
           <li><a href="#" className="nav-item">Support</a></li>
         </ul>
       </nav>
@@ -98,11 +98,11 @@ function Home({ user, onLogout }) {
       <section className="modules-section">
         <div className="modules-grid">
           {modules.map((module, index) => (
-            <Link 
-              key={module.id} 
-              to={module.link} 
+            <Link
+              key={module.id}
+              to={module.link}
               className={`module-card ${module.placeholder ? 'is-placeholder' : ''}`}
-              style={{ 
+              style={{
                 '--card-accent': module.accentColor,
                 '--card-gradient': module.gradient,
                 animationDelay: `${index * 0.12}s`

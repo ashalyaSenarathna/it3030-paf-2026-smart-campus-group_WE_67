@@ -55,8 +55,8 @@ public class BookingController {
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelBooking(@PathVariable String id) {
         try {
-            Booking booking = bookingService.cancelBooking(id);
-            return ResponseEntity.ok(booking);
+            bookingService.cancelBooking(id);
+            return ResponseEntity.ok(Map.of("message", "Booking deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
