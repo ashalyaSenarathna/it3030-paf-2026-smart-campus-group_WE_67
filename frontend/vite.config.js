@@ -8,4 +8,20 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
+      '/oauth2': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
+      '/login/oauth2': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      }
+    }
+  }
 })

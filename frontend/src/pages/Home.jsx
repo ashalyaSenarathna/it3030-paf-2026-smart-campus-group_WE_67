@@ -1,8 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 
-function Home() {
+function Home({ user, onLogout }) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      if (onLogout) {
+        await onLogout();
+      }
+    } finally {
+      navigate('/login');
+    }
+  };
+
+  const isAdmin = user?.roles?.includes('ROLE_ADMIN') || user?.roles?.includes('ADMIN');
+  const isStudent = user?.roles?.includes('ROLE_STUDENT') || user?.roles?.includes('STUDENT');
+  const isTech = user?.roles?.includes('ROLE_TECHNICIAN') || user?.roles?.includes('TECHNICIAN');
+
   const modules = [
     {
       id: 'facility',
@@ -19,9 +35,8 @@ function Home() {
       title: 'Student Portal',
       description: 'Access course materials, exam schedules, and academic records conveniently.',
       icon: '🎓',
-      link: '#',
-      action: 'Explore Portal',
-      placeholder: true,
+      link: '/home',
+      action: 'Open Portal',
       gradient: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
       accentColor: '#0ea5e9',
     },
@@ -53,6 +68,23 @@ function Home() {
         <ul className="nav-links">
           <li><Link to="/" className="nav-item active">Home</Link></li>
           <li><Link to="/facility-management/resource-catalogue" className="nav-item">Resources</Link></li>
+
+          {user ? (
+            <>
+              <li><Link to="/bookings/my-bookings" className="nav-item">My Bookings</Link></li>
+              {isAdmin && <li><Link to="/admin/dashboard" className="nav-item">Admin Dashboard</Link></li>}
+              {isStudent && <li><Link to="/profile/student" className="nav-item">Profile</Link></li>}
+              {isTech && <li><Link to="/profile/technician" className="nav-item">Tech Profile</Link></li>}
+              <li>
+                <button type="button" className="nav-item nav-logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </li>
+            </>
+          ) : (
+            <li><Link to="/login" className="nav-item">Login</Link></li>
+          )}
+
           <li><a href="#" className="nav-item">Support</a></li>
         </ul>
       </nav>
@@ -66,11 +98,11 @@ function Home() {
       <section className="modules-section">
         <div className="modules-grid">
           {modules.map((module, index) => (
-            <Link 
-              key={module.id} 
-              to={module.link} 
+            <Link
+              key={module.id}
+              to={module.link}
               className={`module-card ${module.placeholder ? 'is-placeholder' : ''}`}
-              style={{ 
+              style={{
                 '--card-accent': module.accentColor,
                 '--card-gradient': module.gradient,
                 animationDelay: `${index * 0.12}s`
