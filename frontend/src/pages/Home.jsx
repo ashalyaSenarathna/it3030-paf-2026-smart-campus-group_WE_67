@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 
-function Home({ onLogout }) {
+function Home({ user, onLogout }) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -14,6 +14,10 @@ function Home({ onLogout }) {
       navigate('/login');
     }
   };
+
+  const isAdmin = user?.roles?.includes('ROLE_ADMIN') || user?.roles?.includes('ADMIN');
+  const isStudent = user?.roles?.includes('ROLE_STUDENT') || user?.roles?.includes('STUDENT');
+  const isTech = user?.roles?.includes('ROLE_TECHNICIAN') || user?.roles?.includes('TECHNICIAN');
 
   const modules = [
     {
@@ -64,12 +68,23 @@ function Home({ onLogout }) {
         <ul className="nav-links">
           <li><Link to="/" className="nav-item active">Home</Link></li>
           <li><Link to="/facility-management/resource-catalogue" className="nav-item">Resources</Link></li>
-          <li><Link to="/profile/student" className="nav-item">Student Profile</Link></li>
-          <li>
-            <button type="button" className="nav-item nav-logout-btn" onClick={handleLogout}>
-              Logout
-            </button>
-          </li>
+          
+          {user ? (
+            <>
+              <li><Link to="/bookings/my-bookings" className="nav-item">My Bookings</Link></li>
+              {isAdmin && <li><Link to="/admin/dashboard" className="nav-item">Admin Dashboard</Link></li>}
+              {isStudent && <li><Link to="/profile/student" className="nav-item">Profile</Link></li>}
+              {isTech && <li><Link to="/profile/technician" className="nav-item">Tech Profile</Link></li>}
+              <li>
+                <button type="button" className="nav-item nav-logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </li>
+            </>
+          ) : (
+            <li><Link to="/login" className="nav-item">Login</Link></li>
+          )}
+          
           <li><a href="#" className="nav-item">Support</a></li>
         </ul>
       </nav>

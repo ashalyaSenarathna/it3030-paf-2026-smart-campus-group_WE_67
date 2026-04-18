@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost:8085';
+const API_BASE_URL = '';
 
 export default function LoginPage({ user, onLoginSuccess }) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ export default function LoginPage({ user, onLoginSuccess }) {
     setError(null);
 
     try {
-      const data = await onLoginSuccess(email.trim(), password);
+      const data = await onLoginSuccess(username.trim(), password);
       if (data.roles.includes('ROLE_ADMIN')) {
         navigate('/admin/dashboard');
       } else if (data.roles.includes('ROLE_TECHNICIAN')) {
@@ -50,8 +50,8 @@ export default function LoginPage({ user, onLoginSuccess }) {
     <div className="login-container">
       <div className="login-left">
         <div className="login-brand">
-          <div className="brand-icon">✱</div>
-          <h1 className="brand-title">Hello SmartCampus!</h1>
+          <div className="brand-icon">🏛️</div>
+          <h1 className="brand-title">Smart Campus</h1>
           <p className="brand-description">
             Streamline and automate campus operations. Manage resources, track maintenance requests, and coordinate support across all departments efficiently.
           </p>
@@ -63,7 +63,7 @@ export default function LoginPage({ user, onLoginSuccess }) {
 
       <div className="login-right">
         <div className="login-header">
-          <h2 className="login-app-name">SmartCampus</h2>
+          <h2 className="login-app-name">Smart Campus</h2>
         </div>
         
         <div className="login-form-wrapper">
@@ -72,13 +72,13 @@ export default function LoginPage({ user, onLoginSuccess }) {
 
           <form onSubmit={handleSubmit} className="login-form" autoComplete="off">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="username">Username</label>
               <input
-                id="email"
-                type="email"
-                placeholder="khadim@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="Enter Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="none"

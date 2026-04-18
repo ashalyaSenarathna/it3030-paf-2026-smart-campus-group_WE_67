@@ -26,7 +26,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
         Set<SimpleGrantedAuthority> authorities = user.getRoles().stream()
@@ -34,7 +34,7 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toSet());
 
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
+                .username(user.getUsername())
                 .password(user.getPassword() != null ? user.getPassword() : "")
                 .authorities(authorities)
                 .accountExpired(false)
@@ -48,6 +48,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email);
     }
 
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     public User createOAuthStudent(String email, String name) {
         Optional<User> existingUser = userRepository.findByEmail(email);
         if (existingUser.isPresent()) {
@@ -55,6 +59,7 @@ public class UserService implements UserDetailsService {
         }
 
         User user = new User();
+        user.setUsername(email); // Use email as default username for OAuth
         user.setEmail(email);
         user.setName(name != null ? name : "Student");
         user.setAuthProvider("GOOGLE");

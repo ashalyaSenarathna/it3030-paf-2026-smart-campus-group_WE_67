@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8085';
+const BASE_URL = '';
 
 const fetchWithCredentials = (url, options = {}) => {
   return fetch(`${BASE_URL}${url}`, {
@@ -11,14 +11,14 @@ const fetchWithCredentials = (url, options = {}) => {
   });
 };
 
-export const login = async (email, password) => {
+export const login = async (username, password) => {
   const response = await fetchWithCredentials('/api/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   });
   if (!response.ok) {
     const error = await response.json().catch(() => null);
-    throw new Error(error?.message || 'Invalid email or password');
+    throw new Error(error?.message || 'Invalid username or password');
   }
   return response.json();
 };
