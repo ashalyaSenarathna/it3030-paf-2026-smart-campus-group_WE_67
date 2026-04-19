@@ -1,8 +1,8 @@
-package Backend.service;
+package Backend.service.Booking;
 
 import Backend.model.Booking.Booking;
 import Backend.model.Booking.BookingStatus;
-import Backend.repository.BookingRepository;
+import Backend.repository.Booking.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
