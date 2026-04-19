@@ -1,4 +1,4 @@
-package Backend.repository;
+package Backend.repository.Booking;
 
 import Backend.model.Booking.Booking;
 import org.springframework.data.mongodb.repository.MongoRepository;

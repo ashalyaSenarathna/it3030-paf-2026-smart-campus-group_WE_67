@@ -1,7 +1,7 @@
-package Backend.controller;
+package Backend.controller.Booking;
 
 import Backend.model.Booking.Booking;
-import Backend.service.BookingService;
+import Backend.service.Booking.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

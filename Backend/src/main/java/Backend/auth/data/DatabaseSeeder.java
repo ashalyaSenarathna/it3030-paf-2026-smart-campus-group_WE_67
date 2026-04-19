@@ -6,7 +6,7 @@ import Backend.auth.repository.UserRepository;
 import Backend.model.Booking.Booking;
 import Backend.model.Booking.BookingStatus;
 import Backend.model.facilitymanagement.Resource;
-import Backend.repository.BookingRepository;
+import Backend.repository.Booking.BookingRepository;
 import Backend.repository.facilitymanagement.ResourceRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
