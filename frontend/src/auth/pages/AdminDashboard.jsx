@@ -225,118 +225,152 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   };
 
-  const renderDashboard = () => (
-    <div className="tab-pane animate-in">
-      <header className="tab-header" style={{ marginBottom: '2rem' }}>
-        <span className="sc-badge">SYSTEM HUB</span>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1>Overview</h1>
-            <p>Welcome back, <strong>{user?.username || 'Admin'}</strong>. Monitoring campus health...</p>
+  const renderDashboard = () => {
+    const filteredUsers = users.filter(u =>
+      u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.username?.toLowerCase().includes(userSearch.toLowerCase())
+    );
+
+    // Backend returns roles as plain strings e.g. ["ROLE_ADMIN"] (Java enum serialized)
+    const isAdmin = (u) => u.roles?.some(r => {
+      const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
+      return roleName.toUpperCase().includes('ADMIN');
+    });
+    const isStudent = (u) => u.roles?.some(r => {
+      const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
+      return roleName.toUpperCase().includes('STUDENT');
+    });
+    const isTech = (u) => u.roles?.some(r => {
+      const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
+      return roleName.toUpperCase().includes('TECH');
+    });
+    const adminUsers = users.filter(isAdmin);
+    const userStats = {
+      admin: adminUsers.length,
+      student: users.filter(isStudent).length,
+      tech: users.filter(isTech).length,
+    };
+    const studentCount = userStats.student;
+
+    return (
+      <div className="tab-pane animate-in">
+        <header className="tab-header">
+          <div className="hero-badge" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', border: '1px solid rgba(168, 85, 247, 0.2)' }}>User Directory</div>
+          <h1>Community Management</h1>
+          <p>View and manage all members of the Smart Campus.</p>
+        </header>
+
+        <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
+          <div className="stat-card">
+            <div className="label">Total Members</div>
+            <div className="value">{users.length}</div>
           </div>
-          <div className="debug-infobar" style={{ fontSize: '0.7rem', color: '#64748b', background: 'rgba(255,255,255,0.02)', padding: '5px 12px', borderRadius: '8px', display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <span>📡 {debugMessage}</span>
-            <button onClick={runDiagnostics} style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', color: '#8b5cf6', borderRadius: '4px', padding: '2px 8px', fontSize: '0.6rem', cursor: 'pointer' }}>Troubleshoot</button>
+          <div className="stat-card">
+            <div className="label">Students</div>
+            <div className="value" style={{ color: '#34d399' }}>{studentCount}</div>
+          </div>
+          <div className="stat-card">
+            <div className="label">Technicians</div>
+            <div className="value" style={{ color: '#fbbf24' }}>{userStats.tech}</div>
+          </div>
+          <div className="stat-card admin-persons-card">
+            <div className="label">Administrators</div>
+            <div className="admin-persons-list">
+              {adminUsers.length === 0 ? (
+                <div style={{ color: '#475569', fontSize: '0.8rem' }}>No admins found</div>
+              ) : (
+                adminUsers.map(a => (
+                  <div key={a.id} className="admin-person-row">
+                    <div className="admin-person-avatar">
+                      {(a.name || a.username || 'A').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="admin-person-info">
+                      <div className="admin-person-name">{a.name || a.username || 'Admin'}</div>
+                      <div className="admin-person-role">Administrator</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
-      </header>
 
-      {showDiagnostics && dbStatus && (
-        <div className="diagnostics-panel animate-in" style={{ background: 'rgba(13, 12, 20, 0.6)', border: '1px solid rgba(139, 92, 246, 0.3)', padding: '1.5rem', borderRadius: '16px', marginBottom: '2rem', fontSize: '0.8rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <h3 style={{ color: '#8b5cf6', fontWeight: 800 }}>System Diagnostics</h3>
-            <button onClick={() => setShowDiagnostics(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>Close</button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div>
-              <p><strong>Database:</strong> {dbStatus.database}</p>
-              <p><strong>Connected:</strong> {dbStatus.connected ? '✅ Yes' : '❌ No'}</p>
-              <p><strong>Auth User:</strong> {dbStatus.auth?.principal || 'None'}</p>
-              <p><strong>Status:</strong> {dbStatus.auth?.authenticated ? '✅ Authenticated' : '❌ Unauthenticated'}</p>
-              <p><strong>Backend Roles:</strong> {dbStatus.auth?.authorities?.join(', ') || 'None'}</p>
+        <div className="action-bar-premium">
+          <div className="action-left-group" style={{ maxWidth: '400px' }}>
+            <div className="search-box-wrap">
+              <span className="search-icon-glass">🔍</span>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+              />
             </div>
-            <div>
-              <p><strong>Record Counts:</strong></p>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {Object.entries(dbStatus.counts || {}).map(([c, count]) => (
-                  <li key={c}>{c}: {count}</li>
+          </div>
+          <div className="action-right-group">
+            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Showing {filteredUsers.length} users</p>
+          </div>
+        </div>
+
+        <div className="table-responsive-glass">
+          {filteredUsers.length === 0 ? (
+            <div className="empty-table-state">
+              <div className="empty-icon">👥</div>
+              <h3>No users found</h3>
+            </div>
+          ) : (
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  <th>Person</th>
+                  <th>Digital Identity</th>
+                  <th>Roles</th>
+                  <th>Provider</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map(u => (
+                  <tr key={u.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{u.name || 'Anonymous'}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{u.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div>{u.username}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.email}</div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                        {u.roles?.map((r, idx) => {
+                          const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
+                          const label = roleName.replace(/^ROLE_/i, '');
+                          const cssClass = label.toLowerCase();
+                          return (
+                            <span key={idx} className={`status-dot-pill role-badge role-${cssClass}`}>
+                              {label}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="type-tag">{u.authProvider || 'Local'}</span>
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-            </div>
-          </div>
-          <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-            <p style={{ color: '#64748b', marginBottom: '1rem' }}>If counts are 0, your database is empty. You can force seed sample data:</p>
-            <button onClick={handleForceSeed} className="btn-approve-sm">Force Sync Sample Data</button>
-          </div>
-        </div>
-      )}
-
-      <div className="stats-grid">
-        <div className="stat-card overflow-hidden">
-          <div className="label">Total Facilities</div>
-          <div className="value">{stats.totalResources}</div>
-          <div className="stat-meta">Across all campus zones</div>
-        </div>
-        <div className="stat-card">
-          <div className="label">Available Now</div>
-          <div className="value" style={{ color: '#34d399' }}>{stats.availableResources}</div>
-          <div className="stat-meta">Units ready for use</div>
-        </div>
-        <div className="stat-card">
-          <div className="label">Registered Users</div>
-          <div className="value" style={{ color: '#a855f7' }}>{stats.totalUsers}</div>
-          <div className="stat-meta">Unified community</div>
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
-
-      <div className="dashboard-sections-layout" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2.5rem', marginTop: '3rem' }}>
-        <section className="recent-activity-section">
-          <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Latest Reservations</h2>
-            <button onClick={() => setActiveTab(TABS.BOOKINGS)} style={{ background: 'none', border: 'none', color: '#8b5cf6', cursor: 'pointer', fontWeight: 600 }}>View All</button>
-          </div>
-          <div className="activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {bookings.filter(b => (b.status || '').toUpperCase() === 'PENDING').slice(0, 4).length === 0 ? (
-              <div className="activity-item-glass" style={{ justifyContent: 'center', color: '#64748b' }}>No pending requests</div>
-            ) : (
-              bookings.filter(b => (b.status || '').toUpperCase() === 'PENDING').slice(0, 4).map(b => (
-                <div key={b.id} className="activity-item-glass">
-                  <div className="item-main">
-                    <div className="item-title">{resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Resource'}</div>
-                    <div className="item-sub">{b.userId} • {formatDate(b.date)}</div>
-                  </div>
-                  <div className="item-actions">
-                    <button className="btn-approve-sm" onClick={() => handleBookingAction(b.id, 'APPROVE')}>Approve</button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="shortcuts-section">
-          <div className="shortcut-grid">
-            <div className="shortcut-card-glass" onClick={() => setActiveTab(TABS.RESOURCES)}>
-              <span className="sc-icon">🏢</span>
-              <div className="sc-text">Manage Assets</div>
-            </div>
-            <div className="shortcut-card-glass" onClick={() => setActiveTab(TABS.BOOKINGS)}>
-              <span className="sc-icon">📅</span>
-              <div className="sc-text">Review Bookings</div>
-            </div>
-            <div className="shortcut-card-glass" onClick={() => setActiveTab(TABS.USERS)}>
-              <span className="sc-icon">👥</span>
-              <div className="sc-text">User Directory</div>
-            </div>
-          </div>
-          <div className="shortcut-card-glass" style={{ marginTop: '1rem', width: '100%', opacity: 0.5 }} onClick={() => navigate('/profile/admin')}>
-            <span className="sc-icon">👤</span>
-            <div className="sc-text">Admin Profile</div>
-          </div>
-        </section>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const filteredResources = resources.filter(r => {
     const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.id?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -445,79 +479,171 @@ const AdminDashboard = ({ user, onLogout }) => {
     </div>
   );
 
+  const filteredBookings = bookings.filter(b =>
+    bookingFilter === 'All' || (b.status || '').toUpperCase() === bookingFilter.toUpperCase()
+  ).filter(b => {
+    if (!bookingSearch) return true;
+    const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || '';
+    return (
+      resourceName.toLowerCase().includes(bookingSearch.toLowerCase()) ||
+      (b.userId || '').toLowerCase().includes(bookingSearch.toLowerCase())
+    );
+  });
+
+  const bookingStats = {
+    total: bookings.length,
+    pending: bookings.filter(b => (b.status || '').toUpperCase() === 'PENDING').length,
+    approved: bookings.filter(b => (b.status || '').toUpperCase() === 'APPROVED').length,
+    rejected: bookings.filter(b => (b.status || '').toUpperCase() === 'REJECTED').length,
+  };
+
   const renderBookings = () => (
     <div className="tab-pane animate-in">
       <header className="tab-header">
-        <div className="hero-badge">Reservation Control</div>
+        <div className="hero-badge booking-badge">Reservation Control</div>
         <h1>Booking Management</h1>
         <p>Finalize and monitor all campus facility requests.</p>
       </header>
 
-      <div className="filter-pill-shelf">
-        {['All', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'].map(f => (
-          <button
-            key={f}
-            className={`filter-pill ${bookingFilter === f ? 'active' : ''}`}
-            onClick={() => setBookingFilter(f)}
-          >
-            {f}
-          </button>
-        ))}
+      {/* Stats Row */}
+      <div className="stats-grid booking-stats-grid" style={{ marginBottom: '2.5rem' }}>
+        <div className="stat-card booking-stat-card">
+          <div className="booking-stat-icon">📋</div>
+          <div className="label">Total Bookings</div>
+          <div className="value">{bookingStats.total}</div>
+          <div className="stat-meta">All reservations</div>
+        </div>
+        <div className="stat-card booking-stat-card pending-card">
+          <div className="booking-stat-icon">⏳</div>
+          <div className="label">Pending Review</div>
+          <div className="value" style={{ color: '#fbbf24' }}>{bookingStats.pending}</div>
+          <div className="stat-meta">Awaiting action</div>
+        </div>
+        <div className="stat-card booking-stat-card approved-card">
+          <div className="booking-stat-icon">✅</div>
+          <div className="label">Approved</div>
+          <div className="value" style={{ color: '#34d399' }}>{bookingStats.approved}</div>
+          <div className="stat-meta">Confirmed bookings</div>
+        </div>
+        <div className="stat-card booking-stat-card rejected-card">
+          <div className="booking-stat-icon">❌</div>
+          <div className="label">Rejected</div>
+          <div className="value" style={{ color: '#f87171' }}>{bookingStats.rejected}</div>
+          <div className="stat-meta">Declined requests</div>
+        </div>
       </div>
 
-      <div className="table-responsive-glass">
-        {bookings.length === 0 ? (
-          <div className="empty-table-state">
-            <div className="empty-icon">📁</div>
-            <h3>No reservations found</h3>
-            <p>The campus booking ledger is currently empty.</p>
-          </div>
-        ) : (
-          <table className="premium-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Facility</th>
-                <th>Requested By</th>
-                <th>Time Window</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.filter(b => bookingFilter === 'All' || (b.status || '').toUpperCase() === bookingFilter.toUpperCase()).map(b => (
-                <tr key={b.id}>
-                  <td>{formatDate(b.date)}</td>
-                  <td style={{ fontWeight: 700 }}>{resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Loading...'}</td>
-                  <td style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{b.userId}</td>
-                  <td>{formatTime(b.startTime)} — {formatTime(b.endTime)}</td>
-                  <td><span className={`status-dot-pill status-${(b.status || '').toLowerCase()}`}>{b.status}</span></td>
-                  <td>
+      {/* Search + Filter Bar */}
+      <div className="booking-control-bar">
+        <div className="booking-search-wrap">
+          <span className="bk-search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search by facility or user..."
+            value={bookingSearch}
+            onChange={(e) => setBookingSearch(e.target.value)}
+            className="booking-search-input"
+          />
+        </div>
+        <div className="booking-filter-pills">
+          {['All', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'].map(f => (
+            <button
+              key={f}
+              className={`bk-filter-pill ${bookingFilter === f ? 'active' : ''}`}
+              onClick={() => setBookingFilter(f)}
+            >
+              {f === 'All' ? '🗂 All' : f === 'PENDING' ? '⏳ Pending' : f === 'APPROVED' ? '✅ Approved' : f === 'REJECTED' ? '❌ Rejected' : '🚫 Cancelled'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Results count */}
+      <div className="booking-results-meta">
+        Showing <strong>{filteredBookings.length}</strong> of {bookings.length} bookings
+        {bookingSearch && <span> · Filtered by "<em>{bookingSearch}</em>"</span>}
+      </div>
+
+      {/* Booking Cards */}
+      {filteredBookings.length === 0 ? (
+        <div className="empty-table-state booking-empty">
+          <div className="empty-icon">📅</div>
+          <h3>No reservations found</h3>
+          <p>Try adjusting your search or filter criteria.</p>
+          {bookingSearch && (
+            <button className="bk-clear-btn" onClick={() => setBookingSearch('')}>Clear Search</button>
+          )}
+        </div>
+      ) : (
+        <div className="booking-cards-list">
+          {filteredBookings.map((b, idx) => {
+            const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Unknown Facility';
+            const statusLower = (b.status || '').toLowerCase();
+            return (
+              <div key={b.id} className={`booking-card-glass bk-status-${statusLower}`} style={{ animationDelay: `${idx * 0.05}s` }}>
+                <div className="bk-card-left">
+                  <div className="bk-resource-avatar">{resourceName.charAt(0)}</div>
+                  <div className="bk-card-info">
+                    <div className="bk-resource-name">{resourceName}</div>
+                    <div className="bk-user-tag">👤 {b.userId || 'Unknown User'}</div>
+                  </div>
+                </div>
+                <div className="bk-card-middle">
+                  <div className="bk-detail-chip">
+                    <span className="bk-chip-label">Date</span>
+                    <span className="bk-chip-value">📆 {formatDate(b.date)}</span>
+                  </div>
+                  <div className="bk-detail-chip">
+                    <span className="bk-chip-label">Time</span>
+                    <span className="bk-chip-value">🕐 {formatTime(b.startTime)} – {formatTime(b.endTime)}</span>
+                  </div>
+                </div>
+                <div className="bk-card-right">
+                  <span className={`bk-status-badge bk-s-${statusLower}`}>{b.status}</span>
+                  <div className="bk-action-group">
                     {b.status === 'PENDING' && (
-                      <div className="action-row">
-                        <button title="Approve" className="tab-icon-btn approve" onClick={() => handleBookingAction(b.id, 'APPROVE')}>✅</button>
-                        <button title="Reject" className="tab-icon-btn reject" onClick={() => {
-                          const reason = prompt("Rejection Reason:");
-                          if (reason) handleBookingAction(b.id, 'REJECT', reason);
-                        }}>❌</button>
-                      </div>
+                      <>
+                        <button
+                          className="bk-btn-approve"
+                          title="Approve Booking"
+                          onClick={() => handleBookingAction(b.id, 'APPROVE')}
+                        >
+                          ✓ Approve
+                        </button>
+                        <button
+                          className="bk-btn-reject"
+                          title="Reject Booking"
+                          onClick={() => {
+                            const reason = prompt('Rejection Reason:');
+                            if (reason) handleBookingAction(b.id, 'REJECT', reason);
+                          }}
+                        >
+                          ✕ Reject
+                        </button>
+                      </>
                     )}
                     {(b.status === 'APPROVED' || b.status === 'PENDING') && (
-                      <button title="Delete Booking" className="tab-icon-btn delete" onClick={() => handleBookingAction(b.id, 'CANCEL')}>🗑️</button>
+                      <button
+                        className="bk-btn-delete"
+                        title="Delete Booking"
+                        onClick={() => handleBookingAction(b.id, 'CANCEL')}
+                      >
+                        🗑
+                      </button>
                     )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 
   const renderUsers = () => {
-    const filteredUsers = users.filter(u => 
-      u.name?.toLowerCase().includes(userSearch.toLowerCase()) || 
+    const filteredUsers = users.filter(u =>
+      u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
       u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
       u.username?.toLowerCase().includes(userSearch.toLowerCase())
     );
@@ -527,7 +653,7 @@ const AdminDashboard = ({ user, onLogout }) => {
       student: users.filter(u => u.roles?.some(r => r.name === 'ROLE_STUDENT' || r.name === 'STUDENT')).length,
       tech: users.filter(u => u.roles?.some(r => r.name === 'ROLE_TECHNICIAN' || r.name === 'TECHNICIAN')).length,
     };
-    
+
     // Corrected stats logic
     const studentCount = userStats.student;
 
@@ -647,10 +773,9 @@ const AdminDashboard = ({ user, onLogout }) => {
         </div>
         <nav className="sidebar-nav-container">
           {[
-            { id: TABS.DASHBOARD, icon: '📊', label: 'Dashboard' },
+            { id: TABS.DASHBOARD, icon: '👥', label: 'Dashboard' },
             { id: TABS.RESOURCES, icon: '🏢', label: 'Resources' },
             { id: TABS.BOOKINGS, icon: '📅', label: 'Bookings' },
-            { id: TABS.USERS, icon: '👥', label: 'Users' },
             { id: TABS.MAINTENANCE, icon: '🛠️', label: 'Support' }
           ].map((tab) => (
             <div
@@ -672,7 +797,6 @@ const AdminDashboard = ({ user, onLogout }) => {
         {activeTab === TABS.DASHBOARD && renderDashboard()}
         {activeTab === TABS.RESOURCES && renderResources()}
         {activeTab === TABS.BOOKINGS && renderBookings()}
-        {activeTab === TABS.USERS && renderUsers()}
         {activeTab === TABS.MAINTENANCE && (
           <div className="tab-pane animate-in">
             <header className="tab-header">
@@ -856,11 +980,100 @@ const AdminDashboard = ({ user, onLogout }) => {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulseBg { from { transform: scale(1); opacity: 0.5; } to { transform: scale(1.5); opacity: 1; } }
 
+        /* ── Booking Tab Exclusive Styles ── */
+        .booking-badge { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.25); }
+        .booking-stats-grid { grid-template-columns: repeat(4, 1fr); }
+        .booking-stat-card { position: relative; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
+        .booking-stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .booking-stat-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+        .pending-card { border-color: rgba(251, 191, 36, 0.15); }
+        .approved-card { border-color: rgba(52, 211, 153, 0.15); }
+        .rejected-card { border-color: rgba(248, 113, 113, 0.15); }
+
+        .booking-control-bar { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.25rem; }
+        .booking-search-wrap { position: relative; flex: 1; min-width: 220px; }
+        .bk-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; opacity: 0.5; pointer-events: none; }
+        .booking-search-input { width: 100%; padding: 11px 16px 11px 38px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #f8fafc; font-size: 0.9rem; transition: all 0.3s; box-sizing: border-box; }
+        .booking-search-input::placeholder { color: #475569; }
+        .booking-search-input:focus { outline: none; border-color: rgba(251,191,36,0.5); background: rgba(255,255,255,0.05); box-shadow: 0 0 20px rgba(251,191,36,0.07); }
+        .booking-filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+        .bk-filter-pill { padding: 9px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); color: #64748b; border-radius: 10px; cursor: pointer; font-size: 0.78rem; font-weight: 700; transition: all 0.25s; white-space: nowrap; }
+        .bk-filter-pill:hover:not(.active) { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+        .bk-filter-pill.active { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.35); }
+
+        .booking-results-meta { font-size: 0.78rem; color: #475569; margin-bottom: 1.5rem; }
+        .booking-results-meta strong { color: #94a3b8; }
+        .booking-results-meta em { color: #8b5cf6; font-style: normal; }
+
+        .booking-cards-list { display: flex; flex-direction: column; gap: 12px; }
+        .booking-card-glass {
+          display: flex; align-items: center; gap: 1.5rem;
+          background: rgba(13,12,20,0.5); border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 20px; padding: 1.25rem 1.5rem;
+          backdrop-filter: blur(10px);
+          transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+          animation: fadeIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+          border-left-width: 3px;
+        }
+        .booking-card-glass:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+        .bk-status-pending { border-left-color: #fbbf24; }
+        .bk-status-approved { border-left-color: #34d399; }
+        .bk-status-rejected { border-left-color: #f87171; }
+        .bk-status-cancelled { border-left-color: #475569; }
+
+        .bk-card-left { display: flex; align-items: center; gap: 14px; flex: 1.2; min-width: 0; }
+        .bk-resource-avatar {
+          width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+          background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(251,191,36,0.2));
+          border: 1px solid rgba(255,255,255,0.08);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 1.25rem; font-weight: 900; color: #c084fc; text-transform: uppercase;
+        }
+        .bk-resource-name { font-weight: 700; font-size: 0.95rem; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bk-user-tag { font-size: 0.78rem; color: #64748b; margin-top: 3px; }
+
+        .bk-card-middle { display: flex; gap: 2rem; flex: 1; }
+        .bk-detail-chip { display: flex; flex-direction: column; gap: 4px; }
+        .bk-chip-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; }
+        .bk-chip-value { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+
+        .bk-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .bk-status-badge { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 100px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+        .bk-s-pending { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+        .bk-s-approved { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+        .bk-s-rejected { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
+        .bk-s-cancelled { background: rgba(148,163,184,0.07); color: #94a3b8; border: 1px solid rgba(148,163,184,0.15); }
+
+        .bk-action-group { display: flex; gap: 8px; align-items: center; }
+        .bk-btn-approve { padding: 7px 14px; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: #34d399; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .bk-btn-approve:hover { background: rgba(52,211,153,0.2); transform: scale(1.05); box-shadow: 0 4px 12px rgba(52,211,153,0.2); }
+        .bk-btn-reject { padding: 7px 14px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #f87171; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .bk-btn-reject:hover { background: rgba(248,113,113,0.2); transform: scale(1.05); box-shadow: 0 4px 12px rgba(248,113,113,0.2); }
+        .bk-btn-delete { width: 34px; height: 34px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.9rem; }
+        .bk-btn-delete:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.3); }
+
+        .booking-empty { margin-top: 2rem; }
+        .bk-clear-btn { margin-top: 1.5rem; padding: 9px 20px; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #8b5cf6; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.2s; }
+        .bk-clear-btn:hover { background: rgba(139,92,246,0.2); }
+
+        /* ── Administrators persons card ── */
+        .admin-persons-card { border-color: rgba(168, 85, 247, 0.2) !important; }
+        .admin-persons-list { display: flex; flex-direction: column; gap: 10px; margin-top: 0.75rem; }
+        .admin-person-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.12); border-radius: 12px; transition: background 0.2s; }
+        .admin-person-row:hover { background: rgba(168,85,247,0.12); }
+        .admin-person-avatar { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #7c3aed, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #fff; flex-shrink: 0; box-shadow: 0 4px 10px rgba(168,85,247,0.3); }
+        .admin-person-info { min-width: 0; }
+        .admin-person-name { font-weight: 700; font-size: 0.85rem; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .admin-person-role { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #a855f7; margin-top: 1px; }
+
         @media (max-width: 1024px) {
           .dashboard-sections-layout { grid-template-columns: 1fr; }
           .sidebar-glass { width: 80px; }
           .nav-t, .sidebar-brand, .sidebar-footer span { display: none; }
           .sidebar-nav-item { justify-content: center; padding: 15px; }
+          .booking-stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .booking-card-glass { flex-wrap: wrap; }
+          .bk-card-middle { flex-wrap: wrap; gap: 1rem; }
         }
       `}</style>
     </div>
