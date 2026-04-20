@@ -36,6 +36,8 @@ public class ResourceService {
             resource.setLocation(resourceDetails.getLocation());
             resource.setDescription(resourceDetails.getDescription());
             resource.setStatus(resourceDetails.getStatus());
+            resource.setAvailableFrom(resourceDetails.getAvailableFrom());
+            resource.setAvailableTo(resourceDetails.getAvailableTo());
             return resourceRepository.save(resource);
         }
         return null;
