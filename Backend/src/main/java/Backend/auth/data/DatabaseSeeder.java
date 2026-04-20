@@ -48,11 +48,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         // 2. Seed Resources if missing
         if (resourceRepository.count() == 0) {
             List<Resource> resources = new ArrayList<>();
-            resources.add(new Resource(null, "Main Auditorium", "Lecture Hall", 500, "Building A, Floor 1", "Large auditorium for major events", "Available"));
-            resources.add(new Resource(null, "Physics Lab 01", "Lab", 40, "Building B, Floor 2", "Fully equipped physics laboratory", "Available"));
-            resources.add(new Resource(null, "Conference Room B", "Meeting Room", 15, "Building C, Floor 3", "Private meeting room with AV setup", "Available"));
-            resources.add(new Resource(null, "Indoor Sports Center", "Sports Facility", 100, "Campus West Zone", "Basketball and badminton courts", "Available"));
-            resources.add(new Resource(null, "Smart Classroom 402", "Lecture Hall", 60, "Building D, Floor 4", "Modern classroom with interactive boards", "Available"));
+            resources.add(new Resource(null, "Main Auditorium", "Lecture Hall", 500, "Building A, Floor 1", "Large auditorium for major events", "Available", "08:00", "18:00"));
+            resources.add(new Resource(null, "Physics Lab 01", "Lab", 40, "Building B, Floor 2", "Fully equipped physics laboratory", "Available", "09:00", "17:00"));
+            resources.add(new Resource(null, "Conference Room B", "Meeting Room", 15, "Building C, Floor 3", "Private meeting room with AV setup", "Available", "08:00", "18:00"));
+            resources.add(new Resource(null, "Indoor Sports Center", "Sports Facility", 100, "Campus West Zone", "Basketball and badminton courts", "Available", "06:00", "22:00"));
+            resources.add(new Resource(null, "Smart Classroom 402", "Lecture Hall", 60, "Building D, Floor 4", "Modern classroom with interactive boards", "Available", "08:00", "20:00"));
             
             resourceRepository.saveAll(resources);
             System.out.println("Seeded 5 resources.");
