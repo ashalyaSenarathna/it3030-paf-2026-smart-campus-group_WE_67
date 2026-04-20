@@ -60,6 +60,7 @@ export const bookingApi = {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
+  checkAvailability: (resourceId, date) => fetchWithCredentials(`/bookings/availability?resourceId=${resourceId}&date=${date}`),
 };
 
 export const adminApi = {
