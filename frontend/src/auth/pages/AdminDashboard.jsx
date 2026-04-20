@@ -162,8 +162,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     fetchAllData();
   }, []);
 
-  const handleLogout = async () => {
-    await onLogout();
+  const handleLogout = () => {
+    if (onLogout) onLogout();
     navigate('/login');
   };
 
