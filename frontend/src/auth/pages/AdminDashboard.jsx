@@ -917,6 +917,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         .search-icon-glass { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 0.8rem; }
         .search-box-wrap input { width: 100%; padding: 12px 15px 12px 40px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #fff; }
         .filter-select-wrap select { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #fff; padding: 12px 15px; cursor: pointer; min-width: 150px; }
+        .filter-select-wrap select option { background: #0d0c14; color: #fff; }
         .btn-add-premium { background: #8b5cf6; color: #fff; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2); transition: all 0.3s; }
         .btn-add-premium:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4); }
         .toast-premium { position: fixed; bottom: 30px; right: 30px; background: #0d0c14; border: 1px solid #8b5cf6; padding: 12px 24px; border-radius: 14px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 5000; }
