@@ -39,6 +39,11 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Rejection Modal states
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectingBooking, setRejectingBooking] = useState(null);
+  const [tempReason, setTempReason] = useState('');
 
   const defaultForm = { name: '', type: 'Lecture Hall', capacity: 0, location: '', description: '', status: 'Available' };
   const [formData, setFormData] = useState(defaultForm);
@@ -205,6 +210,23 @@ const AdminDashboard = ({ user, onLogout }) => {
         showNotification('Delete failed');
       }
     }
+  };
+
+  const handleOpenRejectModal = (booking) => {
+    setRejectingBooking(booking);
+    setTempReason('');
+    setIsRejectModalOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!tempReason.trim()) {
+      alert("Please provide a reason for rejection.");
+      return;
+    }
+    await handleBookingAction(rejectingBooking.id, 'REJECT', tempReason);
+    setIsRejectModalOpen(false);
+    setRejectingBooking(null);
+    showNotification('Booking rejected with reason.');
   };
 
   const handleBookingAction = async (id, action, reason = null) => {
@@ -613,10 +635,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                         <button
                           className="bk-btn-reject"
                           title="Reject Booking"
-                          onClick={() => {
-                            const reason = prompt('Rejection Reason:');
-                            if (reason) handleBookingAction(b.id, 'REJECT', reason);
-                          }}
+                          onClick={() => handleOpenRejectModal(b)}
                         >
                           ✕ Reject
                         </button>
@@ -813,6 +832,59 @@ const AdminDashboard = ({ user, onLogout }) => {
 
       {/* Success/Error Toast */}
       {toast && <div className="toast-premium animate-in">✅ {toast}</div>}
+
+      {/* Rejection Modal */}
+      {isRejectModalOpen && (
+        <div className="modal-root-glass" onClick={() => setIsRejectModalOpen(false)}>
+          <div className="modal-box-premium" style={{ maxWidth: '450px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <h2>Reject Reservation</h2>
+              <button className="modal-close-x" onClick={() => setIsRejectModalOpen(false)}>&times;</button>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Please provide a brief reason for declining this request. This will be visible to the student.
+              </p>
+              <div className="f-group full">
+                <label>Rejection Reason</label>
+                <textarea 
+                  required 
+                  rows="4"
+                  value={tempReason}
+                  onChange={e => setTempReason(e.target.value)}
+                  placeholder="e.g. This slot is reserved for a special department event."
+                  style={{
+                    width: '100%',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '12px',
+                    padding: '12px',
+                    color: '#fff',
+                    fontFamily: 'inherit',
+                    resize: 'none'
+                  }}
+                />
+              </div>
+              <div className="modal-footer" style={{ marginTop: '2rem', display: 'flex', gap: '10px' }}>
+                <button 
+                  className="btn-cancel-modal" 
+                  onClick={() => setIsRejectModalOpen(false)}
+                  style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#94a3b8', borderRadius: '12px', cursor: 'pointer', fontWeight: 700 }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="btn-add-premium" 
+                  onClick={handleConfirmReject}
+                  style={{ flex: 2, padding: '12px', background: '#f87171', border: 'none', color: '#fff', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, boxShadow: '0 4px 15px rgba(248,113,113,0.3)' }}
+                >
+                  Confirm Rejection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-root-glass" onClick={() => setIsModalOpen(false)}>
