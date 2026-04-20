@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 export default function TechnicianDashboard({ user, onLogout }) {
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await onLogout();
-    navigate('/');
+  const handleLogout = () => {
+    if (onLogout) onLogout();
+    navigate('/login');
   };
 
   return (
