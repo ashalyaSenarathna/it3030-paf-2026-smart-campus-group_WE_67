@@ -15,17 +15,20 @@ public class BookingService {
     private BookingRepository bookingRepository;
 
     public Booking createBooking(Booking booking) {
-        // Check for conflicts
-        List<Booking> conflicts = bookingRepository.findConflictingBookings(
-                booking.getResourceId(),
-                booking.getDate(),
-                booking.getStartTime(),
-                booking.getEndTime()
+        // --- LAYER: Failsafe Manual Check (Paranoid Mode) ---
+        List<Booking> allDayBookings = bookingRepository.findByResourceIdAndDateAndStatusIn(
+                booking.getResourceId(), 
+                booking.getDate(), 
+                java.util.Arrays.asList("PENDING", "APPROVED")
         );
 
-        if (!conflicts.isEmpty()) {
-            throw new RuntimeException("Scheduling conflict: the resource is already booked for this time range.");
+        for (Booking existing : allDayBookings) {
+            if (isOverlapping(booking.getStartTime(), booking.getEndTime(), 
+                             existing.getStartTime(), existing.getEndTime())) {
+                throw new RuntimeException("Scheduling conflict: This time is already reserved by another booking.");
+            }
         }
+        // -----------------------------------------------------------
 
         booking.setStatus(BookingStatus.PENDING);
         return bookingRepository.save(booking);
@@ -76,19 +79,21 @@ public class BookingService {
             !booking.getStartTime().equals(bookingDetails.getStartTime()) ||
             !booking.getEndTime().equals(bookingDetails.getEndTime())) {
             
-            List<Booking> conflicts = bookingRepository.findConflictingBookings(
-                    bookingDetails.getResourceId(),
-                    bookingDetails.getDate(),
-                    bookingDetails.getStartTime(),
-                    bookingDetails.getEndTime()
+            // --- LAYER: Failsafe Manual Check (Paranoid Mode) ---
+            List<Booking> allDayBookings = bookingRepository.findByResourceIdAndDateAndStatusIn(
+                    bookingDetails.getResourceId(), 
+                    bookingDetails.getDate(), 
+                    java.util.Arrays.asList("PENDING", "APPROVED")
             );
-            
-            // Exclude current booking from conflict check
-            conflicts.removeIf(b -> b.getId().equals(id));
 
-            if (!conflicts.isEmpty()) {
-                throw new RuntimeException("Scheduling conflict: the resource is already booked for this time range.");
+            for (Booking existing : allDayBookings) {
+                if (existing.getId().equals(id)) continue; // Skip self
+                if (isOverlapping(bookingDetails.getStartTime(), bookingDetails.getEndTime(), 
+                                 existing.getStartTime(), existing.getEndTime())) {
+                    throw new RuntimeException("Scheduling conflict: This time is already reserved by another booking.");
+                }
             }
+            // -----------------------------------------------------------
         }
 
         booking.setResourceId(bookingDetails.getResourceId());
@@ -102,5 +107,12 @@ public class BookingService {
         booking.setStatus(BookingStatus.PENDING);
         
         return bookingRepository.save(booking);
+    }
+
+    private boolean isOverlapping(java.time.LocalTime start1, java.time.LocalTime end1, 
+                                java.time.LocalTime start2, java.time.LocalTime end2) {
+        // Interval (start1, end1) overlaps (start2, end2) if:
+        // start1 < end2 AND end1 > start2
+        return start1.isBefore(end2) && end1.isAfter(start2);
     }
 }
