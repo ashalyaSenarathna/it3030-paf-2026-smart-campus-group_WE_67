@@ -46,7 +46,16 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [editingResource, setEditingResource] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const defaultForm = { name: '', type: 'Lecture Hall', capacity: '', location: '', description: '', status: 'Available' };
+  const defaultForm = { 
+    name: '', 
+    type: 'Lecture Hall', 
+    capacity: '', 
+    location: '', 
+    description: '', 
+    status: 'Available',
+    availableFrom: '08:00',
+    availableTo: '18:00'
+  };
   const [formData, setFormData] = useState(defaultForm);
 
   const [debugMessage, setDebugMessage] = useState('Initializing...');
@@ -195,7 +204,9 @@ const AdminDashboard = ({ user, onLogout }) => {
     try {
       const sanitizedData = {
         ...formData,
-        capacity: parseInt(formData.capacity) || 0
+        capacity: parseInt(formData.capacity) || 0,
+        availableFrom: formData.availableFrom || '08:00',
+        availableTo: formData.availableTo || '18:00'
       };
       if (editingResource) {
         await resourceApi.update(editingResource.id, sanitizedData);
@@ -475,7 +486,12 @@ const AdminDashboard = ({ user, onLogout }) => {
             <tbody>
               {filteredResources.map(r => (
                 <tr key={r.id}>
-                  <td style={{ fontWeight: 700 }}>{r.name}</td>
+                  <td style={{ fontWeight: 700 }}>
+                    <div>{r.name}</div>
+                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      🕒 {r.availableFrom || '08:00'} - {r.availableTo || '18:00'}
+                    </div>
+                  </td>
                   <td><span className="type-tag">{r.type}</span></td>
                   <td>{r.capacity} Seats</td>
                   <td>{r.location}</td>
@@ -948,6 +964,24 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                   {RESOURCE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
+              </div>
+              <div className="f-group" style={{ opacity: formData.status === 'Available' ? 1 : 0.5 }}>
+                <label>Opening Time {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
+                <input 
+                  type="time" 
+                  disabled={formData.status !== 'Available'}
+                  value={formData.availableFrom} 
+                  onChange={e => setFormData({ ...formData, availableFrom: e.target.value })} 
+                />
+              </div>
+              <div className="f-group" style={{ opacity: formData.status === 'Available' ? 1 : 0.5 }}>
+                <label>Closing Time {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
+                <input 
+                  type="time" 
+                  disabled={formData.status !== 'Available'}
+                  value={formData.availableTo} 
+                  onChange={e => setFormData({ ...formData, availableTo: e.target.value })} 
+                />
               </div>
               <div className="modal-f-actions">
                 <button type="button" className="m-btn-sec" onClick={() => setIsModalOpen(false)}>Cancel</button>
