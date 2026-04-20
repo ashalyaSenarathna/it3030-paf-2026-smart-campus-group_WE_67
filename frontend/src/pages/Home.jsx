@@ -60,35 +60,6 @@ function Home({ user, onLogout }) {
       <div className="bg-blob blob-2" aria-hidden="true"></div>
       <div className="bg-blob blob-3" aria-hidden="true"></div>
 
-      <nav className="home-navbar">
-        <div className="navbar-brand">
-          <span className="brand-icon">🏛️</span>
-          Smart Campus
-        </div>
-        <ul className="nav-links">
-          <li><Link to="/" className="nav-item active">Home</Link></li>
-          <li><Link to="/facility-management/resource-catalogue" className="nav-item">Resources</Link></li>
-
-          {user ? (
-            <>
-               <li><Link to="/bookings/my-bookings" className="nav-item">My Bookings</Link></li>
-              <li><Link to="/bookings/all" className="nav-item">Bookings</Link></li>
-              {isAdmin && <li><Link to="/admin/dashboard" className="nav-item">Admin Dashboard</Link></li>}
-              {isStudent && <li><Link to="/profile/student" className="nav-item">Profile</Link></li>}
-              {isTech && <li><Link to="/profile/technician" className="nav-item">Tech Profile</Link></li>}
-              <li>
-                <button type="button" className="nav-item nav-logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
-              </li>
-            </>
-          ) : (
-            <li><Link to="/login" className="nav-item">Login</Link></li>
-          )}
-
-          <li><a href="#" className="nav-item">Support</a></li>
-        </ul>
-      </nav>
 
       <section className="home-hero">
         <div className="hero-badge">✨ Your Digital Campus Companion</div>
