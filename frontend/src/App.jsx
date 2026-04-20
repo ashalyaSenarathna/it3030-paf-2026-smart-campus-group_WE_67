@@ -12,6 +12,7 @@ import AdminProfilePage from './auth/pages/AdminProfilePage.jsx';
 import TechnicianProfilePage from './auth/pages/TechnicianProfilePage.jsx';
 import StudentProfilePage from './auth/pages/StudentProfilePage.jsx';
 import UserBookings from './pages/Booking/UserBookings.jsx';
+import AllBookings from './pages/Booking/AllBookings.jsx';
 import './App.css';
 import './auth/auth.css';
 
@@ -137,6 +138,14 @@ function App() {
         element={
           <ProtectedRoute user={user}>
             <UserBookings user={user} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bookings/all"
+        element={
+          <ProtectedRoute user={user}>
+            <AllBookings user={user} />
           </ProtectedRoute>
         }
       />

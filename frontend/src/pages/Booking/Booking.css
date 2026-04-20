@@ -141,6 +141,25 @@
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
 }
 
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--status-approved);
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.live-indicator .pulse {
+  width: 8px;
+  height: 8px;
+  background: var(--status-approved);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--status-approved);
+  animation: pulse 2s infinite;
+}
+
 /* Hero Section & Headers */
 .bookings-hero, .bookings-header {
   text-align: center;
@@ -205,6 +224,44 @@
 .filter-main {
   display: flex;
   align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.search-bar-glass {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 10px 20px;
+  flex: 1;
+  max-width: 400px;
+  transition: all 0.3s ease;
+}
+
+.search-bar-glass:focus-within {
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.search-bar-glass svg {
+  color: #64748b;
+}
+
+.search-bar-glass input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.search-bar-glass input:focus {
+  outline: none;
 }
 
 .filter-group {
@@ -366,12 +423,32 @@
 .pill-CANCELLED, .status-CANCELLED { background: rgba(148, 163, 184, 0.1); color: var(--status-cancelled); border: 1px solid rgba(148, 163, 184, 0.2); }
 
 /* Card Content Details */
-.resource-name, .booking-card h3 {
+.resource-name {
   font-size: 1.6rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
   color: #fff;
   line-height: 1.2;
+}
+
+.resource-type-small {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.attendee-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  border: 1px solid var(--glass-border);
 }
 
 .info-grid {

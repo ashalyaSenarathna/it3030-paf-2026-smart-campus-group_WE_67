@@ -71,7 +71,8 @@ function Home({ user, onLogout }) {
 
           {user ? (
             <>
-              <li><Link to="/bookings/my-bookings" className="nav-item">My Bookings</Link></li>
+               <li><Link to="/bookings/my-bookings" className="nav-item">My Bookings</Link></li>
+              <li><Link to="/bookings/all" className="nav-item">Bookings</Link></li>
               {isAdmin && <li><Link to="/admin/dashboard" className="nav-item">Admin Dashboard</Link></li>}
               {isStudent && <li><Link to="/profile/student" className="nav-item">Profile</Link></li>}
               {isTech && <li><Link to="/profile/technician" className="nav-item">Tech Profile</Link></li>}
