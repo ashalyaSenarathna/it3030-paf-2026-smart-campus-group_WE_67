@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { bookingApi } from '../../api/api';
 import './Booking.css';
 
@@ -12,6 +12,27 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [existingBookings, setExistingBookings] = useState([]);
+
+  useEffect(() => {
+    if (formData.date && resource.id) {
+      bookingApi.checkAvailability(resource.id, formData.date)
+        .then(res => setExistingBookings(res.data))
+        .catch(err => console.error("Error fetching availability:", err));
+    }
+  }, [formData.date, resource.id]);
+
+  const isOverlapping = (start, end) => {
+    if (!start || !end) return false;
+    return existingBookings.some(b => {
+      if (existingBooking && b.id === existingBooking.id) return false;
+      const bStart = Array.isArray(b.startTime) ? `${b.startTime[0].toString().padStart(2, '0')}:${b.startTime[1].toString().padStart(2, '0')}` : b.startTime.substring(0, 5);
+      const bEnd = Array.isArray(b.endTime) ? `${b.endTime[0].toString().padStart(2, '0')}:${b.endTime[1].toString().padStart(2, '0')}` : b.endTime.substring(0, 5);
+      return (start < bEnd && end > bStart);
+    });
+  };
+
+  const hasConflict = isOverlapping(formData.startTime, formData.endTime);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -55,7 +76,22 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
         <h2>{existingBooking ? 'Edit' : 'Book'} {resource.name}</h2>
         <p>{existingBooking ? 'Update your reservation details.' : 'Fill out the details below to request a booking.'}</p>
         
-        {error && <div className="booking-reason" style={{marginBottom: '1rem'}}>{error}</div>}
+        {existingBookings.length > 0 && (
+          <div className="availability-alert">
+            <label>Reserved Times for this date:</label>
+            <div className="reserved-slots-list">
+              {existingBookings.map(b => (
+                <span key={b.id} className="reserved-slot-tag">
+                  {Array.isArray(b.startTime) ? `${b.startTime[0]}:${b.startTime[1].toString().padStart(2, '0')}` : b.startTime.substring(0, 5)} - 
+                  {Array.isArray(b.endTime) ? `${b.endTime[0]}:${b.endTime[1].toString().padStart(2, '0')}` : b.endTime.substring(0, 5)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {error && <div className="booking-reason" style={{marginBottom: '1rem', background: 'rgba(248, 113, 113, 0.1)', color: '#f87171'}}>{error}</div>}
+        {hasConflict && <div className="booking-reason" style={{marginBottom: '1rem', background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24'}}>⚠️ The selected time overlaps with an existing booking.</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -88,8 +124,8 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
 
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'Processing...' : (existingBooking ? 'Update Booking' : 'Request Booking')}
+            <button type="submit" className="btn-submit" disabled={loading || hasConflict}>
+              {loading ? 'Processing...' : (hasConflict ? 'Time Conflict' : (existingBooking ? 'Update Booking' : 'Request Booking'))}
             </button>
           </div>
         </form>
