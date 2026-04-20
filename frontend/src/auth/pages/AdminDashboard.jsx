@@ -46,7 +46,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [editingResource, setEditingResource] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const defaultForm = { name: '', type: 'Lecture Hall', capacity: 0, location: '', description: '', status: 'Available' };
+  const defaultForm = { name: '', type: 'Lecture Hall', capacity: '', location: '', description: '', status: 'Available' };
   const [formData, setFormData] = useState(defaultForm);
 
   const [debugMessage, setDebugMessage] = useState('Initializing...');
@@ -193,11 +193,15 @@ const AdminDashboard = ({ user, onLogout }) => {
   const handleSaveResource = async (e) => {
     e.preventDefault();
     try {
+      const sanitizedData = {
+        ...formData,
+        capacity: parseInt(formData.capacity) || 0
+      };
       if (editingResource) {
-        await resourceApi.update(editingResource.id, formData);
+        await resourceApi.update(editingResource.id, sanitizedData);
         showNotification('Facility updated successfully!');
       } else {
-        await resourceApi.create(formData);
+        await resourceApi.create(sanitizedData);
         showNotification('New facility registered!');
       }
       setIsModalOpen(false);
@@ -846,7 +850,16 @@ const AdminDashboard = ({ user, onLogout }) => {
               </div>
               <div className="f-group">
                 <label>Capacity</label>
-                <input type="number" required value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: parseInt(e.target.value) })} />
+                <input 
+                  type="number" 
+                  required 
+                  value={formData.capacity} 
+                  placeholder="0"
+                  onChange={e => {
+                    const val = e.target.value;
+                    setFormData({ ...formData, capacity: val === '' ? '' : parseInt(val) });
+                  }} 
+                />
               </div>
               <div className="f-group full" style={{ position: 'relative' }}>
                 <label>Location</label>
