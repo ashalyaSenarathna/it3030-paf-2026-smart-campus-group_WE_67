@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { bookingApi, resourceApi } from '../../api/api';
+import { RESOURCE_TYPES, RESOURCE_TYPE_ICONS } from '../facility-management/resourceConstants';
 import './Booking.css';
 
 const AllBookings = ({ user }) => {
@@ -11,6 +12,7 @@ const AllBookings = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [typeFilter, setTypeFilter] = useState('ALL');
 
   const formatTime = (time) => {
     if (!time) return '--:--';
@@ -75,6 +77,10 @@ const AllBookings = ({ user }) => {
     if (statusFilter !== 'ALL') {
       result = result.filter(b => b.status?.toUpperCase() === statusFilter.toUpperCase());
     }
+
+    if (typeFilter !== 'ALL') {
+      result = result.filter(b => resources[b.resourceId]?.type === typeFilter);
+    }
     
     if (searchTerm.trim() !== '') {
       result = result.filter(b => {
@@ -86,7 +92,7 @@ const AllBookings = ({ user }) => {
     }
     
     setFilteredBookings(result);
-  }, [searchTerm, statusFilter, bookings, resources]);
+  }, [searchTerm, statusFilter, typeFilter, bookings, resources]);
 
   if (loading) {
     return (
@@ -135,6 +141,21 @@ const AllBookings = ({ user }) => {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="filter-group">
+                <select 
+                  className="filter-select-glass"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                >
+                  <option value="ALL">All Resource Types</option>
+                  {RESOURCE_TYPES.map(type => (
+                    <option key={type} value={type}>
+                      {RESOURCE_TYPE_ICONS[type] || '🏫'} {type}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

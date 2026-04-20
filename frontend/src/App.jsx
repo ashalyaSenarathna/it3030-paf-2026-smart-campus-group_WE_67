@@ -13,7 +13,7 @@ import TechnicianProfilePage from './auth/pages/TechnicianProfilePage.jsx';
 import StudentProfilePage from './auth/pages/StudentProfilePage.jsx';
 import UserBookings from './pages/Booking/UserBookings.jsx';
 import AllBookings from './pages/Booking/AllBookings.jsx';
-import Nav from './Components/Nav.jsx';
+import Nav from './components/Nav.jsx';
 import './App.css';
 import './auth/auth.css';
 
