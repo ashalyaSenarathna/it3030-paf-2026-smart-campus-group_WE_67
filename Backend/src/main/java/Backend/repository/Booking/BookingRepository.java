@@ -14,6 +14,8 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     
     List<Booking> findByUserId(String userId);
 
+    List<Booking> findByResourceId(String resourceId);
+
     @Query("{ 'resourceId': ?0, 'date': ?1, 'startTime': { $lt: ?3 }, 'endTime': { $gt: ?2 }, 'status': { $in: ['PENDING', 'APPROVED'] } }")
     List<Booking> findConflictingBookings(String resourceId, LocalDate date, LocalTime startTime, LocalTime endTime);
 }
