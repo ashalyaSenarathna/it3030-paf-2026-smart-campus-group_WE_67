@@ -1,7 +1,9 @@
 package Backend.service.facilitymanagement;
 
 import Backend.model.facilitymanagement.Resource;
+import Backend.model.Booking.Booking;
 import Backend.repository.facilitymanagement.ResourceRepository;
+import Backend.repository.Booking.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ public class ResourceService {
 
     @Autowired
     private ResourceRepository resourceRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     public List<Resource> getAllResources() {
         return resourceRepository.findAll();
@@ -44,6 +49,11 @@ public class ResourceService {
     }
 
     public void deleteResource(String id) {
+        // First delete all bookings associated with this resource
+        List<Booking> bookings = bookingRepository.findByResourceId(id);
+        if (bookings != null && !bookings.isEmpty()) {
+            bookingRepository.deleteAll(bookings);
+        }
         resourceRepository.deleteById(id);
     }
 }

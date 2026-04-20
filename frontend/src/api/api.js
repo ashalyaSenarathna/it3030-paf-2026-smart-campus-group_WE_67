@@ -18,7 +18,14 @@ const fetchWithCredentials = async (url, options = {}) => {
     throw error;
   }
   
-  const data = await response.json();
+  // Handle 204 No Content or empty responses
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
+    return { data: null };
+  }
+
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+  
   // Wrap in .data to maintain compatibility with existing components
   return { data };
 };
