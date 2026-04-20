@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { resourceApi } from '../../api/api';
+import { getCurrentUser } from '../../auth/api';
+import RequestBookingModal from '../Booking/RequestBookingModal';
 import './ResourceCatalogue.css';
 import { RESOURCE_TYPE_ICONS, RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
-
 const STATUS_OPTIONS = [
   { value: 'All',         label: 'All Statuses', color: '#6b7280', bg: '#f3f4f6' },
   { value: 'Available',   label: 'Available',    color: '#065f46', bg: '#d1fae5' },
@@ -26,6 +27,8 @@ function ResourceCatalogue() {
   const [typeFilter, setTypeFilter]   = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy]           = useState('default');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [selectedResource, setSelectedResource] = useState(null);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -38,6 +41,13 @@ function ResourceCatalogue() {
         setLoading(false);
       }
     };
+    const fetchUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+      } catch(e){}
+    }
+    fetchUser();
     fetchResources();
   }, []);
 
@@ -215,10 +225,22 @@ function ResourceCatalogue() {
                 <span className="capacity-tag">👥 {resource.capacity} Seats</span>
                 <span className="location-tag">📍 {resource.location}</span>
               </div>
-              <div className="card-footer">
+              <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div className={`resource-status-badge ${(resource.status || '').toLowerCase()}`}>
                   {resource.status}
                 </div>
+                {resource.status !== 'Maintenance' && (
+                  <button 
+                    className="clear-filters-btn-lg" 
+                    onClick={() => {
+                      if (!currentUser) alert("Please log in to book this resource.");
+                      else setSelectedResource(resource);
+                    }}
+                    style={{ padding: '8px 20px', fontSize: '0.85rem' }}
+                  >
+                    Book Now
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -234,6 +256,18 @@ function ResourceCatalogue() {
             </button>
           )}
         </div>
+      )}
+
+      {selectedResource && (
+        <RequestBookingModal
+          resource={selectedResource}
+          user={currentUser}
+          onClose={() => setSelectedResource(null)}
+          onSuccess={() => {
+            alert('Booking requested successfully!');
+            setSelectedResource(null);
+          }}
+        />
       )}
     </div>
   );
