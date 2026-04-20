@@ -19,4 +19,6 @@ public class Resource {
     private String location;
     private String description;
     private String status;
+    private String availableFrom;
+    private String availableTo;
 }
