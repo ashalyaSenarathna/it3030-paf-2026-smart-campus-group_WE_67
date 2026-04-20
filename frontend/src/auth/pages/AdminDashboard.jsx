@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { resourceApi, bookingApi, adminApi } from '../../api/api';
 import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
+
+// ── Campus Location Suggestions ──
+const CAMPUS_LOCATIONS = [
+  ...Array.from({ length: 7 }, (_, i) => `Main Building, Floor ${i + 1}`),
+  ...Array.from({ length: 14 }, (_, i) => `New Building, Floor ${i + 1}`),
+];
 
 const TABS = {
   DASHBOARD: 'Dashboard',
@@ -46,6 +52,12 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [debugMessage, setDebugMessage] = useState('Initializing...');
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [dbStatus, setDbStatus] = useState(null);
+
+  // Location autocomplete state
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [activeSuggestionIdx, setActiveSuggestionIdx] = useState(0);
+  const locationInputRef = useRef(null);
 
   const showNotification = (message) => {
     setToast(message);
@@ -836,9 +848,87 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <label>Capacity</label>
                 <input type="number" required value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: parseInt(e.target.value) })} />
               </div>
-              <div className="f-group full">
+              <div className="f-group full" style={{ position: 'relative' }}>
                 <label>Location</label>
-                <input type="text" required value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} placeholder="Building 02, Floor 03" />
+                <input
+                  ref={locationInputRef}
+                  type="text"
+                  required
+                  autoComplete="off"
+                  value={formData.location}
+                  placeholder="Type 'M' for Main Building or 'N' for New Building..."
+                  onChange={e => {
+                    const val = e.target.value;
+                    setFormData({ ...formData, location: val });
+                    if (val.trim().length > 0) {
+                      const filtered = CAMPUS_LOCATIONS.filter(loc =>
+                        loc.toLowerCase().startsWith(val.toLowerCase())
+                      );
+                      setLocationSuggestions(filtered);
+                      setShowLocationSuggestions(filtered.length > 0);
+                      setActiveSuggestionIdx(0);
+                    } else {
+                      setShowLocationSuggestions(false);
+                      setLocationSuggestions([]);
+                    }
+                  }}
+                  onKeyDown={e => {
+                    if (!showLocationSuggestions || locationSuggestions.length === 0) return;
+                    if (e.key === 'Tab') {
+                      e.preventDefault();
+                      setFormData({ ...formData, location: locationSuggestions[activeSuggestionIdx] });
+                      setShowLocationSuggestions(false);
+                    } else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setActiveSuggestionIdx(prev => (prev + 1) % locationSuggestions.length);
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setActiveSuggestionIdx(prev => (prev - 1 + locationSuggestions.length) % locationSuggestions.length);
+                    } else if (e.key === 'Enter' && showLocationSuggestions) {
+                      e.preventDefault();
+                      setFormData({ ...formData, location: locationSuggestions[activeSuggestionIdx] });
+                      setShowLocationSuggestions(false);
+                    } else if (e.key === 'Escape') {
+                      setShowLocationSuggestions(false);
+                    }
+                  }}
+                  onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
+                  onFocus={e => {
+                    const val = e.target.value;
+                    if (val.trim().length > 0) {
+                      const filtered = CAMPUS_LOCATIONS.filter(loc =>
+                        loc.toLowerCase().startsWith(val.toLowerCase())
+                      );
+                      if (filtered.length > 0) {
+                        setLocationSuggestions(filtered);
+                        setShowLocationSuggestions(true);
+                        setActiveSuggestionIdx(0);
+                      }
+                    }
+                  }}
+                />
+                {showLocationSuggestions && locationSuggestions.length > 0 && (
+                  <div className="loc-autocomplete-dropdown">
+                    <div className="loc-ac-hint">Press <kbd>Tab</kbd> or <kbd>Enter</kbd> to select · <kbd>↑↓</kbd> to navigate</div>
+                    {locationSuggestions.map((loc, idx) => (
+                      <div
+                        key={loc}
+                        className={`loc-ac-item ${idx === activeSuggestionIdx ? 'active' : ''}`}
+                        onMouseDown={e => {
+                          e.preventDefault();
+                          setFormData({ ...formData, location: loc });
+                          setShowLocationSuggestions(false);
+                        }}
+                        onMouseEnter={() => setActiveSuggestionIdx(idx)}
+                      >
+                        <span className="loc-ac-icon">{loc.startsWith('Main') ? '🏛️' : '🏢'}</span>
+                        <span className="loc-ac-text">
+                          <strong>{loc.split(',')[0]}</strong>{loc.includes(',') ? ',' + loc.split(',').slice(1).join(',') : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="f-group full">
                 <label>Status</label>
@@ -968,6 +1058,20 @@ const AdminDashboard = ({ user, onLogout }) => {
         .f-group input, .f-group select { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; appearance: none; }
         .f-group select option { background: #0d0c14; color: #fff; }
         .f-group input:focus, .f-group select:focus { outline: none; border-color: #8b5cf6; background: rgba(255,255,255,0.05); }
+
+        /* ── Location Autocomplete Styles ── */
+        .loc-autocomplete-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 100; margin-top: 6px; background: #13121f; border: 1px solid rgba(139,92,246,0.25); border-radius: 16px; padding: 8px 0; max-height: 260px; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 30px rgba(139,92,246,0.08); backdrop-filter: blur(20px); animation: fadeIn 0.25s ease; }
+        .loc-autocomplete-dropdown::-webkit-scrollbar { width: 6px; }
+        .loc-autocomplete-dropdown::-webkit-scrollbar-track { background: transparent; }
+        .loc-autocomplete-dropdown::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.25); border-radius: 10px; }
+        .loc-ac-hint { padding: 6px 16px 10px; font-size: 0.65rem; color: #475569; letter-spacing: 0.03em; border-bottom: 1px solid rgba(255,255,255,0.04); margin-bottom: 4px; }
+        .loc-ac-hint kbd { display: inline-block; padding: 1px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.6rem; color: #8b5cf6; font-family: inherit; margin: 0 2px; }
+        .loc-ac-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; cursor: pointer; transition: all 0.15s ease; border-left: 3px solid transparent; }
+        .loc-ac-item:hover, .loc-ac-item.active { background: rgba(139,92,246,0.08); border-left-color: #8b5cf6; }
+        .loc-ac-item.active { background: rgba(139,92,246,0.12); }
+        .loc-ac-icon { font-size: 1.1rem; flex-shrink: 0; }
+        .loc-ac-text { font-size: 0.85rem; color: #cbd5e1; }
+        .loc-ac-text strong { color: #f1f5f9; font-weight: 700; }
 
         .modal-f-actions { grid-column: span 2; display: flex; gap: 1rem; margin-top: 2rem; }
         .m-btn-pri { flex: 1; background: #8b5cf6; color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; }
