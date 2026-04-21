@@ -32,7 +32,16 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
     });
   };
 
+  const isTimeWithinRange = (time) => {
+    if (!time) return true;
+    return time >= "08:00" && time <= "18:00";
+  };
+
   const hasConflict = isOverlapping(formData.startTime, formData.endTime);
+  const startTimeInvalid = !isTimeWithinRange(formData.startTime);
+  const endTimeInvalid = !isTimeWithinRange(formData.endTime);
+  const timeSequenceInvalid = formData.startTime && formData.endTime && formData.startTime >= formData.endTime;
+  const hasTimeError = startTimeInvalid || endTimeInvalid || timeSequenceInvalid;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -71,61 +80,153 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
   };
 
   return (
-    <div className="booking-modal-overlay" onClick={onClose}>
-      <div className="booking-modal" onClick={e => e.stopPropagation()}>
-        <h2>{existingBooking ? 'Edit' : 'Book'} {resource.name}</h2>
-        <p>{existingBooking ? 'Update your reservation details.' : 'Fill out the details below to request a booking.'}</p>
+    <div className="ub-modal-overlay" onClick={onClose}>
+      <div className="ub-modal-content" onClick={e => e.stopPropagation()}>
+        <div className="ub-modal-glow"></div>
         
-        {existingBookings.length > 0 && (
-          <div className="availability-alert">
-            <label>Reserved Times for this date:</label>
-            <div className="reserved-slots-list">
-              {existingBookings.map(b => (
-                <span key={b.id} className="reserved-slot-tag">
-                  {Array.isArray(b.startTime) ? `${b.startTime[0]}:${b.startTime[1].toString().padStart(2, '0')}` : b.startTime.substring(0, 5)} - 
-                  {Array.isArray(b.endTime) ? `${b.endTime[0]}:${b.endTime[1].toString().padStart(2, '0')}` : b.endTime.substring(0, 5)}
-                </span>
-              ))}
-            </div>
+        {/* Header */}
+        <div className="ub-modal-header">
+          <div className="ub-modal-title-stack">
+            <span className="ub-modal-badge">{resource.type || 'Facility'}</span>
+            <h2>{existingBooking ? 'Edit' : 'Book'} {resource.name}</h2>
+            <p className="ub-modal-subtitle">{existingBooking ? 'Modify your current reservation details.' : 'Reserve this facility for your academic or event needs.'}</p>
           </div>
-        )}
+          <button className="ub-modal-close" onClick={onClose}>✕</button>
+        </div>
 
-        {error && <div className="booking-reason" style={{marginBottom: '1rem', background: 'rgba(248, 113, 113, 0.1)', color: '#f87171'}}>{error}</div>}
-        {hasConflict && <div className="booking-reason" style={{marginBottom: '1rem', background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24'}}>⚠️ The selected time overlaps with an existing booking.</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Date</label>
-            <input type="date" name="date" required value={formData.date} onChange={handleChange} min={new Date().toISOString().split('T')[0]} />
-          </div>
-          
-          <div className="time-row">
-            <div className="form-group">
-              <label>Start Time</label>
-              <input type="time" name="startTime" required value={formData.startTime} onChange={handleChange} />
-            </div>
-            <div className="form-group">
-              <label>End Time</label>
-              <input type="time" name="endTime" required value={formData.endTime} onChange={handleChange} />
-            </div>
-          </div>
-          
-          <div className="form-group">
-            <label>Purpose</label>
-            <textarea name="purpose" rows="3" required placeholder="Why do you need this resource?" value={formData.purpose} onChange={handleChange}></textarea>
-          </div>
-          
-          {resource.capacity > 0 && (
-            <div className="form-group">
-              <label>Expected Attendees (Max {resource.capacity})</label>
-              <input type="number" name="expectedAttendees" min="1" max={resource.capacity} required value={formData.expectedAttendees} onChange={handleChange} />
+        {/* Status/Zone */}
+        <div className="ub-modal-status-zone">
+          {existingBookings.length > 0 && (
+            <div className="ub-availability-shelf">
+              <div className="shelf-header">
+                <span className="icon">📅</span>
+                <label>Occupied Slots for this Date</label>
+              </div>
+              <div className="shelf-slots">
+                {existingBookings.map(b => (
+                  <span key={b.id} className="ub-slot-pill">
+                    {Array.isArray(b.startTime) ? `${b.startTime[0]}:${b.startTime[1].toString().padStart(2, '0')}` : b.startTime.substring(0, 5)} - 
+                    {Array.isArray(b.endTime) ? `${b.endTime[0]}:${b.endTime[1].toString().padStart(2, '0')}` : b.endTime.substring(0, 5)}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
-          <div className="modal-actions">
-            <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-submit" disabled={loading || hasConflict}>
-              {loading ? 'Processing...' : (hasConflict ? 'Time Conflict' : (existingBooking ? 'Update Booking' : 'Request Booking'))}
+          {error && <div className="ub-alert ub-alert-error">{error}</div>}
+          {hasConflict && <div className="ub-alert ub-alert-warning">⚠️ This time slot overlaps with an existing reservation.</div>}
+          {hasTimeError && (
+            <div className="ub-alert ub-alert-warning">
+              {timeSequenceInvalid 
+                ? "⚠️ End time must be after start time." 
+                : "⚠️ Bookings are only allowed between 8:00 AM and 6:00 PM."}
+            </div>
+          )}
+        </div>
+
+        <form className="ub-modal-form" onSubmit={handleSubmit}>
+          <div className="ub-form-grid">
+            {/* Date Field */}
+            <div className="ub-field-group full">
+              <label className="ub-field-label">Select Date</label>
+              <div className="ub-input-wrapper">
+                <span className="ub-input-icon">📅</span>
+                <input 
+                  type="date" 
+                  name="date" 
+                  required 
+                  value={formData.date} 
+                  onChange={handleChange} 
+                  min={new Date().toISOString().split('T')[0]} 
+                />
+              </div>
+            </div>
+            
+            {/* Time Fields */}
+            <div className="ub-field-group">
+              <label className="ub-field-label">Start Time</label>
+              <div className="ub-input-wrapper">
+                <span className="ub-input-icon">🕒</span>
+                <input 
+                  type="time" 
+                  name="startTime" 
+                  required 
+                  value={formData.startTime} 
+                  onChange={handleChange}
+                  min="08:00"
+                  max="18:00"
+                />
+              </div>
+            </div>
+            <div className="ub-field-group">
+              <label className="ub-field-label">End Time</label>
+              <div className="ub-input-wrapper">
+                <span className="ub-input-icon">🕒</span>
+                <input 
+                  type="time" 
+                  name="endTime" 
+                  required 
+                  value={formData.endTime} 
+                  onChange={handleChange}
+                  min="08:00"
+                  max="18:00"
+                />
+              </div>
+            </div>
+
+            {/* Attendees */}
+            {resource.capacity > 0 && (
+              <div className="ub-field-group full">
+                <label className="ub-field-label">Expected Participants (Capacity: {resource.capacity})</label>
+                <div className="ub-input-wrapper">
+                  <span className="ub-input-icon">👥</span>
+                  <input 
+                    type="number" 
+                    name="expectedAttendees" 
+                    min="1" 
+                    max={resource.capacity} 
+                    required 
+                    value={formData.expectedAttendees} 
+                    onChange={handleChange} 
+                  />
+                  <div className="ub-capacity-bar">
+                    <div 
+                      className="ub-capacity-progress" 
+                      style={{ width: `${Math.min(100, (formData.expectedAttendees / resource.capacity) * 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Purpose */}
+            <div className="ub-field-group full">
+              <label className="ub-field-label">Purpose of Booking</label>
+              <div className="ub-input-wrapper">
+                <textarea 
+                  name="purpose" 
+                  rows="3" 
+                  required 
+                  placeholder="Describe the nature of your event or meeting..." 
+                  value={formData.purpose} 
+                  onChange={handleChange}
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div className="ub-modal-footer">
+            <button type="button" className="ub-btn-ghost" onClick={onClose}>Dismiss</button>
+            <button 
+              type="submit" 
+              className={`ub-btn-action ${(hasConflict || hasTimeError) ? 'is-disabled' : ''}`}
+              disabled={loading || hasConflict || hasTimeError}
+            >
+              {loading ? (
+                <span className="ub-loading-state"><span className="spinner"></span> Processing...</span>
+              ) : (
+                hasConflict ? 'Time Conflict' : (hasTimeError ? 'Invalid Time' : (existingBooking ? 'Save Changes' : 'Confirm Reservation'))
+              )}
             </button>
           </div>
         </form>
