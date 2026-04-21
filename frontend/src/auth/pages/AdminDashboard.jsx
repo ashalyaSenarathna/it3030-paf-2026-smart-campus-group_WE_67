@@ -539,8 +539,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     if (!bookingSearch) return true;
     const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || '';
     return (
-      resourceName.toLowerCase().includes(bookingSearch.toLowerCase()) ||
-      (b.userId || '').toLowerCase().includes(bookingSearch.toLowerCase())
+      resourceName.toLowerCase().startsWith(bookingSearch.toLowerCase())
     );
   });
 
@@ -626,8 +625,8 @@ const AdminDashboard = ({ user, onLogout }) => {
         <div className="bk-empty-state">
           <div className="bk-empty-orb"></div>
           <div className="bk-empty-icon">🗓️</div>
-          <h3>No reservations found</h3>
-          <p>Try adjusting your search or filter criteria.</p>
+          <h3>{bookingSearch ? `No results for "${bookingSearch}"` : "No reservations found"}</h3>
+          <p>{bookingSearch ? `We couldn't find any bookings starting with the characters you typed.` : "Try adjusting your search or filter criteria."}</p>
           {bookingSearch && (
             <button className="bk-clear-btn" onClick={() => setBookingSearch('')}>Clear Search</button>
           )}
@@ -705,7 +704,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 </div>
 
                 {/* Action footer */}
-                {(b.status === 'PENDING' || b.status === 'APPROVED') && (
+                {(b.status === 'PENDING' || b.status === 'APPROVED' || b.status === 'REJECTED') && (
                   <div className="bk-p-actions">
                     {b.status === 'PENDING' && (
                       <>
