@@ -1592,205 +1592,187 @@
   color: #94a3b8;
 }
 
-/* ── Definitive Premium Modal System ── */
-.ub-modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(5, 5, 8, 0.85) !important;
-  backdrop-filter: blur(18px) !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  z-index: 9999 !important;
-  animation: ubFadeIn 0.4s ease-out;
-  padding: 1.5rem;
+.ub-glow-4 {
+  width: 450px;
+  height: 450px;
+  background: rgba(14, 165, 233, 0.1);
+  top: 20%;
+  right: 15%;
+  animation: ubPulse 12s infinite alternate;
 }
 
-.ub-modal-content {
-  background: #0d0c14 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 38px !important;
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 3.5rem !important;
-  position: relative;
-  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.7) !important;
-  animation: ubModalSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  color: #f8fafc !important;
+/* ── All Bookings Specific Styles ── */
+.all-filter-shelf {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 1.5rem;
+  background: rgba(13, 12, 20, 0.5);
+  padding: 1.5rem 2rem;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(30px);
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  align-items: center;
 }
 
-.ub-modal-glow {
-  position: absolute;
-  top: -15%; left: -15%;
-  width: 130%; height: 50%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 75%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.ub-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 3rem;
-  position: relative;
-  z-index: 2;
-}
-
-.ub-modal-badge {
-  display: inline-block;
-  padding: 6px 16px;
-  background: rgba(14, 165, 233, 0.15);
-  color: #0ea5e9 !important;
-  border-radius: 100px;
-  font-size: 0.65rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  border: 1px solid rgba(14, 165, 233, 0.25);
-  margin-bottom: 14px;
-}
-
-.ub-modal-header h2 {
-  font-size: 2.5rem !important;
-  font-weight: 900 !important;
-  margin: 0 !important;
-  letter-spacing: -0.04em !important;
-  color: #fff !important;
-  background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  line-height: 1.1;
-}
-
-.ub-modal-subtitle {
-  color: #94a3b8 !important;
-  font-size: 1.05rem !important;
-  margin: 12px 0 0 !important;
-  font-weight: 500;
-}
-
-.ub-modal-close {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8 !important;
-  width: 44px; height: 44px;
-  border-radius: 14px;
+.ub-search-glass {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.ub-modal-close:hover { 
-  background: rgba(248, 113, 113, 0.15); 
-  color: #f87171 !important; 
-  border-color: rgba(248, 113, 113, 0.3); 
-  transform: rotate(90deg) scale(1.1); 
-}
-
-.ub-modal-status-zone { margin-bottom: 2.5rem; position: relative; z-index: 2; }
-
-.ub-availability-shelf {
-  background: rgba(139, 92, 246, 0.06);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 24px;
-  padding: 1.5rem;
-  margin-bottom: 1.25rem;
-}
-.shelf-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-.shelf-header label { font-size: 0.75rem; font-weight: 900; color: #a78bfa !important; text-transform: uppercase; letter-spacing: 0.08em; }
-.shelf-slots { display: flex; flex-wrap: wrap; gap: 10px; }
-.ub-slot-pill {
-  background: rgba(255, 255, 255, 0.04);
-  padding: 6px 14px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #cbd5e1 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.ub-alert { padding: 14px 20px; border-radius: 18px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; }
-.ub-alert-error { background: rgba(248, 113, 113, 0.12); color: #fca5a5 !important; border: 1px solid rgba(248, 113, 113, 0.2); }
-.ub-alert-warning { background: rgba(251, 191, 36, 0.12); color: #fcd34d !important; border: 1px solid rgba(251, 191, 36, 0.2); }
-
-.ub-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; position: relative; z-index: 2; }
-.ub-field-group.full { grid-column: span 2; }
-.ub-field-label { display: block; font-size: 0.75rem !important; font-weight: 900 !important; color: #64748b !important; margin-bottom: 12px !important; text-transform: uppercase; letter-spacing: 0.06em; }
-
-.ub-input-wrapper { position: relative; }
-.ub-input-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.5; color: #8b5cf6; }
-
-.ub-input-wrapper input, .ub-input-wrapper textarea {
-  width: 100%;
-  padding: 16px 20px 16px 52px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: #fff !important;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.ub-input-wrapper textarea { padding-left: 20px; resize: none; min-height: 100px; }
-.ub-input-wrapper input:focus, .ub-input-wrapper textarea:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.15);
-  transform: translateY(-2px);
-}
-
-.ub-capacity-bar { height: 5px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-top: 12px; overflow: hidden; }
-.ub-capacity-progress { height: 100%; background: linear-gradient(90deg, #8b5cf6, #0ea5e9); transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
-
-.ub-modal-footer { margin-top: 3.5rem; display: flex; gap: 1.5rem; position: relative; z-index: 2; }
-
-.ub-btn-action {
-  flex: 2;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-  color: #fff !important;
-  border: none;
-  padding: 18px;
-  border-radius: 22px;
-  font-weight: 800;
-  font-size: 1rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 15px 35px rgba(139, 92, 246, 0.35);
-}
-.ub-btn-action:hover:not(.is-disabled) { transform: translateY(-4px); box-shadow: 0 20px 45px rgba(139, 92, 246, 0.5); filter: brightness(1.1); }
-.ub-btn-action:active:not(.is-disabled) { transform: translateY(-1px); }
-.ub-btn-action.is-disabled { background: rgba(255, 255, 255, 0.08); color: #475569 !important; pointer-events: none; opacity: 0.6; box-shadow: none; border: 1px solid rgba(255,255,255,0.05); }
-
-.ub-btn-ghost {
-  flex: 1;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #cbd5e1 !important;
-  padding: 18px;
-  border-radius: 22px;
-  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+.ub-search-glass:focus-within {
+  border-color: #8b5cf6;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ub-search-icon {
+  font-size: 1rem;
+  opacity: 0.5;
+}
+
+.ub-search-glass input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.ub-search-glass input:focus {
+  outline: none;
+}
+
+.ub-select-premium {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 10px 15px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: 0.3s;
-}
-.ub-btn-ghost:hover { background: rgba(255, 255, 255, 0.08); color: #fff !important; border-color: rgba(255,255,255,0.2); }
-
-@keyframes ubModalSlideDown {
-  from { opacity: 0; transform: translateY(-40px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 15px;
 }
 
-@keyframes ubFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.ub-res-type-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #0ea5e9;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: rgba(14, 165, 233, 0.05);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(14, 165, 233, 0.1);
+}
 
-@media (max-width: 640px) {
-  .ub-modal-content { padding: 2.5rem 1.5rem !important; }
-  .ub-form-grid { grid-template-columns: 1fr; }
-  .ub-field-group { grid-column: span 1 !important; }
-  .ub-modal-header h2 { font-size: 1.8rem !important; }
+.ub-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  letter-spacing: 0.05em;
+  margin-left: 5px;
+}
+
+.live-dot {
+  width: 5px;
+  height: 5px;
+  background: #34d399;
+  border-radius: 50%;
+  animation: ubLivePulse 1.5s infinite;
+}
+
+@keyframes ubLivePulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.ub-card-header .ub-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.is-live-pulse {
+  border-color: rgba(52, 211, 153, 0.2) !important;
+  box-shadow: 0 0 30px rgba(52, 211, 153, 0.05);
+}
+
+.ub-card-spotlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(400px circle at center, rgba(255, 255, 255, 0.05), transparent 40%);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.ub-booking-card:hover .ub-card-spotlight {
+  opacity: 1;
+}
+
+.ub-detail-text label {
+  display: block;
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  letter-spacing: 0.02em;
+}
+
+.ub-attendee-stat strong {
+  color: #fff;
+  font-size: 0.95rem;
+  margin-right: 4px;
+}
+
+.ub-attendee-stat .label {
+  font-size: 0.65rem;
+  color: #475569;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@media (max-width: 992px) {
+  .all-filter-shelf {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
