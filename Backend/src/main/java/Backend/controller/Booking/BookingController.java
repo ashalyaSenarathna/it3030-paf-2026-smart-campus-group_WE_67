@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,9 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private Backend.repository.Booking.BookingRepository bookingRepository;
+
     @PostMapping
     public ResponseEntity<?> createBooking(@RequestBody Booking booking) {
         try {
@@ -26,6 +31,17 @@ public class BookingController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    @GetMapping("/availability")
+    public ResponseEntity<List<Booking>> getAvailability(@RequestParam String resourceId, @RequestParam String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        List<Booking> bookings = bookingRepository.findByResourceIdAndDateAndStatusIn(
+                resourceId, 
+                localDate, 
+                Arrays.asList("PENDING", "APPROVED")
+        );
+        return ResponseEntity.ok(bookings);
     }
 
     @PutMapping("/{id}/approve")

@@ -8,6 +8,11 @@ const AdminBookingManagement = () => {
   const [resources, setResources] = useState({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
+  
+  // Rejection Modal states
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectingBooking, setRejectingBooking] = useState(null);
+  const [tempReason, setTempReason] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -44,15 +49,29 @@ const AdminBookingManagement = () => {
     }
   };
 
-  const handleReject = async (id) => {
-    const reason = prompt("Please enter a reason for rejection:");
-    if (!reason) return;
+  const handleOpenRejectModal = (booking) => {
+    setRejectingBooking(booking);
+    setTempReason('');
+    setIsRejectModalOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!tempReason.trim()) {
+      alert("Please provide a reason for rejection.");
+      return;
+    }
     try {
-      await bookingApi.reject(id, reason);
-      setBookings(bookings.map(b => b.id === id ? { ...b, status: 'REJECTED', adminReason: reason } : b));
+      await bookingApi.reject(rejectingBooking.id, tempReason);
+      setBookings(bookings.map(b => b.id === rejectingBooking.id ? { ...b, status: 'REJECTED', adminReason: tempReason } : b));
+      setIsRejectModalOpen(false);
+      setRejectingBooking(null);
     } catch (err) {
       alert("Failed to reject booking: " + (err.response?.data?.message || err.message));
     }
+  };
+
+  const handleReject = async (id) => {
+    // Legacy support if needed, but we use the modal now
   };
 
   const filteredBookings = filter === 'All' ? bookings : bookings.filter(b => b.status?.toUpperCase() === filter.toUpperCase());
@@ -71,16 +90,7 @@ const AdminBookingManagement = () => {
   return (
     <div className="bookings-dashboard">
       <div className="dashboard-content-wrapper">
-        <div className="catalogue-topbar">
-          <Link to="/" className="back-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Back to Dashboard
-          </Link>
-          <div className="admin-status-badge">
-            <span className="pulse-dot"></span>
-            System Administrator
-          </div>
-        </div>
+
 
         <div className="bookings-header">
           <div className="hero-badge">Control Center</div>
@@ -176,7 +186,7 @@ const AdminBookingManagement = () => {
                     <button className="btn-approve" onClick={() => handleApprove(booking.id)}>
                       Approve
                     </button>
-                    <button className="btn-reject" onClick={() => handleReject(booking.id)}>
+                    <button className="btn-reject" onClick={() => handleOpenRejectModal(booking)}>
                       Reject
                     </button>
                   </div>
@@ -186,6 +196,51 @@ const AdminBookingManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Rejection Modal */}
+      {isRejectModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          padding: '20px'
+        }} onClick={() => setIsRejectModalOpen(false)}>
+          <div style={{
+            background: 'rgba(23, 23, 23, 0.95)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '450px',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+          }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ color: '#fff', marginBottom: '8px' }}>Reject Booking</h2>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '24px' }}>
+              Please provide a reason. The student will see this reason in their dashboard.
+            </p>
+            
+            <textarea 
+              autoFocus
+              placeholder="e.g. The hall is undergoing maintenance."
+              value={tempReason}
+              onChange={e => setTempReason(e.target.value)}
+              style={{
+                width: '100%', minHeight: '120px', background: 'rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px',
+                padding: '16px', color: '#fff', fontSize: '1rem', outline: 'none',
+                resize: 'none', marginBottom: '24px'
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setIsRejectModalOpen(false)} style={{
+                flex: 1, padding: '14px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)',
+                background: 'transparent', color: '#fff', fontWeight: '600', cursor: 'pointer'
+              }}>Cancel</button>
+              <button onClick={handleConfirmReject} style={{
+                flex: 1, padding: '14px', borderRadius: '14px', border: 'none',
+                background: '#f87171', color: '#fff', fontWeight: '600', cursor: 'pointer'
+              }}>Reject Now</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
