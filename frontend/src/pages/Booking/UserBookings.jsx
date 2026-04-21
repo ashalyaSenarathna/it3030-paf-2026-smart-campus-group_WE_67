@@ -125,164 +125,172 @@ const UserBookings = ({ user, onLogout }) => {
 
   return (
     <div className="ub-page">
-      {/* Ambient background glows */}
-      <div className="ub-blob ub-blob-1" aria-hidden="true"></div>
-      <div className="ub-blob ub-blob-2" aria-hidden="true"></div>
+      {/* ── Ambient Background Glows ── */}
+      <div className="ub-ambient-glow ub-glow-1"></div>
+      <div className="ub-ambient-glow ub-glow-2"></div>
+      <div className="ub-ambient-glow ub-glow-3"></div>
 
+      <main className="ub-container">
+        {/* ── Premium Hero Section ── */}
+        <div className="ub-hero-section">
+          <div className="ub-hero-badge animate-float">
+            <span className="ub-badge-dot"></span>
+            My Personal Space
+          </div>
+          <h1 className="ub-main-title">My Bookings</h1>
+          <p className="ub-sub-title">Manage and track all your facility reservations across the campus campus.</p>
 
-
-      {/* ─── MAIN CONTENT ─── */}
-      <main className="ub-main">
-        {/* Hero */}
-        <div className="ub-hero">
-          <div className="ub-hero-badge">📋 Resource Management</div>
-          <h1 className="ub-hero-title">My Bookings</h1>
-          <p className="ub-hero-sub">Track, manage, and monitor your campus facility reservations in real-time.</p>
-
-          {/* Stats */}
-          <div className="ub-stats-row">
-            <div className="ub-stat-pill">
-              <span className="ub-stat-num">{totalCount}</span>
-              <span className="ub-stat-label">Total</span>
+          <div className="ub-summary-grid">
+            <div className="ub-summary-card">
+              <div className="ub-card-inner">
+                <span className="ub-card-icon">🗂️</span>
+                <div className="ub-card-data">
+                  <span className="ub-data-num">{totalCount}</span>
+                  <span className="ub-data-label">Total Requests</span>
+                </div>
+              </div>
             </div>
-            <div className="ub-stat-pill ub-stat-pill--approved">
-              <span className="ub-stat-num">{approvedCount}</span>
-              <span className="ub-stat-label">Confirmed</span>
+            <div className="ub-summary-card ub-card-confirmed">
+              <div className="ub-card-inner">
+                <span className="ub-card-icon">✅</span>
+                <div className="ub-card-data">
+                  <span className="ub-data-num">{approvedCount}</span>
+                  <span className="ub-data-label">Confirmed</span>
+                </div>
+              </div>
             </div>
-            <div className="ub-stat-pill ub-stat-pill--pending">
-              <span className="ub-stat-num">{pendingCount}</span>
-              <span className="ub-stat-label">Pending</span>
+            <div className="ub-summary-card ub-card-pending">
+              <div className="ub-card-inner">
+                <span className="ub-card-icon">⏳</span>
+                <div className="ub-card-data">
+                  <span className="ub-data-num">{pendingCount}</span>
+                  <span className="ub-data-label">Pending Review</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <div className="ub-filter-bar">
-          <span className="ub-filter-label">Filter by Status</span>
-          <div className="ub-filter-pills">
+        {/* ── Interactive Filter Shelf ── */}
+        <div className="ub-shelf">
+          <div className="ub-shelf-label">Filter by Status</div>
+          <div className="ub-shelf-actions">
             {['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'].map(s => (
               <button
                 key={s}
-                className={`ub-filter-btn ${statusFilter === s ? 'ub-filter-btn--active' : ''}`}
+                className={`ub-pill-btn ${statusFilter === s ? 'is-active' : ''}`}
+                data-status={s.toLowerCase()}
                 onClick={() => setStatusFilter(s)}
               >
-                <span className={`ub-dot ub-dot--${s.toLowerCase()}`}></span>
                 {s}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Cards */}
+        {/* ── Results count meta ── */}
+        <div className="ub-meta-row">
+          Showing <strong>{filteredBookings.length}</strong> reservations
+          {statusFilter !== 'ALL' && <span className="ub-tag-inline">Filtered by {statusFilter}</span>}
+        </div>
+
+        {/* ── Booking Records ── */}
         {filteredBookings.length === 0 ? (
-          <div className="empty-state-card">
-            <div className="empty-icon-glow">{statusFilter === 'ALL' ? '📅' : '🔍'}</div>
-            <h3>{statusFilter === 'ALL' ? 'No Active Reservations' : `No ${statusFilter.toLowerCase()} bookings`}</h3>
-            <p className="empty-description">
-              {statusFilter === 'ALL'
-                ? 'Your reservation list is empty. Discover and book premium campus facilities today.'
-                : `We couldn't find any bookings matching the ${statusFilter.toLowerCase()} criteria.`}
-            </p>
+          <div className="ub-empty-state animate-in">
+            <div className="ub-empty-decor"></div>
+            <div className="ub-empty-icon">📂</div>
+            <h3>No bookings found</h3>
+            <p>You haven't made any reservations under this category yet.</p>
             {statusFilter === 'ALL' ? (
-              <Link to="/facility-management/resource-catalogue" className="btn-primary-glow">Explore Catalogue</Link>
+              <Link to="/facility-management/resource-catalogue" className="ub-action-btn-main">Explore Catalogue</Link>
             ) : (
-              <button onClick={() => setStatusFilter('ALL')} className="btn-secondary-glass">Clear Filters</button>
+              <button onClick={() => setStatusFilter('ALL')} className="ub-action-btn-alt">Reset Filters</button>
             )}
           </div>
         ) : (
-          <div className="bookings-masonry">
-            {filteredBookings.map((booking, index) => (
-              <div
-                key={booking.id}
-                className={`booking-glass-card status-border-${booking.status}`}
-                style={{ '--index': index }}
-              >
-                <div className="card-glass-shine"></div>
-
-                {/* Card Header */}
-                <div className="card-header">
-                  <div className={`status-pill pill-${booking.status?.toString().toUpperCase()}`}>
-                    <span className="status-dot-animated"></span>
-                    {booking.status}
+          <div className="ub-records-grid">
+            {filteredBookings.map((booking, index) => {
+              const rName = resources[booking.resourceId] || 'Campus Facility';
+              const status = (booking.status || 'PENDING').toUpperCase();
+              return (
+                <div
+                  key={booking.id}
+                  className={`ub-booking-card s-border-${status.toLowerCase()}`}
+                  style={{ '--entry-delay': `${index * 0.08}s` }}
+                >
+                  <div className="ub-card-shine"></div>
+                  
+                  {/* Card Header */}
+                  <div className="ub-card-header">
+                    <span className={`ub-status-tag tag-${status.toLowerCase()}`}>
+                      <span className="ub-tag-dot"></span>
+                      {status}
+                    </span>
+                    <span className="ub-card-id">#{booking.id.toString().slice(-6)}</span>
                   </div>
-                  <div className="booking-id">#{booking.id.toString().slice(-6)}</div>
-                </div>
 
-                <h3 className="resource-name">{resources[booking.resourceId] || 'Campus Resource'}</h3>
+                  <h2 className="ub-facility-name">{rName}</h2>
 
-                <div className="info-grid">
-                  <div className="info-item">
-                    <div className="info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
+                  {/* Details Flex */}
+                  <div className="ub-detail-stack">
+                    <div className="ub-detail-row">
+                      <span className="ub-detail-icon">📅</span>
+                      <div className="ub-detail-text">
+                        <label>Reservation Date</label>
+                        <span>{formatDate(booking.date)}</span>
+                      </div>
                     </div>
-                    <div className="info-content">
-                      <label>Reservation Date</label>
-                      <span>{formatDate(booking.date)}</span>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <div className="info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                    </div>
-                    <div className="info-content">
-                      <label>Time Slot</label>
-                      <span>{formatTime(booking.startTime)} — {formatTime(booking.endTime)}</span>
+                    <div className="ub-detail-row">
+                      <span className="ub-detail-icon">🕒</span>
+                      <div className="ub-detail-text">
+                        <label>Assigned Slot</label>
+                        <span>{formatTime(booking.startTime)} — {formatTime(booking.endTime)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="purpose-section">
-                  <label>Purpose</label>
-                  <p>{booking.purpose}</p>
-                </div>
-
-                {booking.status === 'REJECTED' && booking.adminReason && (
-                  <div className="admin-note">
-                    <strong>Rejection Reason:</strong>
-                    <p>{booking.adminReason}</p>
+                  {/* Purpose Box */}
+                  <div className="ub-purpose-box">
+                    <label>Stated Purpose</label>
+                    <p>{booking.purpose || 'No purpose stated'}</p>
                   </div>
-                )}
 
-                <div className="card-footer">
-                  <div className="footer-actions">
-                    {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
-                      <>
-                        <button
-                          className="ub-btn-edit"
-                          onClick={() => setEditingBooking(booking)}
-                        >
-                          ✏️ Edit
-                        </button>
-                        <button
-                          className="btn-cancel-glass"
-                          onClick={() => handleCancel(booking.id)}
-                        >
-                          Cancel Booking
-                        </button>
-                      </>
-                    )}
-                  </div>
+                  {status === 'REJECTED' && booking.adminReason && (
+                    <div className="ub-feedback-box">
+                      <div className="ub-feedback-header">Admin Feedback</div>
+                      <p>{booking.adminReason}</p>
+                    </div>
+                  )}
+
+                  {/* Actions Footer */}
+                  {(status === 'PENDING' || status === 'APPROVED') && (
+                    <div className="ub-card-footer">
+                      <button
+                        className="ub-footer-btn ub-edit-btn"
+                        onClick={() => setEditingBooking(booking)}
+                      >
+                        ✏️ Edit Request
+                      </button>
+                      <button
+                        className="ub-footer-btn ub-cancel-btn"
+                        onClick={() => handleCancel(booking.id)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="ub-footer">
-        <p>© 2026 Smart Campus — WE_146_3.1</p>
+      <footer className="ub-site-footer">
+        <p>© 2026 Smart Campus Management System</p>
       </footer>
 
-      {/* Edit Modal */}
+      {/* ── Edit Modal ── */}
       {editingBooking && (
         <RequestBookingModal
           resource={resourceDetails.find(r => r.id === editingBooking.resourceId) || { name: 'Resource', id: editingBooking.resourceId }}
