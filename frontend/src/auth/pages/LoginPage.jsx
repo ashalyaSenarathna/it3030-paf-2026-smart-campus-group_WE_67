@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = '';
 
@@ -14,11 +14,11 @@ export default function LoginPage({ user, onLoginSuccess }) {
   useEffect(() => {
     if (user) {
       if (user.roles.includes('ROLE_ADMIN')) {
-        navigate('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
       } else if (user.roles.includes('ROLE_TECHNICIAN')) {
-        navigate('/tech/dashboard');
+        navigate('/tech/dashboard', { replace: true });
       } else if (user.roles.includes('ROLE_STUDENT')) {
-        navigate('/home');
+        navigate('/home', { replace: true });
       }
     }
   }, [navigate, user]);
@@ -31,9 +31,9 @@ export default function LoginPage({ user, onLoginSuccess }) {
     try {
       const data = await onLoginSuccess(username.trim(), password);
       if (data.roles.includes('ROLE_ADMIN')) {
-        navigate('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
       } else if (data.roles.includes('ROLE_TECHNICIAN')) {
-        navigate('/tech/dashboard');
+        navigate('/tech/dashboard', { replace: true });
       }
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -63,6 +63,12 @@ export default function LoginPage({ user, onLoginSuccess }) {
 
       <div className="login-right">
         <div className="login-header">
+          <Link to="/" className="back-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Home</span>
+          </Link>
           <h2 className="login-app-name">Smart Campus</h2>
         </div>
         
