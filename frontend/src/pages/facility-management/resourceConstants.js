@@ -11,6 +11,7 @@ export const RESOURCE_TYPES = [
   'Cafeteria',
   'Auditorium',
   'Office',
+  'Equipment',
 ];
 
 export const RESOURCE_STATUSES = [
@@ -29,4 +30,5 @@ export const RESOURCE_TYPE_ICONS = {
   'Cafeteria':       '🍽️',
   'Auditorium':      '🎭',
   'Office':          '🗂️',
+  'Equipment':       '📦',
 };
