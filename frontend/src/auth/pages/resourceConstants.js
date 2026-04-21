@@ -5,7 +5,8 @@ export const RESOURCE_TYPES = [
   'Sports Facility',
   'Auditorium',
   'Cafeteria',
-  'Study Area'
+  'Study Area',
+  'Equipment'
 ];
 
 export const RESOURCE_STATUSES = [

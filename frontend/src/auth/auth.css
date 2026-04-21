@@ -173,7 +173,8 @@ body {
 
 .login-header {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  align-items: center;
   margin: 0 auto 1.6rem;
   width: min(100%, 430px);
 }
@@ -185,6 +186,34 @@ body {
   font-weight: 800;
   letter-spacing: -0.03em;
   text-transform: none;
+  flex: 1;
+  text-align: right;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8.5px;
+  color: rgba(224, 223, 228, 0.45);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 0;
+  border-radius: 8px;
+}
+
+.back-link svg {
+  transition: transform 0.25s ease;
+}
+
+.back-link:hover {
+  color: #ffffff;
+}
+
+.back-link:hover svg {
+  transform: translateX(-4px);
+  color: #c084fc;
 }
 
 .login-form-wrapper {

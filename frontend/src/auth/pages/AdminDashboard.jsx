@@ -477,8 +477,8 @@ const AdminDashboard = ({ user, onLogout }) => {
               <tr>
                 <th>Facility Name</th>
                 <th>Type</th>
-                <th>Capacity</th>
-                <th>Location</th>
+                <th>{filteredResources.some(r => r.type === 'Equipment') ? 'Capacity / Qty' : 'Capacity'}</th>
+                <th>{filteredResources.some(r => r.type === 'Equipment') ? 'Location / Pick-up' : 'Location'}</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -493,7 +493,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                     </div>
                   </td>
                   <td><span className="type-tag">{r.type}</span></td>
-                  <td>{r.capacity} Seats</td>
+                  <td>{r.type === 'Equipment' ? r.capacity : `${r.capacity} Seats`}</td>
                   <td>{r.location}</td>
                   <td><span className={`status-dot-pill status-${(r.status || '').toLowerCase()}`}>{r.status}</span></td>
                   <td>
@@ -865,7 +865,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 </select>
               </div>
               <div className="f-group">
-                <label>Capacity</label>
+                <label>{formData.type === 'Equipment' ? 'Quantity' : 'Capacity'}</label>
                 <input 
                   type="number" 
                   required 
@@ -878,85 +878,97 @@ const AdminDashboard = ({ user, onLogout }) => {
                 />
               </div>
               <div className="f-group full" style={{ position: 'relative' }}>
-                <label>Location</label>
-                <input
-                  ref={locationInputRef}
-                  type="text"
-                  required
-                  autoComplete="off"
-                  value={formData.location}
-                  placeholder="Type 'M' for Main Building or 'N' for New Building..."
-                  onChange={e => {
-                    const val = e.target.value;
-                    setFormData({ ...formData, location: val });
-                    if (val.trim().length > 0) {
-                      const filtered = CAMPUS_LOCATIONS.filter(loc =>
-                        loc.toLowerCase().startsWith(val.toLowerCase())
-                      );
-                      setLocationSuggestions(filtered);
-                      setShowLocationSuggestions(filtered.length > 0);
-                      setActiveSuggestionIdx(0);
-                    } else {
-                      setShowLocationSuggestions(false);
-                      setLocationSuggestions([]);
-                    }
-                  }}
-                  onKeyDown={e => {
-                    if (!showLocationSuggestions || locationSuggestions.length === 0) return;
-                    if (e.key === 'Tab') {
-                      e.preventDefault();
-                      setFormData({ ...formData, location: locationSuggestions[activeSuggestionIdx] });
-                      setShowLocationSuggestions(false);
-                    } else if (e.key === 'ArrowDown') {
-                      e.preventDefault();
-                      setActiveSuggestionIdx(prev => (prev + 1) % locationSuggestions.length);
-                    } else if (e.key === 'ArrowUp') {
-                      e.preventDefault();
-                      setActiveSuggestionIdx(prev => (prev - 1 + locationSuggestions.length) % locationSuggestions.length);
-                    } else if (e.key === 'Enter' && showLocationSuggestions) {
-                      e.preventDefault();
-                      setFormData({ ...formData, location: locationSuggestions[activeSuggestionIdx] });
-                      setShowLocationSuggestions(false);
-                    } else if (e.key === 'Escape') {
-                      setShowLocationSuggestions(false);
-                    }
-                  }}
-                  onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
-                  onFocus={e => {
-                    const val = e.target.value;
-                    if (val.trim().length > 0) {
-                      const filtered = CAMPUS_LOCATIONS.filter(loc =>
-                        loc.toLowerCase().startsWith(val.toLowerCase())
-                      );
-                      if (filtered.length > 0) {
-                        setLocationSuggestions(filtered);
-                        setShowLocationSuggestions(true);
-                        setActiveSuggestionIdx(0);
-                      }
-                    }
-                  }}
-                />
-                {showLocationSuggestions && locationSuggestions.length > 0 && (
-                  <div className="loc-autocomplete-dropdown">
-                    <div className="loc-ac-hint">Press <kbd>Tab</kbd> or <kbd>Enter</kbd> to select · <kbd>↑↓</kbd> to navigate</div>
-                    {locationSuggestions.map((loc, idx) => (
-                      <div
-                        key={loc}
-                        className={`loc-ac-item ${idx === activeSuggestionIdx ? 'active' : ''}`}
-                        onMouseDown={e => {
-                          e.preventDefault();
-                          setFormData({ ...formData, location: loc });
+                <label>{formData.type === 'Equipment' ? 'Pick-up Location' : 'Location'}</label>
+                {formData.type === 'Equipment' ? (
+                  <input
+                    type="text"
+                    required
+                    value={formData.location}
+                    placeholder="e.g. IT Admin Room"
+                    onChange={e => setFormData({ ...formData, location: e.target.value })}
+                  />
+                ) : (
+                  <>
+                    <input
+                      ref={locationInputRef}
+                      type="text"
+                      required
+                      autoComplete="off"
+                      value={formData.location}
+                      placeholder="Type 'M' for Main Building or 'N' for New Building..."
+                      onChange={e => {
+                        const val = e.target.value;
+                        setFormData({ ...formData, location: val });
+                        if (val.trim().length > 0) {
+                          const filtered = CAMPUS_LOCATIONS.filter(loc =>
+                            loc.toLowerCase().startsWith(val.toLowerCase())
+                          );
+                          setLocationSuggestions(filtered);
+                          setShowLocationSuggestions(filtered.length > 0);
+                          setActiveSuggestionIdx(0);
+                        } else {
                           setShowLocationSuggestions(false);
-                        }}
-                        onMouseEnter={() => setActiveSuggestionIdx(idx)}
-                      >
-                        <span className="loc-ac-icon">{loc.startsWith('Main') ? '🏛️' : '🏢'}</span>
-                        <span className="loc-ac-text">
-                          <strong>{loc.split(',')[0]}</strong>{loc.includes(',') ? ',' + loc.split(',').slice(1).join(',') : ''}
-                        </span>
+                          setLocationSuggestions([]);
+                        }
+                      }}
+                      onKeyDown={e => {
+                        if (!showLocationSuggestions || locationSuggestions.length === 0) return;
+                        if (e.key === 'Tab') {
+                          e.preventDefault();
+                          setFormData({ ...formData, location: locationSuggestions[activeSuggestionIdx] });
+                          setShowLocationSuggestions(false);
+                        } else if (e.key === 'ArrowDown') {
+                          e.preventDefault();
+                          setActiveSuggestionIdx(prev => (prev + 1) % locationSuggestions.length);
+                        } else if (e.key === 'ArrowUp') {
+                          e.preventDefault();
+                          setActiveSuggestionIdx(prev => (prev - 1 + locationSuggestions.length) % locationSuggestions.length);
+                        } else if (e.key === 'Enter' && showLocationSuggestions) {
+                          e.preventDefault();
+                          setFormData({ ...formData, location: locationSuggestions[activeSuggestionIdx] });
+                          setShowLocationSuggestions(false);
+                        } else if (e.key === 'Escape') {
+                          setShowLocationSuggestions(false);
+                        }
+                      }}
+                      onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
+                      onFocus={e => {
+                        const val = e.target.value;
+                        if (val.trim().length > 0) {
+                          const filtered = CAMPUS_LOCATIONS.filter(loc =>
+                            loc.toLowerCase().startsWith(val.toLowerCase())
+                          );
+                          if (filtered.length > 0) {
+                            setLocationSuggestions(filtered);
+                            setShowLocationSuggestions(true);
+                            setActiveSuggestionIdx(0);
+                          }
+                        }
+                      }}
+                    />
+                    {showLocationSuggestions && locationSuggestions.length > 0 && (
+                      <div className="loc-autocomplete-dropdown">
+                        <div className="loc-ac-hint">Press <kbd>Tab</kbd> or <kbd>Enter</kbd> to select · <kbd>↑↓</kbd> to navigate</div>
+                        {locationSuggestions.map((loc, idx) => (
+                          <div
+                            key={loc}
+                            className={`loc-ac-item ${idx === activeSuggestionIdx ? 'active' : ''}`}
+                            onMouseDown={e => {
+                              e.preventDefault();
+                              setFormData({ ...formData, location: loc });
+                              setShowLocationSuggestions(false);
+                            }}
+                            onMouseEnter={() => setActiveSuggestionIdx(idx)}
+                          >
+                            <span className="loc-ac-icon">{loc.startsWith('Main') ? '🏛️' : '🏢'}</span>
+                            <span className="loc-ac-text">
+                              <strong>{loc.split(',')[0]}</strong>{loc.includes(',') ? ',' + loc.split(',').slice(1).join(',') : ''}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 )}
               </div>
               <div className="f-group full">
@@ -966,7 +978,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 </select>
               </div>
               <div className="f-group" style={{ opacity: formData.status === 'Available' ? 1 : 0.5 }}>
-                <label>Opening Time {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
+                <label>{formData.type === 'Equipment' ? 'Available From' : 'Opening Time'} {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
                 <input 
                   type="time" 
                   disabled={formData.status !== 'Available'}
@@ -975,7 +987,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 />
               </div>
               <div className="f-group" style={{ opacity: formData.status === 'Available' ? 1 : 0.5 }}>
-                <label>Closing Time {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
+                <label>{formData.type === 'Equipment' ? 'Available Until' : 'Closing Time'} {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
                 <input 
                   type="time" 
                   disabled={formData.status !== 'Available'}
