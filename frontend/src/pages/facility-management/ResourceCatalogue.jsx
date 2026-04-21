@@ -91,13 +91,6 @@ function ResourceCatalogue() {
   return (
     <div className="resource-catalogue">
 
-      {/* ---- TOP NAV ---- */}
-      <div className="catalogue-topbar">
-        <Link to="/" className="back-btn">
-          <span>&larr;</span> Back to Overview
-        </Link>
-
-      </div>
 
       {/* ---- HEADER ---- */}
       <header className="catalogue-header">

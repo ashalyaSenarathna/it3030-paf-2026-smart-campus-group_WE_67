@@ -1,17 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { bookingApi, resourceApi } from '../../api/api';
 import RequestBookingModal from './RequestBookingModal';
 import './Booking.css';
 
-const UserBookings = ({ user }) => {
+const UserBookings = ({ user, onLogout }) => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [resources, setResources] = useState({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [editingBooking, setEditingBooking] = useState(null);
-  const [resourceDetails, setResourceDetails] = useState([]); // Store raw resource objects
+  const [resourceDetails, setResourceDetails] = useState([]);
+  const [scrolled, setScrolled] = useState(false);
+
+  const isAdmin = user?.roles?.includes('ROLE_ADMIN') || user?.roles?.includes('ADMIN');
+  const isStudent = user?.roles?.includes('ROLE_STUDENT') || user?.roles?.includes('STUDENT');
+  const isTech = user?.roles?.includes('ROLE_TECHNICIAN') || user?.roles?.includes('TECHNICIAN');
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      if (onLogout) await onLogout();
+    } finally {
+      navigate('/login');
+    }
+  };
 
   const formatTime = (time) => {
     if (!time) return '--:--';
@@ -36,27 +56,19 @@ const UserBookings = ({ user }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!user?.id) {
-          setLoading(false);
-          return;
-        }
-
+        if (!user?.id) { setLoading(false); return; }
         const [bookingsRes, resourcesRes] = await Promise.all([
           bookingApi.getByUser(user.id),
           resourceApi.getAll()
         ]);
-
         const resourceMap = {};
-        resourcesRes.data.forEach(r => {
-          resourceMap[r.id] = r.name;
-        });
-        
+        resourcesRes.data.forEach(r => { resourceMap[r.id] = r.name; });
         setResources(resourceMap);
         setResourceDetails(resourcesRes.data);
         setBookings(bookingsRes.data);
         setFilteredBookings(bookingsRes.data);
       } catch (err) {
-        console.error("Error fetching bookings:", err);
+        console.error('Error fetching bookings:', err);
       } finally {
         setLoading(false);
       }
@@ -72,24 +84,20 @@ const UserBookings = ({ user }) => {
     }
   }, [statusFilter, bookings]);
 
-  const handleUpdateSuccess = () => {
-    setEditingBooking(null);
-    window.location.reload();
-  };
-
+  const handleUpdateSuccess = () => { setEditingBooking(null); window.location.reload(); };
   const handleCancel = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
     try {
       await bookingApi.cancel(id);
       window.location.reload();
     } catch (err) {
-      alert("Failed to cancel booking: " + (err.response?.data?.message || err.message));
+      alert('Failed to cancel booking: ' + (err.response?.data?.message || err.message));
     }
   };
 
   if (loading) {
     return (
-      <div className="bookings-dashboard">
+      <div className="ub-page">
         <div className="loader-container">
           <div className="premium-loader"></div>
           <p>Gathering your reservations...</p>
@@ -100,114 +108,117 @@ const UserBookings = ({ user }) => {
 
   if (!user) {
     return (
-      <div className="bookings-dashboard">
-        <div className="empty-state-card">
-          <div className="empty-icon">🔐</div>
-          <h2>Authentication Required</h2>
-          <p>Please log in to view and manage your resource bookings.</p>
-          <Link to="/login" className="btn-submit">Sign In Now</Link>
+      <div className="ub-page">
+        <div className="empty-state-card" style={{ marginTop: '20vh' }}>
+          <div className="empty-icon-glow">🔐</div>
+          <h3>Authentication Required</h3>
+          <p className="empty-description">Please log in to view and manage your bookings.</p>
+          <Link to="/login" className="btn-primary-glow">Sign In Now</Link>
         </div>
       </div>
     );
   }
 
+  const totalCount = bookings.length;
+  const approvedCount = bookings.filter(b => b.status?.toUpperCase() === 'APPROVED').length;
+  const pendingCount = bookings.filter(b => b.status?.toUpperCase() === 'PENDING').length;
+
   return (
-    <div className="bookings-dashboard">
-      <div className="dashboard-content-wrapper">
-        <div className="catalogue-topbar">
-          <Link to="/" className="back-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Back to Home
-          </Link>
-          <div className="user-badge">
-            <div className="user-avatar">{user.username?.charAt(0) || user.email?.charAt(0) || 'U'}</div>
-            <span>{user.username || user.email}</span>
-          </div>
-        </div>
+    <div className="ub-page">
+      {/* Ambient background glows */}
+      <div className="ub-blob ub-blob-1" aria-hidden="true"></div>
+      <div className="ub-blob ub-blob-2" aria-hidden="true"></div>
 
-        <div className="bookings-hero">
-          <div className="hero-badge">Resource Management</div>
-          <h1 className="glitch-text" data-text="My Bookings">My Bookings</h1>
-          <p className="hero-subtitle">
-            Track, manage, and monitor your campus facility reservations in real-time.
-          </p>
-          
-          <div className="filter-shelf">
-            <div className="filter-main">
-              <div className="filter-group">
-                <label>Filter by Status</label>
-                <div className="filter-buttons">
-                  {['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'].map(status => (
-                    <button 
-                      key={status}
-                      className={`filter-tag ${statusFilter.toUpperCase() === status.toUpperCase() ? 'active' : ''}`}
-                      onClick={() => setStatusFilter(status)}
-                    >
-                      <span className={`status-dot-sm ${status.toLowerCase()}`}></span>
-                      {status}
-                    </button>
-                  ))}
-                </div>
-              </div>
+
+
+      {/* ─── MAIN CONTENT ─── */}
+      <main className="ub-main">
+        {/* Hero */}
+        <div className="ub-hero">
+          <div className="ub-hero-badge">📋 Resource Management</div>
+          <h1 className="ub-hero-title">My Bookings</h1>
+          <p className="ub-hero-sub">Track, manage, and monitor your campus facility reservations in real-time.</p>
+
+          {/* Stats */}
+          <div className="ub-stats-row">
+            <div className="ub-stat-pill">
+              <span className="ub-stat-num">{totalCount}</span>
+              <span className="ub-stat-label">Total</span>
             </div>
-
-            <div className="booking-stats-horizontal">
-              <div className="stat-card">
-                <div className="stat-value">{bookings.length}</div>
-                <div className="stat-label">Total Requests</div>
-              </div>
-              <div className="stat-card approved">
-                <div className="stat-value">
-                  {bookings.filter(b => b.status?.toString().toUpperCase() === 'APPROVED').length}
-                </div>
-                <div className="stat-label">Confirmed</div>
-              </div>
+            <div className="ub-stat-pill ub-stat-pill--approved">
+              <span className="ub-stat-num">{approvedCount}</span>
+              <span className="ub-stat-label">Confirmed</span>
+            </div>
+            <div className="ub-stat-pill ub-stat-pill--pending">
+              <span className="ub-stat-num">{pendingCount}</span>
+              <span className="ub-stat-label">Pending</span>
             </div>
           </div>
         </div>
-        
+
+        {/* Filter Bar */}
+        <div className="ub-filter-bar">
+          <span className="ub-filter-label">Filter by Status</span>
+          <div className="ub-filter-pills">
+            {['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'].map(s => (
+              <button
+                key={s}
+                className={`ub-filter-btn ${statusFilter === s ? 'ub-filter-btn--active' : ''}`}
+                onClick={() => setStatusFilter(s)}
+              >
+                <span className={`ub-dot ub-dot--${s.toLowerCase()}`}></span>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Cards */}
         {filteredBookings.length === 0 ? (
           <div className="empty-state-card">
-            <div className="empty-icon-glow">
-              {statusFilter === 'ALL' ? '📅' : '🔍'}
-            </div>
-            <h3>{statusFilter === 'ALL' ? 'No Active Reservations' : `No ${statusFilter.toLowerCase()} bookings found`}</h3>
+            <div className="empty-icon-glow">{statusFilter === 'ALL' ? '📅' : '🔍'}</div>
+            <h3>{statusFilter === 'ALL' ? 'No Active Reservations' : `No ${statusFilter.toLowerCase()} bookings`}</h3>
             <p className="empty-description">
-              {statusFilter === 'ALL' 
-                ? "Your reservation list is empty. Discover and book premium campus facilities today."
+              {statusFilter === 'ALL'
+                ? 'Your reservation list is empty. Discover and book premium campus facilities today.'
                 : `We couldn't find any bookings matching the ${statusFilter.toLowerCase()} criteria.`}
             </p>
             {statusFilter === 'ALL' ? (
-              <Link to="/facility-management/resource-catalogue" className="btn-primary-glow">
-                Explore Catalogue
-              </Link>
+              <Link to="/facility-management/resource-catalogue" className="btn-primary-glow">Explore Catalogue</Link>
             ) : (
-              <button onClick={() => setStatusFilter('ALL')} className="btn-secondary-glass">Clear All Filters</button>
+              <button onClick={() => setStatusFilter('ALL')} className="btn-secondary-glass">Clear Filters</button>
             )}
           </div>
         ) : (
           <div className="bookings-masonry">
             {filteredBookings.map((booking, index) => (
-              <div 
-                key={booking.id} 
+              <div
+                key={booking.id}
                 className={`booking-glass-card status-border-${booking.status}`}
                 style={{ '--index': index }}
               >
                 <div className="card-glass-shine"></div>
+
+                {/* Card Header */}
                 <div className="card-header">
                   <div className={`status-pill pill-${booking.status?.toString().toUpperCase()}`}>
                     <span className="status-dot-animated"></span>
                     {booking.status}
                   </div>
-                  <div className="booking-id">ID: {booking.id.toString().slice(-6)}</div>
+                  <div className="booking-id">#{booking.id.toString().slice(-6)}</div>
                 </div>
-                
+
                 <h3 className="resource-name">{resources[booking.resourceId] || 'Campus Resource'}</h3>
-                
+
                 <div className="info-grid">
                   <div className="info-item">
                     <div className="info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
                     </div>
                     <div className="info-content">
                       <label>Reservation Date</label>
@@ -216,7 +227,10 @@ const UserBookings = ({ user }) => {
                   </div>
                   <div className="info-item">
                     <div className="info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
                     </div>
                     <div className="info-content">
                       <label>Time Slot</label>
@@ -224,15 +238,15 @@ const UserBookings = ({ user }) => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="purpose-section">
                   <label>Purpose</label>
                   <p>{booking.purpose}</p>
                 </div>
-                
+
                 {booking.status === 'REJECTED' && booking.adminReason && (
                   <div className="admin-note">
-                    <strong>Reason for Rejection:</strong>
+                    <strong>Rejection Reason:</strong>
                     <p>{booking.adminReason}</p>
                   </div>
                 )}
@@ -241,15 +255,14 @@ const UserBookings = ({ user }) => {
                   <div className="footer-actions">
                     {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
                       <>
-                        <button 
-                          className="btn-submit-sm" 
-                          style={{ marginRight: '10px', background: 'rgba(139, 92, 246, 0.2)', border: '1px solid #8b5cf6', color: '#fff', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer' }}
+                        <button
+                          className="ub-btn-edit"
                           onClick={() => setEditingBooking(booking)}
                         >
-                          Edit
+                          ✏️ Edit
                         </button>
-                        <button 
-                          className="btn-cancel-glass" 
+                        <button
+                          className="btn-cancel-glass"
                           onClick={() => handleCancel(booking.id)}
                         >
                           Cancel Booking
@@ -262,8 +275,14 @@ const UserBookings = ({ user }) => {
             ))}
           </div>
         )}
-      </div>
-      
+      </main>
+
+      {/* Footer */}
+      <footer className="ub-footer">
+        <p>© 2026 Smart Campus — WE_146_3.1</p>
+      </footer>
+
+      {/* Edit Modal */}
       {editingBooking && (
         <RequestBookingModal
           resource={resourceDetails.find(r => r.id === editingBooking.resourceId) || { name: 'Resource', id: editingBooking.resourceId }}
@@ -278,4 +297,3 @@ const UserBookings = ({ user }) => {
 };
 
 export default UserBookings;
-

@@ -12,8 +12,11 @@ import AdminProfilePage from './auth/pages/AdminProfilePage.jsx';
 import TechnicianProfilePage from './auth/pages/TechnicianProfilePage.jsx';
 import StudentProfilePage from './auth/pages/StudentProfilePage.jsx';
 import UserBookings from './pages/Booking/UserBookings.jsx';
+import AllBookings from './pages/Booking/AllBookings.jsx';
+import Nav from './components/Nav.jsx';
 import './App.css';
 import './auth/auth.css';
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -47,18 +50,18 @@ function App() {
     return loggedInUser;
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } finally {
-      setUser(null);
-      localStorage.removeItem('sc_user');
-    }
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('sc_user');
+    logout().catch(err => console.error('Logout error:', err));
   };
 
   return (
-    <Routes>
-      <Route path="/" element={<Home user={user} onLogout={handleLogout} />} />
+    <>
+      <Nav key="nav-force-remount" user={user} onLogout={handleLogout} />
+      <Routes>
+        <Route path="/" element={<Home user={user} onLogout={handleLogout} />} />
+
       <Route path="/home" element={<Home user={user} onLogout={handleLogout} />} />
       <Route path="/login" element={<LoginPage user={user} onLoginSuccess={handleLogin} />} />
 
@@ -136,11 +139,20 @@ function App() {
         path="/bookings/my-bookings"
         element={
           <ProtectedRoute user={user}>
-            <UserBookings user={user} />
+            <UserBookings user={user} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bookings/all"
+        element={
+          <ProtectedRoute user={user}>
+            <AllBookings user={user} />
           </ProtectedRoute>
         }
       />
     </Routes>
+    </>
   );
 }
 

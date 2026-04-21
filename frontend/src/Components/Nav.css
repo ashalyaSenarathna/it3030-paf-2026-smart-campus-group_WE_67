@@ -1,0 +1,106 @@
+/* =====================================================
+   GLOBAL NAVBAR
+   Premium Dark Glassmorphic Design
+   ===================================================== */
+
+.global-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  background: rgba(10, 9, 18, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.global-navbar--scrolled {
+  background: rgba(10, 9, 18, 0.85);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+.global-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #e0b3ff, #a5b4fc, #67d4ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+
+.global-brand-icon {
+  font-size: 1.4rem;
+  -webkit-text-fill-color: initial;
+}
+
+.global-nav-links {
+  list-style: none;
+  display: flex;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.global-nav-item {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  padding: 7px 15px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.global-nav-item:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.global-nav-item--active {
+  color: #fff;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.global-logout-btn {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.global-logout-btn:hover {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .global-navbar {
+    padding: 0.875rem 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .global-nav-links {
+    gap: 0.25rem;
+  }
+
+  .global-nav-item {
+    font-size: 0.8rem;
+    padding: 6px 11px;
+  }
+}
