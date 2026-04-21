@@ -32,16 +32,16 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
     });
   };
 
-  const isTimeWithinRange = (time) => {
-    if (!time) return true;
-    return time >= "08:00" && time <= "18:00";
+  const isWithinAllowedHours = (start, end) => {
+    // If only start is selected, check it separately
+    if (start && !end) return start >= "08:00" && start <= "18:00";
+    // If both are selected, check both and the range
+    if (start && end) return start >= "08:00" && end <= "18:00" && start < end;
+    return true;
   };
 
   const hasConflict = isOverlapping(formData.startTime, formData.endTime);
-  const startTimeInvalid = !isTimeWithinRange(formData.startTime);
-  const endTimeInvalid = !isTimeWithinRange(formData.endTime);
-  const timeSequenceInvalid = formData.startTime && formData.endTime && formData.startTime >= formData.endTime;
-  const hasTimeError = startTimeInvalid || endTimeInvalid || timeSequenceInvalid;
+  const isTimeInvalid = !isWithinAllowedHours(formData.startTime, formData.endTime);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -115,11 +115,9 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
 
           {error && <div className="ub-alert ub-alert-error">{error}</div>}
           {hasConflict && <div className="ub-alert ub-alert-warning">⚠️ This time slot overlaps with an existing reservation.</div>}
-          {hasTimeError && (
+          {isTimeInvalid && formData.startTime && (
             <div className="ub-alert ub-alert-warning">
-              {timeSequenceInvalid 
-                ? "⚠️ End time must be after start time." 
-                : "⚠️ Bookings are only allowed between 8:00 AM and 6:00 PM."}
+              🕒 Reservations are only allowed between <strong>08:00 AM</strong> and <strong>06:00 PM</strong>.
             </div>
           )}
         </div>
@@ -147,30 +145,14 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
               <label className="ub-field-label">Start Time</label>
               <div className="ub-input-wrapper">
                 <span className="ub-input-icon">🕒</span>
-                <input 
-                  type="time" 
-                  name="startTime" 
-                  required 
-                  value={formData.startTime} 
-                  onChange={handleChange}
-                  min="08:00"
-                  max="18:00"
-                />
+                <input type="time" name="startTime" required value={formData.startTime} onChange={handleChange} min="08:00" max="18:00" />
               </div>
             </div>
             <div className="ub-field-group">
               <label className="ub-field-label">End Time</label>
               <div className="ub-input-wrapper">
                 <span className="ub-input-icon">🕒</span>
-                <input 
-                  type="time" 
-                  name="endTime" 
-                  required 
-                  value={formData.endTime} 
-                  onChange={handleChange}
-                  min="08:00"
-                  max="18:00"
-                />
+                <input type="time" name="endTime" required value={formData.endTime} onChange={handleChange} min="08:00" max="18:00" />
               </div>
             </div>
 
@@ -219,13 +201,13 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
             <button type="button" className="ub-btn-ghost" onClick={onClose}>Dismiss</button>
             <button 
               type="submit" 
-              className={`ub-btn-action ${(hasConflict || hasTimeError) ? 'is-disabled' : ''}`}
-              disabled={loading || hasConflict || hasTimeError}
+              className={`ub-btn-action ${hasConflict || isTimeInvalid ? 'is-disabled' : ''}`}
+              disabled={loading || hasConflict || isTimeInvalid}
             >
               {loading ? (
                 <span className="ub-loading-state"><span className="spinner"></span> Processing...</span>
               ) : (
-                hasConflict ? 'Time Conflict' : (hasTimeError ? 'Invalid Time' : (existingBooking ? 'Save Changes' : 'Confirm Reservation'))
+                hasConflict ? 'Time Conflict' : isTimeInvalid ? 'Invalid Time' : (existingBooking ? 'Save Changes' : 'Confirm Reservation')
               )}
             </button>
           </div>
