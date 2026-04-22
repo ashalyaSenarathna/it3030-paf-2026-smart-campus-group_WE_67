@@ -539,8 +539,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     if (!bookingSearch) return true;
     const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || '';
     return (
-      resourceName.toLowerCase().includes(bookingSearch.toLowerCase()) ||
-      (b.userId || '').toLowerCase().includes(bookingSearch.toLowerCase())
+      resourceName.toLowerCase().startsWith(bookingSearch.toLowerCase())
     );
   });
 
@@ -556,41 +555,42 @@ const AdminDashboard = ({ user, onLogout }) => {
       <header className="tab-header">
         <div className="hero-badge booking-badge">Reservation Control</div>
         <h1>Booking Management</h1>
-        <p>Finalize and monitor all campus facility requests.</p>
+        <p>Review, approve, and monitor all campus facility reservation requests.</p>
       </header>
 
-      {/* Stats Row */}
-      <div className="stats-grid booking-stats-grid" style={{ marginBottom: '2.5rem' }}>
-        <div className="stat-card booking-stat-card">
-          <div className="booking-stat-icon">📋</div>
-          <div className="label">Total Bookings</div>
-          <div className="value">{bookingStats.total}</div>
-          <div className="stat-meta">All reservations</div>
+      {/* ── Premium Stats Row ── */}
+      <div className="bk-stats-row">
+        <div className="bk-stat-tile bk-tile-total">
+          <div className="bk-tile-glow"></div>
+          <div className="bk-tile-icon">📋</div>
+          <div className="bk-tile-value">{bookingStats.total}</div>
+          <div className="bk-tile-label">Total Bookings</div>
         </div>
-        <div className="stat-card booking-stat-card pending-card">
-          <div className="booking-stat-icon">⏳</div>
-          <div className="label">Pending Review</div>
-          <div className="value" style={{ color: '#fbbf24' }}>{bookingStats.pending}</div>
-          <div className="stat-meta">Awaiting action</div>
+        <div className="bk-stat-tile bk-tile-pending">
+          <div className="bk-tile-glow"></div>
+          <div className="bk-tile-icon">⏳</div>
+          <div className="bk-tile-value" style={{ color: '#fbbf24' }}>{bookingStats.pending}</div>
+          <div className="bk-tile-label">Pending Review</div>
+          {bookingStats.pending > 0 && <div className="bk-tile-urgent-dot"></div>}
         </div>
-        <div className="stat-card booking-stat-card approved-card">
-          <div className="booking-stat-icon">✅</div>
-          <div className="label">Approved</div>
-          <div className="value" style={{ color: '#34d399' }}>{bookingStats.approved}</div>
-          <div className="stat-meta">Confirmed bookings</div>
+        <div className="bk-stat-tile bk-tile-approved">
+          <div className="bk-tile-glow"></div>
+          <div className="bk-tile-icon">✅</div>
+          <div className="bk-tile-value" style={{ color: '#34d399' }}>{bookingStats.approved}</div>
+          <div className="bk-tile-label">Approved</div>
         </div>
-        <div className="stat-card booking-stat-card rejected-card">
-          <div className="booking-stat-icon">❌</div>
-          <div className="label">Rejected</div>
-          <div className="value" style={{ color: '#f87171' }}>{bookingStats.rejected}</div>
-          <div className="stat-meta">Declined requests</div>
+        <div className="bk-stat-tile bk-tile-rejected">
+          <div className="bk-tile-glow"></div>
+          <div className="bk-tile-icon">❌</div>
+          <div className="bk-tile-value" style={{ color: '#f87171' }}>{bookingStats.rejected}</div>
+          <div className="bk-tile-label">Rejected</div>
         </div>
       </div>
 
-      {/* Search + Filter Bar */}
-      <div className="booking-control-bar">
-        <div className="booking-search-wrap">
-          <span className="bk-search-icon">🔍</span>
+      {/* ── Search + Filter Bar ── */}
+      <div className="bk-control-bar">
+        <div className="bk-search-glass">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input
             type="text"
             placeholder="Search by facility or user..."
@@ -599,91 +599,138 @@ const AdminDashboard = ({ user, onLogout }) => {
             className="booking-search-input"
           />
         </div>
-        <div className="booking-filter-pills">
-          {['All', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'].map(f => (
+        <div className="bk-filter-row">
+          {[['All','All','#8b5cf6'], ['PENDING','⏳ Pending','#fbbf24'], ['APPROVED','✅ Approved','#34d399'], ['REJECTED','❌ Rejected','#f87171'], ['CANCELLED','🚫 Cancelled','#94a3b8']].map(([val, label, color]) => (
             <button
-              key={f}
-              className={`bk-filter-pill ${bookingFilter === f ? 'active' : ''}`}
-              onClick={() => setBookingFilter(f)}
+              key={val}
+              className={`bk-filter-pill-v2 ${bookingFilter === val ? 'active' : ''}`}
+              style={bookingFilter === val ? { '--pill-color': color } : {}}
+              onClick={() => setBookingFilter(val)}
             >
-              {f === 'All' ? '🗂 All' : f === 'PENDING' ? '⏳ Pending' : f === 'APPROVED' ? '✅ Approved' : f === 'REJECTED' ? '❌ Rejected' : '🚫 Cancelled'}
+              {label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Results count */}
+      {/* ── Results meta ── */}
       <div className="booking-results-meta">
-        Showing <strong>{filteredBookings.length}</strong> of {bookings.length} bookings
-        {bookingSearch && <span> · Filtered by "<em>{bookingSearch}</em>"</span>}
+        Showing <strong>{filteredBookings.length}</strong> of {bookings.length} reservations
+        {bookingSearch && <span> · searching for "<em>{bookingSearch}</em>"</span>}
+        {bookingSearch && <button className="bk-inline-clear" onClick={() => setBookingSearch('')}>✕ clear</button>}
       </div>
 
-      {/* Booking Cards */}
+      {/* ── Booking Cards ── */}
       {filteredBookings.length === 0 ? (
-        <div className="empty-table-state booking-empty">
-          <div className="empty-icon">📅</div>
-          <h3>No reservations found</h3>
-          <p>Try adjusting your search or filter criteria.</p>
+        <div className="bk-empty-state">
+          <div className="bk-empty-orb"></div>
+          <div className="bk-empty-icon">🗓️</div>
+          <h3>{bookingSearch ? `No results for "${bookingSearch}"` : "No reservations found"}</h3>
+          <p>{bookingSearch ? `We couldn't find any bookings starting with the characters you typed.` : "Try adjusting your search or filter criteria."}</p>
           {bookingSearch && (
             <button className="bk-clear-btn" onClick={() => setBookingSearch('')}>Clear Search</button>
           )}
         </div>
       ) : (
-        <div className="booking-cards-list">
+        <div className="bk-cards-grid">
           {filteredBookings.map((b, idx) => {
             const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Unknown Facility';
+            const resourceObj = resources.find(r => String(r.id) === String(b.resourceId));
             const statusLower = (b.status || '').toLowerCase();
             return (
-              <div key={b.id} className={`booking-card-glass bk-status-${statusLower}`} style={{ animationDelay: `${idx * 0.05}s` }}>
-                <div className="bk-card-left">
-                  <div className="bk-resource-avatar">{resourceName.charAt(0)}</div>
-                  <div className="bk-card-info">
-                    <div className="bk-resource-name">{resourceName}</div>
-                    <div className="bk-user-tag">👤 {b.userId || 'Unknown User'}</div>
+              <div
+                key={b.id}
+                className={`bk-premium-card bk-status-${statusLower}`}
+                style={{ '--anim-delay': `${idx * 0.06}s` }}
+              >
+                {/* Gloss reflection */}
+                <div className="bk-card-shine"></div>
+
+                {/* Top row: avatar + name + status badge */}
+                <div className="bk-premium-top">
+                  <div className={`bk-p-avatar bk-avatar-${statusLower}`}>
+                    {resourceName.charAt(0).toUpperCase()}
                   </div>
+                  <div className="bk-p-title-block">
+                    <div className="bk-p-resource-name">{resourceName}</div>
+                    {resourceObj?.type && <div className="bk-p-resource-type">{resourceObj.type}</div>}
+                  </div>
+                  <span className={`bk-badge-v2 bk-badge-${statusLower}`}>
+                    <span className="bk-badge-dot"></span>
+                    {b.status}
+                  </span>
                 </div>
-                <div className="bk-card-middle">
-                  <div className="bk-detail-chip">
-                    <span className="bk-chip-label">Date</span>
-                    <span className="bk-chip-value">📆 {formatDate(b.date)}</span>
-                  </div>
-                  <div className="bk-detail-chip">
-                    <span className="bk-chip-label">Time</span>
-                    <span className="bk-chip-value">🕐 {formatTime(b.startTime)} – {formatTime(b.endTime)}</span>
-                  </div>
+
+                {/* User info */}
+                <div className="bk-p-user-row">
+                  <span className="bk-p-user-icon">👤</span>
+                  <span className="bk-p-user-id">{b.userId || 'Unknown User'}</span>
                 </div>
-                <div className="bk-card-right">
-                  <span className={`bk-status-badge bk-s-${statusLower}`}>{b.status}</span>
-                  <div className="bk-action-group">
+
+                {/* Detail chips grid */}
+                <div className="bk-p-chips">
+                  <div className="bk-p-chip">
+                    <span className="bk-p-chip-icon">📅</span>
+                    <div>
+                      <div className="bk-p-chip-label">Date</div>
+                      <div className="bk-p-chip-val">{formatDate(b.date)}</div>
+                    </div>
+                  </div>
+                  <div className="bk-p-chip">
+                    <span className="bk-p-chip-icon">🕐</span>
+                    <div>
+                      <div className="bk-p-chip-label">Time Slot</div>
+                      <div className="bk-p-chip-val">{formatTime(b.startTime)} — {formatTime(b.endTime)}</div>
+                    </div>
+                  </div>
+                  {b.purpose && (
+                    <div className="bk-p-chip bk-p-chip-wide">
+                      <span className="bk-p-chip-icon">📝</span>
+                      <div>
+                        <div className="bk-p-chip-label">Purpose</div>
+                        <div className="bk-p-chip-val bk-p-purpose">{b.purpose}</div>
+                      </div>
+                    </div>
+                  )}
+                  {b.adminReason && b.status === 'REJECTED' && (
+                    <div className="bk-p-chip bk-p-chip-wide bk-chip-reason">
+                      <span className="bk-p-chip-icon">🚫</span>
+                      <div>
+                        <div className="bk-p-chip-label">Rejection Reason</div>
+                        <div className="bk-p-chip-val">{b.adminReason}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action footer */}
+                {(b.status === 'PENDING' || b.status === 'APPROVED' || b.status === 'REJECTED') && (
+                  <div className="bk-p-actions">
                     {b.status === 'PENDING' && (
                       <>
                         <button
-                          className="bk-btn-approve"
-                          title="Approve Booking"
+                          className="bk-p-btn bk-p-btn-approve"
                           onClick={() => handleBookingAction(b.id, 'APPROVE')}
                         >
-                          ✓ Approve
+                          <span>✓</span> Approve
                         </button>
                         <button
-                          className="bk-btn-reject"
-                          title="Reject Booking"
+                          className="bk-p-btn bk-p-btn-reject"
                           onClick={() => handleOpenRejectModal(b)}
                         >
-                          ✕ Reject
+                          <span>✕</span> Reject
                         </button>
                       </>
                     )}
-                    {(b.status === 'APPROVED' || b.status === 'PENDING') && (
-                      <button
-                        className="bk-btn-delete"
-                        title="Delete Booking"
-                        onClick={() => handleBookingAction(b.id, 'CANCEL')}
-                      >
-                        🗑
-                      </button>
-                    )}
+                    <button
+                      className="bk-p-btn bk-p-btn-delete"
+                      title="Delete Booking"
+                      onClick={() => handleBookingAction(b.id, 'CANCEL')}
+                    >
+                      🗑
+                    </button>
                   </div>
-                </div>
+                )}
               </div>
             );
           })}
@@ -1216,81 +1263,143 @@ const AdminDashboard = ({ user, onLogout }) => {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulseBg { from { transform: scale(1); opacity: 0.5; } to { transform: scale(1.5); opacity: 1; } }
 
-        /* ── Booking Tab Exclusive Styles ── */
+        /* ══════════════════════════════════════════
+           BOOKING TAB — PREMIUM REDESIGN v2
+        ══════════════════════════════════════════ */
         .booking-badge { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.25); }
-        .booking-stats-grid { grid-template-columns: repeat(4, 1fr); }
-        .booking-stat-card { position: relative; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
-        .booking-stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .booking-stat-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
-        .pending-card { border-color: rgba(251, 191, 36, 0.15); }
-        .approved-card { border-color: rgba(52, 211, 153, 0.15); }
-        .rejected-card { border-color: rgba(248, 113, 113, 0.15); }
 
-        .booking-control-bar { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.25rem; }
-        .booking-search-wrap { position: relative; flex: 1; min-width: 220px; }
-        .bk-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; opacity: 0.5; pointer-events: none; }
-        .booking-search-input { width: 100%; padding: 11px 16px 11px 38px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #f8fafc; font-size: 0.9rem; transition: all 0.3s; box-sizing: border-box; }
+        /* ── Stats Tiles ── */
+        .bk-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
+        .bk-stat-tile {
+          position: relative; overflow: hidden;
+          background: rgba(13,12,20,0.5); border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 24px; padding: 1.75rem 1.5rem;
+          backdrop-filter: blur(12px);
+          transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), box-shadow 0.35s;
+          cursor: default;
+        }
+        .bk-stat-tile:hover { transform: translateY(-6px); box-shadow: 0 24px 50px rgba(0,0,0,0.35); }
+        .bk-tile-glow { position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; border-radius: 50%; opacity: 0.15; filter: blur(30px); pointer-events: none; }
+        .bk-tile-total .bk-tile-glow { background: #8b5cf6; }
+        .bk-tile-pending .bk-tile-glow { background: #fbbf24; }
+        .bk-tile-approved .bk-tile-glow { background: #34d399; }
+        .bk-tile-rejected .bk-tile-glow { background: #f87171; }
+        .bk-tile-pending { border-color: rgba(251,191,36,0.18); }
+        .bk-tile-approved { border-color: rgba(52,211,153,0.18); }
+        .bk-tile-rejected { border-color: rgba(248,113,113,0.18); }
+        .bk-tile-icon { font-size: 1.6rem; margin-bottom: 1rem; }
+        .bk-tile-value { font-size: 2.8rem; font-weight: 900; line-height: 1; margin-bottom: 0.4rem; }
+        .bk-tile-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #475569; }
+        .bk-tile-urgent-dot {
+          position: absolute; top: 1.25rem; right: 1.25rem;
+          width: 10px; height: 10px; border-radius: 50%; background: #fbbf24;
+          box-shadow: 0 0 0 4px rgba(251,191,36,0.2);
+          animation: bkPulse 1.8s infinite;
+        }
+        @keyframes bkPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(251,191,36,0.2); } 50% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(251,191,36,0); } }
+
+        /* ── Control Bar ── */
+        .bk-control-bar { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.25rem; padding: 1.25rem 1.5rem; background: rgba(13,12,20,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; backdrop-filter: blur(12px); }
+        .bk-search-glass { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 10px 16px; transition: all 0.3s; }
+        .bk-search-glass:focus-within { border-color: rgba(139,92,246,0.5); background: rgba(255,255,255,0.05); box-shadow: 0 0 0 3px rgba(139,92,246,0.08); }
+        .bk-search-glass svg { color: #475569; flex-shrink: 0; }
+        .booking-search-input { background: transparent; border: none; color: #f8fafc; font-size: 0.9rem; width: 100%; box-sizing: border-box; outline: none; }
         .booking-search-input::placeholder { color: #475569; }
-        .booking-search-input:focus { outline: none; border-color: rgba(251,191,36,0.5); background: rgba(255,255,255,0.05); box-shadow: 0 0 20px rgba(251,191,36,0.07); }
-        .booking-filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-        .bk-filter-pill { padding: 9px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); color: #64748b; border-radius: 10px; cursor: pointer; font-size: 0.78rem; font-weight: 700; transition: all 0.25s; white-space: nowrap; }
-        .bk-filter-pill:hover:not(.active) { background: rgba(255,255,255,0.05); color: #e2e8f0; }
-        .bk-filter-pill.active { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.35); }
+        .bk-filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .bk-filter-pill-v2 {
+          padding: 9px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+          color: #64748b; border-radius: 12px; cursor: pointer; font-size: 0.78rem; font-weight: 700;
+          transition: all 0.25s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; font-family: inherit;
+        }
+        .bk-filter-pill-v2:hover:not(.active) { background: rgba(255,255,255,0.06); color: #e2e8f0; border-color: rgba(255,255,255,0.12); }
+        .bk-filter-pill-v2.active { background: rgba(var(--pill-color-rgb, 139,92,246),0.12); color: var(--pill-color, #8b5cf6); border-color: var(--pill-color, #8b5cf6); box-shadow: 0 4px 16px rgba(var(--pill-color-rgb, 139,92,246),0.15); transform: translateY(-1px); }
 
-        .booking-results-meta { font-size: 0.78rem; color: #475569; margin-bottom: 1.5rem; }
+        /* ── Results meta ── */
+        .booking-results-meta { font-size: 0.78rem; color: #475569; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .booking-results-meta strong { color: #94a3b8; }
         .booking-results-meta em { color: #8b5cf6; font-style: normal; }
+        .bk-inline-clear { background: none; border: 1px solid rgba(248,113,113,0.25); color: #f87171; border-radius: 8px; padding: 3px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .bk-inline-clear:hover { background: rgba(248,113,113,0.1); }
 
-        .booking-cards-list { display: flex; flex-direction: column; gap: 12px; }
-        .booking-card-glass {
-          display: flex; align-items: center; gap: 1.5rem;
-          background: rgba(13,12,20,0.5); border: 1px solid rgba(255,255,255,0.05);
-          border-radius: 20px; padding: 1.25rem 1.5rem;
-          backdrop-filter: blur(10px);
-          transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
-          animation: fadeIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
-          border-left-width: 3px;
+        /* ── Empty State ── */
+        .bk-empty-state { position: relative; text-align: center; padding: 5rem 2rem; background: rgba(255,255,255,0.01); border-radius: 32px; border: 2px dashed rgba(255,255,255,0.05); overflow: hidden; }
+        .bk-empty-orb { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 300px; height: 300px; background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .bk-empty-icon { font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.5; position: relative; }
+        .bk-empty-state h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; color: #f8fafc; position: relative; }
+        .bk-empty-state p { color: #64748b; position: relative; }
+        .bk-clear-btn { margin-top: 1.5rem; padding: 9px 20px; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #8b5cf6; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.2s; position: relative; }
+        .bk-clear-btn:hover { background: rgba(139,92,246,0.2); transform: translateY(-2px); }
+
+        /* ── Premium Card Grid ── */
+        .bk-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 1.5rem; }
+        .bk-premium-card {
+          position: relative; overflow: hidden;
+          background: rgba(13,12,20,0.55);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 24px; padding: 1.75rem;
+          backdrop-filter: blur(16px);
+          transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s, border-color 0.4s;
+          animation: fadeIn 0.5s cubic-bezier(0.16,1,0.3,1) var(--anim-delay, 0s) both;
+          display: flex; flex-direction: column; gap: 1.25rem;
+          border-left: 3px solid transparent;
         }
-        .booking-card-glass:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
-        .bk-status-pending { border-left-color: #fbbf24; }
-        .bk-status-approved { border-left-color: #34d399; }
-        .bk-status-rejected { border-left-color: #f87171; }
-        .bk-status-cancelled { border-left-color: #475569; }
+        .bk-premium-card:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 30px 60px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); }
+        .bk-status-pending.bk-premium-card { border-left-color: #fbbf24; }
+        .bk-status-approved.bk-premium-card { border-left-color: #34d399; }
+        .bk-status-rejected.bk-premium-card { border-left-color: #f87171; }
+        .bk-status-cancelled.bk-premium-card { border-left-color: #475569; }
+        .bk-card-shine { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%); pointer-events: none; }
 
-        .bk-card-left { display: flex; align-items: center; gap: 14px; flex: 1.2; min-width: 0; }
-        .bk-resource-avatar {
-          width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-          background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(251,191,36,0.2));
-          border: 1px solid rgba(255,255,255,0.08);
+        /* Card Top Row */
+        .bk-premium-top { display: flex; align-items: center; gap: 14px; }
+        .bk-p-avatar {
+          width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
           display: flex; align-items: center; justify-content: center;
-          font-size: 1.25rem; font-weight: 900; color: #c084fc; text-transform: uppercase;
+          font-size: 1.4rem; font-weight: 900; text-transform: uppercase;
+          border: 1px solid rgba(255,255,255,0.1);
         }
-        .bk-resource-name { font-weight: 700; font-size: 0.95rem; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .bk-user-tag { font-size: 0.78rem; color: #64748b; margin-top: 3px; }
+        .bk-avatar-pending { background: linear-gradient(135deg, rgba(251,191,36,0.25), rgba(251,191,36,0.1)); color: #fbbf24; }
+        .bk-avatar-approved { background: linear-gradient(135deg, rgba(52,211,153,0.25), rgba(52,211,153,0.1)); color: #34d399; }
+        .bk-avatar-rejected { background: linear-gradient(135deg, rgba(248,113,113,0.25), rgba(248,113,113,0.1)); color: #f87171; }
+        .bk-avatar-cancelled { background: linear-gradient(135deg, rgba(148,163,184,0.15), rgba(148,163,184,0.05)); color: #94a3b8; }
+        .bk-p-title-block { flex: 1; min-width: 0; }
+        .bk-p-resource-name { font-size: 1.1rem; font-weight: 800; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
+        .bk-p-resource-type { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #0ea5e9; margin-top: 3px; }
 
-        .bk-card-middle { display: flex; gap: 2rem; flex: 1; }
-        .bk-detail-chip { display: flex; flex-direction: column; gap: 4px; }
-        .bk-chip-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; }
-        .bk-chip-value { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+        /* Status badge v2 */
+        .bk-badge-v2 { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 100px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+        .bk-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .bk-badge-pending { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.28); }
+        .bk-badge-pending .bk-badge-dot { animation: bkPulse 1.8s infinite; }
+        .bk-badge-approved { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.28); }
+        .bk-badge-rejected { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.28); }
+        .bk-badge-cancelled { background: rgba(148,163,184,0.07); color: #94a3b8; border: 1px solid rgba(148,163,184,0.18); }
 
-        .bk-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-        .bk-status-badge { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 100px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
-        .bk-s-pending { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
-        .bk-s-approved { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
-        .bk-s-rejected { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
-        .bk-s-cancelled { background: rgba(148,163,184,0.07); color: #94a3b8; border: 1px solid rgba(148,163,184,0.15); }
+        /* User row */
+        .bk-p-user-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid rgba(255,255,255,0.04); }
+        .bk-p-user-icon { font-size: 0.9rem; }
+        .bk-p-user-id { font-size: 0.82rem; color: #64748b; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        .bk-action-group { display: flex; gap: 8px; align-items: center; }
-        .bk-btn-approve { padding: 7px 14px; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: #34d399; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-        .bk-btn-approve:hover { background: rgba(52,211,153,0.2); transform: scale(1.05); box-shadow: 0 4px 12px rgba(52,211,153,0.2); }
-        .bk-btn-reject { padding: 7px 14px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #f87171; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-        .bk-btn-reject:hover { background: rgba(248,113,113,0.2); transform: scale(1.05); box-shadow: 0 4px 12px rgba(248,113,113,0.2); }
-        .bk-btn-delete { width: 34px; height: 34px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.9rem; }
-        .bk-btn-delete:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.3); }
+        /* Chips grid */
+        .bk-p-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .bk-p-chip { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: rgba(255,255,255,0.02); border-radius: 14px; border: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; }
+        .bk-p-chip:hover { background: rgba(255,255,255,0.04); }
+        .bk-p-chip-wide { grid-column: span 2; }
+        .bk-chip-reason { border-color: rgba(248,113,113,0.15); background: rgba(248,113,113,0.04); }
+        .bk-p-chip-icon { font-size: 1rem; flex-shrink: 0; padding-top: 1px; }
+        .bk-p-chip-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #475569; margin-bottom: 3px; }
+        .bk-p-chip-val { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+        .bk-p-purpose { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .booking-empty { margin-top: 2rem; }
-        .bk-clear-btn { margin-top: 1.5rem; padding: 9px 20px; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #8b5cf6; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.2s; }
-        .bk-clear-btn:hover { background: rgba(139,92,246,0.2); }
+        /* Action footer */
+        .bk-p-actions { display: flex; gap: 10px; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); align-items: center; }
+        .bk-p-btn { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); font-family: inherit; }
+        .bk-p-btn-approve { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: #34d399; flex: 1; justify-content: center; }
+        .bk-p-btn-approve:hover { background: rgba(52,211,153,0.22); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(52,211,153,0.2); }
+        .bk-p-btn-reject { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #f87171; flex: 1; justify-content: center; }
+        .bk-p-btn-reject:hover { background: rgba(248,113,113,0.22); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(248,113,113,0.2); }
+        .bk-p-btn-delete { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); color: #64748b; width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 12px; font-size: 0.95rem; }
+        .bk-p-btn-delete:hover { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.3); color: #f87171; transform: translateY(-2px); }
 
         /* ── Administrators persons card ── */
         .admin-persons-card { border-color: rgba(168, 85, 247, 0.2) !important; }

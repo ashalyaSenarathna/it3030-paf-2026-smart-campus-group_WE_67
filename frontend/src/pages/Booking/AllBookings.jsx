@@ -24,6 +24,31 @@ const AllBookings = ({ user }) => {
     return String(time);
   };
 
+  // Helper to determine if a booking is currently "LIVE"
+  const isLive = (date, startTime, endTime) => {
+    try {
+      const now = new Date();
+      let bDate;
+      if (Array.isArray(date)) {
+        bDate = new Date(date[0], date[1] - 1, date[2]);
+      } else {
+        bDate = new Date(date);
+      }
+
+      const isToday = bDate.toDateString() === now.toDateString();
+      if (!isToday) return false;
+
+      const [sH, sM] = Array.isArray(startTime) ? startTime : startTime.split(':').map(Number);
+      const [eH, eM] = Array.isArray(endTime) ? endTime : endTime.split(':').map(Number);
+
+      const start = sH * 60 + (sM || 0);
+      const end = eH * 60 + (eM || 0);
+      const current = now.getHours() * 60 + now.getMinutes();
+
+      return current >= start && current <= end;
+    } catch (e) { return false; }
+  };
+
   const formatDate = (date) => {
     if (!date) return 'Invalid Date';
     if (Array.isArray(date)) {
@@ -50,16 +75,16 @@ const AllBookings = ({ user }) => {
             type: r.type
           };
         });
-        
+
         setResources(resourceMap);
         setResourceDetails(resourcesRes.data);
-        
+
         // Show all bookings, but maybe prioritize Approved ones for a public view
         // Filtering out CANCELLED/REJECTED for the public "Bookings" view to keep it clean
-        const activeBookings = bookingsRes.data.filter(b => 
-            b.status?.toUpperCase() === 'APPROVED' || b.status?.toUpperCase() === 'PENDING'
+        const activeBookings = bookingsRes.data.filter(b =>
+          b.status?.toUpperCase() === 'APPROVED' || b.status?.toUpperCase() === 'PENDING'
         );
-        
+
         setBookings(activeBookings);
         setFilteredBookings(activeBookings);
       } catch (err) {
@@ -73,7 +98,7 @@ const AllBookings = ({ user }) => {
 
   useEffect(() => {
     let result = bookings;
-    
+
     if (statusFilter !== 'ALL') {
       result = result.filter(b => b.status?.toUpperCase() === statusFilter.toUpperCase());
     }
@@ -81,16 +106,20 @@ const AllBookings = ({ user }) => {
     if (typeFilter !== 'ALL') {
       result = result.filter(b => resources[b.resourceId]?.type === typeFilter);
     }
-    
+
     if (searchTerm.trim() !== '') {
       result = result.filter(b => {
         const resourceName = resources[b.resourceId]?.name?.toLowerCase() || '';
         const resourceLocation = resources[b.resourceId]?.location?.toLowerCase() || '';
+        const bookingPurpose = (b.purpose || '').toLowerCase();
         const lowerSearch = searchTerm.toLowerCase();
-        return resourceName.includes(lowerSearch) || resourceLocation.includes(lowerSearch);
+        
+        return resourceName.includes(lowerSearch) || 
+               resourceLocation.includes(lowerSearch) || 
+               bookingPurpose.includes(lowerSearch);
       });
     }
-    
+
     setFilteredBookings(result);
   }, [searchTerm, statusFilter, typeFilter, bookings, resources]);
 
@@ -106,143 +135,183 @@ const AllBookings = ({ user }) => {
   }
 
   return (
-    <div className="bookings-dashboard">
-      <div className="dashboard-content-wrapper">
+    <div className="ub-page">
+      {/* ── Ambient Background Glows ── */}
+      <div className="ub-ambient-glow ub-glow-1"></div>
+      <div className="ub-ambient-glow ub-glow-2"></div>
+      <div className="ub-ambient-glow ub-glow-4"></div>
 
+      <main className="ub-container">
+        {/* ── Premium Hero Section ── */}
+        <div className="ub-hero-section">
+          <div className="ub-hero-badge animate-float">
+            <span className="ub-badge-dot"></span>
+            University Schedule
+          </div>
+          <h1 className="ub-main-title">Campus Reservations</h1>
+          <p className="ub-sub-title">View all active room, hall, and facility bookings across the entire campus ecosystem.</p>
 
-        <div className="bookings-hero">
-          <div className="hero-badge">University Schedule</div>
-          <h1 className="glitch-text" data-text="Resource Bookings">Campus Reservations</h1>
-          <p className="hero-subtitle">
-            View all active room, hall, and facility bookings across the campus.
-          </p>
-          
-          <div className="filter-shelf">
-            <div className="filter-main">
-              <div className="search-bar-glass">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input 
-                  type="text" 
-                  placeholder="Search by Hall or Location..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              
-              <div className="filter-group">
-                <div className="filter-buttons">
-                  {['ALL', 'APPROVED', 'PENDING'].map(status => (
-                    <button 
-                      key={status}
-                      className={`filter-tag ${statusFilter === status ? 'active' : ''}`}
-                      onClick={() => setStatusFilter(status)}
-                    >
-                      {status}
-                    </button>
-                  ))}
+          <div className="ub-stats-row">
+            <div className="ub-summary-card">
+              <div className="ub-card-inner">
+                <span className="ub-card-icon">📚</span>
+                <div className="ub-card-data">
+                  <span className="ub-data-num">{filteredBookings.length}</span>
+                  <span className="ub-data-label">Active Schedule</span>
                 </div>
-              </div>
-
-              <div className="filter-group">
-                <select 
-                  className="filter-select-glass"
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                  <option value="ALL">All Resource Types</option>
-                  {RESOURCE_TYPES.map(type => (
-                    <option key={type} value={type}>
-                      {RESOURCE_TYPE_ICONS[type] || '🏫'} {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="booking-stats-horizontal">
-              <div className="stat-card">
-                <div className="stat-value">{filteredBookings.length}</div>
-                <div className="stat-label">Active Bookings</div>
               </div>
             </div>
           </div>
         </div>
-        
+
+        {/* ── Interactive Filter Shelf ── */}
+        <div className="all-filter-shelf">
+          <div className="all-search-wrapper">
+            <div className="ub-search-glass">
+              <span className="ub-search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder="Find facility or location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="all-filter-group">
+            <div className="ub-shelf-actions">
+              {['ALL', 'APPROVED', 'PENDING'].map(s => (
+                <button
+                  key={s}
+                  className={`ub-pill-btn ${statusFilter === s ? 'is-active' : ''}`}
+                  onClick={() => setStatusFilter(s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="all-filter-group">
+            <select
+              className="ub-select-premium"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="ALL">All Categories</option>
+              {RESOURCE_TYPES.map(type => (
+                <option key={type} value={type}>
+                  {RESOURCE_TYPE_ICONS[type] || '🏫'} {type}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* ── Results count meta ── */}
+        <div className="ub-meta-row" style={{ marginTop: '2rem' }}>
+          Displaying <strong>{filteredBookings.length}</strong> active reservations
+        </div>
+
+        {/* ── Booking Records ── */}
         {filteredBookings.length === 0 ? (
-          <div className="empty-state-card">
-            <div className="empty-icon-glow">📅</div>
-            <h3>No Active Reservations Found</h3>
-            <p className="empty-description">
-              There are no {statusFilter !== 'ALL' ? statusFilter.toLowerCase() : ''} bookings matching your request at the moment.
+          <div className="ub-empty-state animate-in">
+            <div className="ub-empty-decor"></div>
+            <div className="ub-empty-icon">🔍</div>
+            <h3>No reservations found</h3>
+            <p>
+              {searchTerm
+                ? `No results found for "${searchTerm}" in the current schedule.`
+                : "There are no active bookings matching your selected filters."}
             </p>
-            <Link to="/facility-management/resource-catalogue" className="btn-primary-glow">
-              Book a Resource
-            </Link>
+            <Link to="/facility-management/resource-catalogue" className="ub-action-btn-main">Make a Reservation</Link>
           </div>
         ) : (
-          <div className="bookings-masonry">
-            {filteredBookings.map((booking, index) => (
-              <div 
-                key={booking.id} 
-                className={`booking-glass-card status-border-${booking.status}`}
-                style={{ '--index': index }}
-              >
-                <div className="card-glass-shine"></div>
-                <div className="card-header">
-                  <div className={`status-pill pill-${booking.status?.toString().toUpperCase()}`}>
-                    <span className="status-dot-animated"></span>
-                    {booking.status}
+          <div className="ub-records-grid">
+            {filteredBookings.map((booking, index) => {
+              const res = resources[booking.resourceId] || { name: 'Campus Facility', location: 'University', type: 'Facility' };
+              const status = (booking.status || 'PENDING').toUpperCase();
+              const live = isLive(booking.date, booking.startTime, booking.endTime);
+
+              return (
+                <div
+                  key={booking.id}
+                  className={`ub-booking-card s-border-${status.toLowerCase()} ${live ? 'is-live-pulse' : ''}`}
+                  style={{ '--entry-delay': `${index * 0.05}s` }}
+                >
+                  <div className="ub-card-shine"></div>
+                  <div className="ub-card-spotlight"></div>
+
+                  {/* Card Header */}
+                  <div className="ub-card-header">
+                    <div className="ub-header-left">
+                      <span className={`ub-status-tag tag-${status.toLowerCase()}`}>
+                        <span className="ub-tag-dot"></span>
+                        {status}
+                      </span>
+                      {live && (
+                        <span className="ub-live-badge">
+                          <span className="live-dot"></span>
+                          LIVE NOW
+                        </span>
+                      )}
+                    </div>
+                    <span className="ub-res-type-label">
+                      {RESOURCE_TYPE_ICONS[res.type] || '🏫'} {res.type}
+                    </span>
                   </div>
-                  <div className="resource-type-small">{resources[booking.resourceId]?.type || 'Facility'}</div>
+
+                  <h2 className="ub-facility-name">{res.name}</h2>
+
+                  {/* Details Flex */}
+                  <div className="ub-detail-stack" style={{ gap: '0.75rem' }}>
+                    <div className="ub-detail-row">
+                      <span className="ub-detail-icon small">📍</span>
+                      <div className="ub-detail-text">
+                        <label>Location</label>
+                        <span>{res.location}</span>
+                      </div>
+                    </div>
+                    <div className="ub-detail-row">
+                      <span className="ub-detail-icon small">📅</span>
+                      <div className="ub-detail-text">
+                        <label>Date</label>
+                        <span>{formatDate(booking.date)}</span>
+                      </div>
+                    </div>
+                    <div className="ub-detail-row">
+                      <span className="ub-detail-icon small">🕒</span>
+                      <div className="ub-detail-text">
+                        <label>Time Slot</label>
+                        <span>{formatTime(booking.startTime)} — {formatTime(booking.endTime)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Purpose Box */}
+                  <div className="ub-purpose-box">
+                    <label>Activity</label>
+                    <p>{booking.purpose || 'University activity'}</p>
+                  </div>
+
+                  {/* Actions Footer */}
+                  <div className="ub-card-footer" style={{ border: 'none', paddingTop: '0' }}>
+                    <div className="ub-attendee-stat">
+                      <span className="icon">👥</span>
+                      <strong>{booking.expectedAttendees || 0}</strong>
+                      <span className="label">Expected Participants</span>
+                    </div>
+                  </div>
                 </div>
-                
-                <h3 className="resource-name">{resources[booking.resourceId]?.name || 'Campus Resource'}</h3>
-                
-                <div className="info-grid">
-                  <div className="info-item">
-                    <div className="info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    </div>
-                    <div className="info-content">
-                      <label>Location</label>
-                      <span>{resources[booking.resourceId]?.location || 'University Campus'}</span>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <div className="info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    </div>
-                    <div className="info-content">
-                      <label>Date</label>
-                      <span>{formatDate(booking.date)}</span>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <div className="info-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    </div>
-                    <div className="info-content">
-                      <label>Time Slot</label>
-                      <span>{formatTime(booking.startTime)} — {formatTime(booking.endTime)}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="purpose-section">
-                  <label>Booking Purpose</label>
-                  <p>{booking.purpose}</p>
-                </div>
-                
-                <div className="card-footer" style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                  <div className="attendee-badge">
-                    <span className="icon">👥</span> {booking.expectedAttendees || 0} Expected
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-      </div>
+      </main>
+
+      <footer className="ub-site-footer">
+        <p>© 2026 Smart Campus Schedule Management</p>
+      </footer>
     </div>
   );
 };
