@@ -111,9 +111,12 @@ const AllBookings = ({ user }) => {
       result = result.filter(b => {
         const resourceName = resources[b.resourceId]?.name?.toLowerCase() || '';
         const resourceLocation = resources[b.resourceId]?.location?.toLowerCase() || '';
+        const bookingPurpose = (b.purpose || '').toLowerCase();
         const lowerSearch = searchTerm.toLowerCase();
-        // Use startsWith for strict prefix matching as requested
-        return resourceName.startsWith(lowerSearch) || resourceLocation.startsWith(lowerSearch);
+        
+        return resourceName.includes(lowerSearch) || 
+               resourceLocation.includes(lowerSearch) || 
+               bookingPurpose.includes(lowerSearch);
       });
     }
 

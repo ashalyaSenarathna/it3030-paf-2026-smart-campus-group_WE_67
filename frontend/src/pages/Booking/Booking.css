@@ -1799,6 +1799,95 @@
 
 @keyframes ubFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* ── All Bookings Filter Bar ── */
+.all-filter-shelf {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(13, 12, 20, 0.4);
+  padding: 1.25rem 2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  margin-bottom: 2rem;
+}
+
+.all-search-wrapper {
+  flex: 1;
+}
+
+.ub-search-glass {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s;
+}
+
+.ub-search-glass:focus-within {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.15);
+}
+
+.ub-search-glass input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 14px 0;
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+}
+
+.ub-search-icon {
+  font-size: 1.1rem;
+  opacity: 0.5;
+}
+
+.ub-shelf-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ub-select-premium {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  color: #cbd5e1;
+  padding: 10px 18px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 45px;
+  transition: all 0.3s;
+}
+
+.ub-select-premium:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ub-select-premium:focus {
+  border-color: #8b5cf6;
+}
+
+.ub-select-premium option {
+  background: #0d0c14;
+  color: #fff;
+  padding: 10px;
+}
+
 @media (max-width: 640px) {
   .ub-modal-content { padding: 2.5rem 1.5rem !important; }
   .ub-form-grid { grid-template-columns: 1fr !important; }
