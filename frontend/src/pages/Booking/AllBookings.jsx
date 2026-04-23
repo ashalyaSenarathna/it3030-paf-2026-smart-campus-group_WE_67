@@ -7,7 +7,7 @@ import './Booking.css';
 const AllBookings = ({ user }) => {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
-  const [resources, setResources] = useState({});
+  const [resources, setResources] = useState([]);
   const [resourceDetails, setResourceDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,17 +34,17 @@ const AllBookings = ({ user }) => {
       } else {
         bDate = new Date(date);
       }
-      
+
       const isToday = bDate.toDateString() === now.toDateString();
       if (!isToday) return false;
 
       const [sH, sM] = Array.isArray(startTime) ? startTime : startTime.split(':').map(Number);
       const [eH, eM] = Array.isArray(endTime) ? endTime : endTime.split(':').map(Number);
-      
+
       const start = sH * 60 + (sM || 0);
       const end = eH * 60 + (eM || 0);
       const current = now.getHours() * 60 + now.getMinutes();
-      
+
       return current >= start && current <= end;
     } catch (e) { return false; }
   };
@@ -67,24 +67,14 @@ const AllBookings = ({ user }) => {
           resourceApi.getAll()
         ]);
 
-        const resourceMap = {};
-        resourcesRes.data.forEach(r => {
-          resourceMap[r.id] = {
-            name: r.name,
-            location: r.location,
-            type: r.type
-          };
-        });
-        
-        setResources(resourceMap);
-        setResourceDetails(resourcesRes.data);
-        
+        setResources(resourcesRes.data);
+
         // Show all bookings, but maybe prioritize Approved ones for a public view
         // Filtering out CANCELLED/REJECTED for the public "Bookings" view to keep it clean
-        const activeBookings = bookingsRes.data.filter(b => 
-            b.status?.toUpperCase() === 'APPROVED' || b.status?.toUpperCase() === 'PENDING'
+        const activeBookings = bookingsRes.data.filter(b =>
+          b.status?.toUpperCase() === 'APPROVED' || b.status?.toUpperCase() === 'PENDING'
         );
-        
+
         setBookings(activeBookings);
         setFilteredBookings(activeBookings);
       } catch (err) {
@@ -98,7 +88,7 @@ const AllBookings = ({ user }) => {
 
   useEffect(() => {
     let result = bookings;
-    
+
     if (statusFilter !== 'ALL') {
       result = result.filter(b => b.status?.toUpperCase() === statusFilter.toUpperCase());
     }
@@ -106,17 +96,18 @@ const AllBookings = ({ user }) => {
     if (typeFilter !== 'ALL') {
       result = result.filter(b => resources[b.resourceId]?.type === typeFilter);
     }
-    
+
     if (searchTerm.trim() !== '') {
       result = result.filter(b => {
-        const resourceName = resources[b.resourceId]?.name?.toLowerCase() || '';
-        const resourceLocation = resources[b.resourceId]?.location?.toLowerCase() || '';
+        const resource = resources.find(r => 
+          String(r.id || r._id || '').toLowerCase() === String(b.resourceId || '').toLowerCase()
+        );
+        const resName = (resource?.name || '').toLowerCase();
         const lowerSearch = searchTerm.toLowerCase();
-        // Use startsWith for strict prefix matching as requested
-        return resourceName.startsWith(lowerSearch) || resourceLocation.startsWith(lowerSearch);
+        return resName.startsWith(lowerSearch);
       });
     }
-    
+
     setFilteredBookings(result);
   }, [searchTerm, statusFilter, typeFilter, bookings, resources]);
 
@@ -166,15 +157,15 @@ const AllBookings = ({ user }) => {
           <div className="all-search-wrapper">
             <div className="ub-search-glass">
               <span className="ub-search-icon">🔍</span>
-              <input 
-                type="text" 
-                placeholder="Find facility or location..." 
+              <input
+                type="text"
+                placeholder="Search by facility name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
-          
+
           <div className="all-filter-group">
             <div className="ub-shelf-actions">
               {['ALL', 'APPROVED', 'PENDING'].map(s => (
@@ -190,7 +181,7 @@ const AllBookings = ({ user }) => {
           </div>
 
           <div className="all-filter-group">
-            <select 
+            <select
               className="ub-select-premium"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
@@ -217,8 +208,8 @@ const AllBookings = ({ user }) => {
             <div className="ub-empty-icon">🔍</div>
             <h3>No reservations found</h3>
             <p>
-              {searchTerm 
-                ? `No results found for "${searchTerm}" in the current schedule.` 
+              {searchTerm
+                ? `No results found for "${searchTerm}" in the current schedule.`
                 : "There are no active bookings matching your selected filters."}
             </p>
             <Link to="/facility-management/resource-catalogue" className="ub-action-btn-main">Make a Reservation</Link>
@@ -226,10 +217,10 @@ const AllBookings = ({ user }) => {
         ) : (
           <div className="ub-records-grid">
             {filteredBookings.map((booking, index) => {
-              const res = resources[booking.resourceId] || { name: 'Campus Facility', location: 'University', type: 'Facility' };
+              const res = resources.find(r => String(r.id || r._id) === String(booking.resourceId)) || { name: 'Campus Facility', location: 'University', type: 'Facility' };
               const status = (booking.status || 'PENDING').toUpperCase();
               const live = isLive(booking.date, booking.startTime, booking.endTime);
-              
+
               return (
                 <div
                   key={booking.id}
@@ -238,7 +229,7 @@ const AllBookings = ({ user }) => {
                 >
                   <div className="ub-card-shine"></div>
                   <div className="ub-card-spotlight"></div>
-                  
+
                   {/* Card Header */}
                   <div className="ub-card-header">
                     <div className="ub-header-left">
