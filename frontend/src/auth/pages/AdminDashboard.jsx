@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { resourceApi, bookingApi, adminApi } from '../../api/api';
 import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
+import NotificationPanel from '../../notification/NotificationPanel';
 
 // ── Campus Location Suggestions ──
 const CAMPUS_LOCATIONS = [
@@ -887,6 +888,8 @@ const AdminDashboard = ({ user, onLogout }) => {
           ))}
         </nav>
         <div className="sidebar-footer">
+          <NotificationPanel user={user} />
+          <button className="btn-profile-sidebar" onClick={() => navigate('/profile/admin')}>👤 Profile</button>
           <button className="btn-logout-sidebar" onClick={handleLogout}>Logout</button>
         </div>
       </aside>
@@ -1127,15 +1130,23 @@ const AdminDashboard = ({ user, onLogout }) => {
 
       <style>{`
         .admin-dashboard-root { display: flex; min-height: 100vh; background: #050508; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .sidebar-glass { width: 260px; background: rgba(13, 12, 20, 0.4); border-right: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); display: flex; flex-direction: column; padding: 2rem 0; }
-        .sidebar-brand { padding: 0 2rem; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 3rem; }
+        .sidebar-glass { width: 260px; background: #ffffff; border-right: 1px solid #e5e2f5; box-shadow: 2px 0 12px rgba(124,58,237,0.06); display: flex; flex-direction: column; padding: 2rem 0; }
+        .sidebar-brand { padding: 0 2rem; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 3rem; color: #1a1730; }
         .brand-dot { width: 10px; height: 10px; background: #8b5cf6; border-radius: 50%; box-shadow: 0 0 15px #8b5cf6; }
         .sidebar-nav-container { flex: 1; padding: 0 1rem; }
-        .sidebar-nav-item { display: flex; align-items: center; gap: 15px; padding: 14px 20px; border-radius: 12px; cursor: pointer; color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 6px; }
-        .sidebar-nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
-        .sidebar-nav-item.active { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .sidebar-nav-item { display: flex; align-items: center; gap: 15px; padding: 14px 20px; border-radius: 12px; cursor: pointer; color: #6b7280; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 6px; }
+        .sidebar-nav-item:hover { background: #f5f3ff; color: #7c3aed; }
+        .sidebar-nav-item.active { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
         .main-viewport-glass { flex: 1; padding: 3rem 6%; overflow-y: auto; height: 100vh; }
-        .sidebar-footer { padding: 0 1rem; }
+        .sidebar-footer { padding: 0 1rem; display: flex; flex-direction: column; gap: 10px; align-items: stretch; border-top: 1px solid #f0eeff; padding-top: 1rem; }
+        .sidebar-footer .notif-wrapper { display: flex; justify-content: center; }
+        .sidebar-footer .notif-bell { width: 100%; justify-content: center; border-radius: 12px; padding: 12px; font-size: 1rem; color: #6b7280 !important; background: transparent !important; }
+        .sidebar-footer .notif-bell:hover { background: #f5f3ff !important; color: #7c3aed !important; }
+        .sidebar-footer .notif-panel { right: auto; left: 110%; bottom: 0; top: auto; }
+        .btn-profile-sidebar { width: 100%; background: rgba(139,92,246,0.08); color: #7c3aed; border: 1px solid rgba(139,92,246,0.2); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-profile-sidebar:hover { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.35); }
+        .btn-logout-sidebar { width: 100%; background: rgba(239,68,68,0.05); color: #dc2626; border: 1px solid rgba(239,68,68,0.15); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-logout-sidebar:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); }
         
         .admin-loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; background: #050508; color: #64748b; gap: 2rem; }
         .premium-loader { width: 50px; height: 50px; border: 3px solid rgba(139, 92, 246, 0.1); border-top-color: #8b5cf6; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -1220,6 +1231,8 @@ const AdminDashboard = ({ user, onLogout }) => {
         .btn-add-glow:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.5); }
         .btn-logout-sidebar { width: 100%; background: rgba(248, 113, 113, 0.05); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.1); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
         .btn-logout-sidebar:hover { background: rgba(248, 113, 113, 0.15); border-color: rgba(248, 113, 113, 0.3); }
+        .btn-profile-sidebar { width: 100%; background: rgba(139, 92, 246, 0.08); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.15); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-profile-sidebar:hover { background: rgba(139, 92, 246, 0.18); border-color: rgba(139, 92, 246, 0.35); }
 
         .btn-approve-sm { background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.2); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .btn-approve-sm:hover { background: rgba(52, 211, 153, 0.2); transform: scale(1.05); }

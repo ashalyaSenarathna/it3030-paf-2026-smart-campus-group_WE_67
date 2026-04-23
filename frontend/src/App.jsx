@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import ResourceCatalogue from './pages/facility-management/ResourceCatalogue';
 import { getCurrentUser, login, logout } from './auth/api';
@@ -17,9 +17,22 @@ import Nav from './components/Nav.jsx';
 import './App.css';
 import './auth/auth.css';
 
+// Routes where the global navbar must never appear
+const NO_NAV_ROUTES = [
+  '/login',
+  '/admin/dashboard',
+  '/tech/dashboard',
+  '/facility-management/admin',
+  '/bookings/admin',
+  '/profile/admin',
+  '/profile/technician',
+];
 
 function App() {
   const [user, setUser] = useState(null);
+  const location = useLocation();
+
+  const showNav = !NO_NAV_ROUTES.includes(location.pathname);
 
   useEffect(() => {
     const bootstrapUser = async () => {
@@ -58,7 +71,7 @@ function App() {
 
   return (
     <>
-      <Nav key="nav-force-remount" user={user} onLogout={handleLogout} />
+      {showNav && <Nav user={user} onLogout={handleLogout} />}
       <Routes>
         <Route path="/" element={<Home user={user} onLogout={handleLogout} />} />
 
@@ -112,7 +125,7 @@ function App() {
         path="/profile/admin"
         element={
           <ProtectedRoute user={user} requiredRoles={['ROLE_ADMIN']}>
-            <AdminProfilePage user={user} />
+            <AdminProfilePage user={user} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
@@ -120,7 +133,7 @@ function App() {
         path="/profile/technician"
         element={
           <ProtectedRoute user={user} requiredRoles={['ROLE_TECHNICIAN']}>
-            <TechnicianProfilePage user={user} />
+            <TechnicianProfilePage user={user} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
