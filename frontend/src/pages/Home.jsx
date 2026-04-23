@@ -41,6 +41,16 @@ function Home({ user, onLogout }) {
       accentColor: '#0ea5e9',
     },
     {
+      id: 'incidents',
+      title: 'Incident Reporting',
+      description: 'Report campus maintenance issues, technical faults, or safety concerns directly to our team.',
+      icon: '🎫',
+      link: '/incidents/dashboard',
+      action: 'Report Incident',
+      gradient: 'linear-gradient(135deg, #f43f5e, #fb7185)',
+      accentColor: '#f43f5e',
+    },
+    {
       id: 'transport',
       title: 'Campus Transport',
       description: 'Track shuttle locations, view schedules, and manage parking permits.',

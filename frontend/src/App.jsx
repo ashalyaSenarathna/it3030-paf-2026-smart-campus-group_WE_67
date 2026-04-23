@@ -13,8 +13,15 @@ import TechnicianProfilePage from './auth/pages/TechnicianProfilePage.jsx';
 import StudentProfilePage from './auth/pages/StudentProfilePage.jsx';
 import UserBookings from './pages/Booking/UserBookings.jsx';
 import AllBookings from './pages/Booking/AllBookings.jsx';
-import Nav from './components/Nav.jsx';
+import Nav from './Components/Nav.jsx';
+import { IncidentAuthProvider } from './context/IncidentAuthContext';
+import DashboardPage from './pages/incident/TicketDashboardPage';
+import CreateTicketPage from './pages/incident/CreateTicketPage';
+import TicketsPage from './pages/incident/TicketsPage';
+import TicketDetailPage from './pages/incident/TicketDetailPage';
+import { Toaster } from 'react-hot-toast';
 import './App.css';
+import './pages/incident/incident.css';
 import './auth/auth.css';
 
 
@@ -59,7 +66,9 @@ function App() {
   return (
     <>
       <Nav key="nav-force-remount" user={user} onLogout={handleLogout} />
-      <Routes>
+      <Toaster position="top-right" />
+      <IncidentAuthProvider user={user}>
+        <Routes>
         <Route path="/" element={<Home user={user} onLogout={handleLogout} />} />
 
       <Route path="/home" element={<Home user={user} onLogout={handleLogout} />} />
@@ -143,15 +152,50 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/bookings/all"
-        element={
-          <ProtectedRoute user={user}>
-            <AllBookings user={user} />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+        <Route
+          path="/bookings/all"
+          element={
+            <ProtectedRoute user={user}>
+              <AllBookings user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Incident Management Routes */}
+        <Route
+          path="/incidents/dashboard"
+          element={
+            <ProtectedRoute user={user}>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/incidents/create"
+          element={
+            <ProtectedRoute user={user}>
+              <CreateTicketPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tickets"
+          element={
+            <ProtectedRoute user={user}>
+              <TicketsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tickets/:id"
+          element={
+            <ProtectedRoute user={user}>
+              <TicketDetailPage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      </IncidentAuthProvider>
     </>
   );
 }

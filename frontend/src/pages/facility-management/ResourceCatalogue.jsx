@@ -234,6 +234,13 @@ function ResourceCatalogue() {
                     Book Now
                   </button>
                 )}
+                <Link 
+                  to={`/incidents/create?title=${encodeURIComponent(`Issue with ${resource.name}`)}&location=${encodeURIComponent(resource.location || '')}`}
+                  className="btn-ghost"
+                  style={{ fontSize: '0.75rem', padding: '4px 8px', textDecoration: 'none' }}
+                >
+                  ⚠️ Report Issue
+                </Link>
               </div>
             </div>
           ))}

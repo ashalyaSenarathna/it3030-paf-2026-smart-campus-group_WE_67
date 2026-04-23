@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { resourceApi, bookingApi, adminApi } from '../../api/api';
 import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
+import TicketDashboard from '../../pages/incident/TicketDashboardPage';
 
 // ── Campus Location Suggestions ──
 const CAMPUS_LOCATIONS = [
@@ -14,7 +15,8 @@ const TABS = {
   RESOURCES: 'Manage Resources',
   BOOKINGS: 'Booking Management',
   USERS: 'User Management',
-  MAINTENANCE: 'Maintenance & Support'
+  MAINTENANCE: 'Maintenance Hub',
+  TICKETS: 'Incident Tickets'
 };
 
 const AdminDashboard = ({ user, onLogout }) => {
@@ -874,7 +876,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             { id: TABS.DASHBOARD, icon: '👥', label: 'Dashboard' },
             { id: TABS.RESOURCES, icon: '🏢', label: 'Resources' },
             { id: TABS.BOOKINGS, icon: '📅', label: 'Bookings' },
-            { id: TABS.MAINTENANCE, icon: '🛠️', label: 'Support' }
+            { id: TABS.TICKETS, icon: '🎫', label: 'Tickets' }
           ].map((tab) => (
             <div
               key={tab.id}
@@ -895,18 +897,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         {activeTab === TABS.DASHBOARD && renderDashboard()}
         {activeTab === TABS.RESOURCES && renderResources()}
         {activeTab === TABS.BOOKINGS && renderBookings()}
-        {activeTab === TABS.MAINTENANCE && (
-          <div className="tab-pane animate-in">
-            <header className="tab-header">
-              <h1>Maintenance Hub</h1>
-              <p>Ticketing system is launching soon.</p>
-            </header>
-            <div className="coming-soon-card-glass">
-              <div className="cs-glow"></div>
-              <span>Development in Progress</span>
-            </div>
-          </div>
-        )}
+        {activeTab === TABS.TICKETS && <TicketDashboard />}
       </main>
 
       {/* Success/Error Toast */}
