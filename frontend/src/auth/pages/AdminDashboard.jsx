@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { resourceApi, bookingApi, adminApi } from '../../api/api';
 import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
+import NotificationPanel from '../../notification/NotificationPanel';
 
 // ── Campus Location Suggestions ──
 const CAMPUS_LOCATIONS = [
@@ -887,6 +888,8 @@ const AdminDashboard = ({ user, onLogout }) => {
           ))}
         </nav>
         <div className="sidebar-footer">
+          <NotificationPanel user={user} />
+          <button className="btn-profile-sidebar" onClick={() => navigate('/profile/admin')}>👤 Profile</button>
           <button className="btn-logout-sidebar" onClick={handleLogout}>Logout</button>
         </div>
       </aside>
@@ -1127,15 +1130,25 @@ const AdminDashboard = ({ user, onLogout }) => {
 
       <style>{`
         .admin-dashboard-root { display: flex; min-height: 100vh; background: #050508; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .sidebar-glass { width: 260px; background: rgba(13, 12, 20, 0.4); border-right: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); display: flex; flex-direction: column; padding: 2rem 0; }
-        .sidebar-brand { padding: 0 2rem; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 3rem; }
-        .brand-dot { width: 10px; height: 10px; background: #8b5cf6; border-radius: 50%; box-shadow: 0 0 15px #8b5cf6; }
-        .sidebar-nav-container { flex: 1; padding: 0 1rem; }
-        .sidebar-nav-item { display: flex; align-items: center; gap: 15px; padding: 14px 20px; border-radius: 12px; cursor: pointer; color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 6px; }
-        .sidebar-nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
-        .sidebar-nav-item.active { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
-        .main-viewport-glass { flex: 1; padding: 3rem 6%; overflow-y: auto; height: 100vh; }
-        .sidebar-footer { padding: 0 1rem; }
+        .sidebar-glass { width: 260px; background: #0b0a11; border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 2.5rem 0; z-index: 100; }
+        .sidebar-brand { padding: 0 2rem; font-size: 1.6rem; font-weight: 850; display: flex; align-items: center; gap: 12px; margin-bottom: 3.5rem; color: #ffffff; letter-spacing: -0.03em; }
+        .brand-dot { width: 10px; height: 10px; background: #c084fc; border-radius: 50%; box-shadow: 0 0 15px #c084fc; }
+        .sidebar-nav-container { flex: 1; padding: 0 1.25rem; }
+        .sidebar-nav-item { display: flex; align-items: center; gap: 16px; padding: 15px 22px; border-radius: 16px; cursor: pointer; color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 8px; font-weight: 700; }
+        .sidebar-nav-item:hover { background: rgba(255, 255, 255, 0.03); color: #e2e8f0; }
+        .sidebar-nav-item.active { background: rgba(124, 58, 237, 0.12); color: #c084fc; box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.2); }
+        .nav-i { font-size: 1.25rem; opacity: 0.8; transition: transform 0.3s; }
+        .sidebar-nav-item.active .nav-i { transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.5)); }
+        .main-viewport-glass { flex: 1; padding: 3rem 6%; overflow-y: auto; height: 100vh; background: #050508; }
+        .sidebar-footer { padding: 1.5rem 1.25rem; display: flex; flex-direction: column; gap: 12px; align-items: stretch; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+        .sidebar-footer .notif-wrapper { display: flex; justify-content: center; }
+        .sidebar-footer .notif-bell { width: 100%; justify-content: center; border-radius: 14px; padding: 12px; font-size: 1.1rem; color: #64748b !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; }
+        .sidebar-footer .notif-bell:hover { background: rgba(255, 255, 255, 0.06) !important; color: #ffffff !important; }
+        .sidebar-footer .notif-panel { right: auto; left: 110%; bottom: 0; top: auto; }
+        .btn-profile-sidebar { width: 100%; background: rgba(255, 255, 255, 0.03); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 14px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-profile-sidebar:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.15); color: #ffffff; }
+        .btn-logout-sidebar { width: 100%; background: rgba(239, 68, 68, 0.05); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.15); padding: 12px; border-radius: 14px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-logout-sidebar:hover { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); }
         
         .admin-loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; background: #050508; color: #64748b; gap: 2rem; }
         .premium-loader { width: 50px; height: 50px; border: 3px solid rgba(139, 92, 246, 0.1); border-top-color: #8b5cf6; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -1147,13 +1160,13 @@ const AdminDashboard = ({ user, onLogout }) => {
         .empty-table-state p { color: #64748b; }
 
         .hero-badge { display: inline-block; padding: 6px 14px; background: rgba(139, 92, 246, 0.1); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 50px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
-        .tab-header h1 { font-size: 2.5rem; font-weight: 900; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
-        .tab-header p { color: #64748b; margin-bottom: 3rem; }
+        .tab-header h1 { font-size: 2.8rem; font-weight: 900; margin-bottom: 0.6rem; letter-spacing: -0.02em; color: #ffffff; text-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 30px rgba(139,92,246,0.2); }
+        .tab-header p { color: #94a3b8; font-size: 1.05rem; margin-bottom: 3.5rem; max-width: 600px; line-height: 1.6; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
         .stat-card { background: rgba(13, 12, 20, 0.4); border: 1px solid rgba(255,255,255,0.05); padding: 2rem; border-radius: 28px; backdrop-filter: blur(10px); }
         .stat-card .label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.1em; margin-bottom: 1rem; }
-        .stat-card .value { font-size: 2.5rem; font-weight: 900; line-height: 1; }
+        .stat-card .value { font-size: 2.5rem; font-weight: 900; line-height: 1; color: #ffffff; }
         .stat-meta { font-size: 0.75rem; color: #475569; margin-top: 10px; }
 
         .activity-item-glass { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px solid rgba(255,255,255,0.04); }
@@ -1191,7 +1204,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         .toast-premium { position: fixed; bottom: 30px; right: 30px; background: #0d0c14; border: 1px solid #8b5cf6; padding: 12px 24px; border-radius: 14px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 5000; }
 
         .premium-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-        .premium-table th { text-align: left; padding: 1rem; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.1em; }
+        .premium-table th { text-align: left; padding: 1rem; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.1em; }
         .premium-table td { background: rgba(255,255,255,0.02); padding: 1.25rem 1rem; border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); }
         .premium-table td:first-child { border-left: 1px solid rgba(255,255,255,0.04); border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
         .premium-table td:last-child { border-right: 1px solid rgba(255,255,255,0.04); border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
@@ -1220,6 +1233,8 @@ const AdminDashboard = ({ user, onLogout }) => {
         .btn-add-glow:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.5); }
         .btn-logout-sidebar { width: 100%; background: rgba(248, 113, 113, 0.05); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.1); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
         .btn-logout-sidebar:hover { background: rgba(248, 113, 113, 0.15); border-color: rgba(248, 113, 113, 0.3); }
+        .btn-profile-sidebar { width: 100%; background: rgba(139, 92, 246, 0.08); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.15); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-profile-sidebar:hover { background: rgba(139, 92, 246, 0.18); border-color: rgba(139, 92, 246, 0.35); }
 
         .btn-approve-sm { background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.2); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .btn-approve-sm:hover { background: rgba(52, 211, 153, 0.2); transform: scale(1.05); }

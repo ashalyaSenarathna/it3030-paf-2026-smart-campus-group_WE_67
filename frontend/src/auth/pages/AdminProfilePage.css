@@ -1,0 +1,227 @@
+/* =====================================================
+   ADMIN PROFILE PAGE
+   Sidebar styles copied exactly from AdminDashboard
+   ===================================================== */
+
+.admin-profile-root {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f4ff;
+  color: #1a1730;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Sidebar — identical to AdminDashboard .sidebar-glass ── */
+.admin-profile-root .sidebar-glass {
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #e5e2f5;
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-shadow: 2px 0 12px rgba(124, 58, 237, 0.06);
+}
+
+.admin-profile-root .sidebar-brand {
+  padding: 0 2rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3rem;
+  color: #1a1730;
+}
+
+.admin-profile-root .brand-dot {
+  width: 10px;
+  height: 10px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #8b5cf6;
+  flex-shrink: 0;
+}
+
+.admin-profile-root .sidebar-nav-container {
+  flex: 1;
+  padding: 0 1rem;
+}
+
+.admin-profile-root .sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.admin-profile-root .sidebar-nav-item:hover {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.admin-profile-root .sidebar-footer {
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  border-top: 1px solid #f0eeff;
+  padding-top: 1rem;
+}
+
+.admin-profile-root .sidebar-footer .notif-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.admin-profile-root .sidebar-footer .notif-bell {
+  width: 100% !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  font-size: 1rem !important;
+  color: #6b7280 !important;
+  background: transparent !important;
+}
+
+.admin-profile-root .sidebar-footer .notif-bell:hover,
+.admin-profile-root .sidebar-footer .notif-bell--active {
+  background: #f5f3ff !important;
+  color: #7c3aed !important;
+}
+
+.admin-profile-root .sidebar-footer .notif-panel {
+  right: auto;
+  left: 110%;
+  bottom: 0;
+  top: auto;
+}
+
+.admin-profile-root .btn-profile-sidebar {
+  width: 100%;
+  background: rgba(139, 92, 246, 0.08);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.admin-profile-root .btn-profile-sidebar:hover,
+.admin-profile-root .btn-profile-sidebar.active-profile {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+.admin-profile-root .btn-logout-sidebar {
+  width: 100%;
+  background: rgba(239, 68, 68, 0.05);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.admin-profile-root .btn-logout-sidebar:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ── Main content area ── */
+.admin-profile-main {
+  flex: 1;
+  padding: 3rem 6%;
+  overflow-y: auto;
+  height: 100vh;
+  background: #f5f4ff;
+}
+
+.admin-profile-main .sp-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Fix card text colors for light background */
+.admin-profile-main .sp-hero {
+  background: #ffffff;
+  border: 1px solid #e5e2f5;
+  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.08);
+}
+.admin-profile-main .sp-name { color: #1a1730; }
+.admin-profile-main .sp-eyebrow { color: #7c3aed; }
+.admin-profile-main .sp-email { color: #6b7280; }
+.admin-profile-main .sp-role-badge {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+}
+.admin-profile-main .sp-role-dot { background: #7c3aed; box-shadow: 0 0 6px #7c3aed; }
+
+.admin-profile-main .sp-card {
+  background: #ffffff;
+  border: 1px solid #e5e2f5;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.06);
+}
+.admin-profile-main .sp-card:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.12);
+}
+.admin-profile-main .sp-card__header { border-bottom: 1px solid #f0eeff; }
+.admin-profile-main .sp-card__title { color: #1a1730; }
+
+.admin-profile-main .sp-field__label { color: #9ca3af; }
+.admin-profile-main .sp-field__value { color: #1a1730; }
+.admin-profile-main .sp-field__value--badge {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+}
+.admin-profile-main .sp-divider { background: #f3f0ff; }
+
+.admin-profile-main .sp-scope-item { border-bottom-color: #f3f0ff; }
+.admin-profile-main .sp-scope-item__icon { background: #f5f3ff; }
+.admin-profile-main .sp-scope-item__text { color: #4b5563; }
+
+.admin-profile-main .sp-pw-label { color: #9ca3af; }
+.admin-profile-main .sp-pw-input {
+  background: #faf9ff;
+  border-color: #e5e2f5;
+  color: #1a1730;
+}
+.admin-profile-main .sp-pw-input::placeholder { color: #c4b5fd; opacity: 0.6; }
+.admin-profile-main .sp-pw-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  background: #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .admin-profile-root .sidebar-glass { width: 80px; }
+  .admin-profile-root .nav-t,
+  .admin-profile-root .sidebar-brand span { display: none; }
+  .admin-profile-root .sidebar-nav-item { justify-content: center; padding: 15px; }
+}
