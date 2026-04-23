@@ -37,6 +37,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+<<<<<<< Updated upstream
         System.out.println("--- Database Seeding Started ---");
         
         // 1. Seed Users
@@ -118,6 +119,24 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private User createUserIfMissing(String username, String email, String password, String name, Set<Role> roles) {
         return userRepository.findByUsername(username).orElseGet(() -> {
+=======
+        deduplicateByEmail("admin@gmail.com");
+        deduplicateByEmail("tech@gmail.com");
+        createUserIfMissing("admin@gmail.com", "admin123", "Admin User", Set.of(Role.ROLE_ADMIN));
+        createUserIfMissing("tech@gmail.com", "tech123", "Technician User", Set.of(Role.ROLE_TECHNICIAN));
+    }
+
+    private void deduplicateByEmail(String email) {
+        var duplicates = userRepository.findAllByEmail(email);
+        if (duplicates.size() > 1) {
+            // keep the first, delete the rest
+            userRepository.deleteAll(duplicates.subList(1, duplicates.size()));
+        }
+    }
+
+    private void createUserIfMissing(String email, String password, String name, Set<Role> roles) {
+        if (!userRepository.existsByEmail(email)) {
+>>>>>>> Stashed changes
             User user = new User();
             user.setUsername(username);
             user.setEmail(email);

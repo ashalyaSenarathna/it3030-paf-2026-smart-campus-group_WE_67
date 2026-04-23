@@ -9,6 +9,11 @@ import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByEmail(String email);
+<<<<<<< Updated upstream
     Optional<User> findByUsername(String username);
     List<User> findByRolesContaining(Role role);
+=======
+    boolean existsByEmail(String email);
+    List<User> findAllByEmail(String email);
+>>>>>>> Stashed changes
 }
