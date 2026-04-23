@@ -1917,9 +1917,9 @@
 /* ── All Bookings Filter Bar ── */
 .all-filter-shelf {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
   background: rgba(13, 12, 20, 0.4);
   padding: 1.25rem 2rem;
   border-radius: 24px;
@@ -1967,7 +1967,33 @@
 
 .ub-shelf-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 5px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ub-shelf-actions .ub-pill-btn {
+  border-radius: 11px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 7px 18px;
+  font-size: 0.72rem;
+  color: #64748b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ub-shelf-actions .ub-pill-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ub-shelf-actions .ub-pill-btn.is-active {
+  background: rgba(139, 92, 246, 0.12);
+  color: #c084fc;
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .ub-select-premium {
