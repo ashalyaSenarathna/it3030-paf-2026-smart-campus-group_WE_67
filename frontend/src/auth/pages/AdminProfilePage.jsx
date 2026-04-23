@@ -1,128 +1,177 @@
-import React from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { updatePassword } from '../api';
+import NotificationPanel from '../../notification/NotificationPanel';
+import './AdminProfilePage.css';
+import './StudentProfilePage.css';
 
-const AdminProfilePage = ({ user }) => {
+export default function AdminProfilePage({ user, onLogout }) {
   const navigate = useNavigate();
+  const initials = user?.name
+    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'AD';
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword]         = useState('');
+  const [confirm, setConfirm]                 = useState('');
+  const [msg, setMsg]                         = useState(null);
+  const [err, setErr]                         = useState(null);
+  const [loading, setLoading]                 = useState(false);
+
+  const handleLogout = () => { if (onLogout) onLogout(); navigate('/login'); };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setMsg(null); setErr(null);
+    if (newPassword !== confirm) { setErr('New passwords do not match.'); return; }
+    if (newPassword.length < 6)  { setErr('Password must be at least 6 characters.'); return; }
+    setLoading(true);
+    try {
+      const result = await updatePassword(currentPassword, newPassword);
+      if (result.error) { setErr(result.error); }
+      else { setMsg(result.message || 'Password updated successfully.'); setCurrentPassword(''); setNewPassword(''); setConfirm(''); }
+    } catch { setErr('Failed to update password.'); }
+    finally { setLoading(false); }
+  };
 
   return (
     <div className="admin-profile-root">
-      <div className="profile-container-glass">
-        <header className="profile-header">
-          <div className="profile-avatar-large">
-            {user?.username?.charAt(0).toUpperCase() || 'A'}
+
+      {/* ── Sidebar — exact same as AdminDashboard ── */}
+      <aside className="sidebar-glass">
+        <div className="sidebar-brand">
+          <div className="brand-dot"></div>
+          Smart Campus
+        </div>
+
+        <nav className="sidebar-nav-container">
+          <Link to="/admin/dashboard" className="sidebar-nav-item">
+            <span className="nav-i">👥</span>
+            <span className="nav-t">Dashboard</span>
+          </Link>
+          <Link to="/admin/dashboard" className="sidebar-nav-item">
+            <span className="nav-i">🏢</span>
+            <span className="nav-t">Resources</span>
+          </Link>
+          <Link to="/admin/dashboard" className="sidebar-nav-item">
+            <span className="nav-i">📅</span>
+            <span className="nav-t">Bookings </span>
+          </Link>
+          <Link to="/admin/dashboard" className="sidebar-nav-item">
+            <span className="nav-i">🛠️</span>
+            <span className="nav-t">Support</span>
+          </Link>
+        </nav>
+
+        <div className="sidebar-footer">
+          <NotificationPanel user={user} />
+          <button className="btn-profile-sidebar active-profile">👤 Profile</button>
+          <button className="btn-logout-sidebar" onClick={handleLogout}>Logout</button>
+        </div>
+      </aside>
+
+      {/* ── Main content ── */}
+      <main className="admin-profile-main">
+        <div className="sp-content">
+          {/* Hero */}
+          <div className="sp-hero">
+            <div className="sp-avatar">
+              <span className="sp-avatar__initials">{initials}</span>
+              <span className="sp-avatar__ring" />
+            </div>
+            <div className="sp-hero__text">
+              <span className="sp-eyebrow">Admin Profile</span>
+              <h1 className="sp-name">{user?.name || 'Administrator'}</h1>
+              <p className="sp-email">{user?.email || '—'}</p>
+            </div>
+            <div className="sp-role-badge">
+              <span className="sp-role-dot" />
+              Administrator
+            </div>
           </div>
-          <h1>Account Settings</h1>
-          <p>Managed administrative identity and security clearance.</p>
-        </header>
 
-        <div className="profile-sections">
-          <section className="p-section">
-            <h2 className="p-section-title">Identity</h2>
-            <div className="p-info-row">
-              <label>Username</label>
-              <span>{user?.username || 'N/A'}</span>
-            </div>
-            <div className="p-info-row">
-              <label>Institutional Email</label>
-              <span>{user?.email || 'N/A'}</span>
-            </div>
-            <div className="p-info-row">
-              <label>Access Role</label>
-              <span className="p-role-badge">System Administrator</span>
-            </div>
-          </section>
-
-          <section className="p-section">
-            <h2 className="p-section-title">Security & Permissions</h2>
-            <div className="p-permissions-grid">
-              <div className="p-perm-item">
-                <span className="p-p-icon">🛡️</span>
-                <div>
-                  <div className="p-p-name">Full Asset Control</div>
-                  <p className="p-p-desc">Add, edit, or remove university facilities.</p>
-                </div>
+          <div className="sp-grid">
+            {/* Account info */}
+            <div className="sp-card">
+              <div className="sp-card__header">
+                <span className="sp-card__icon">👤</span>
+                <h2 className="sp-card__title">Account Information</h2>
               </div>
-              <div className="p-perm-item">
-                <span className="p-p-icon">⚖️</span>
-                <div>
-                  <div className="p-p-name">Booking Authority</div>
-                  <p className="p-p-desc">Final approval on all reservation requests.</p>
+              <div className="sp-card__body">
+                <div className="sp-field">
+                  <span className="sp-field__label">Full Name</span>
+                  <span className="sp-field__value">{user?.name || 'N/A'}</span>
+                </div>
+                <div className="sp-divider" />
+                <div className="sp-field">
+                  <span className="sp-field__label">Email Address</span>
+                  <span className="sp-field__value">{user?.email || 'N/A'}</span>
+                </div>
+                <div className="sp-divider" />
+                <div className="sp-field">
+                  <span className="sp-field__label">Role</span>
+                  <span className="sp-field__value sp-field__value--badge">Administrator</span>
                 </div>
               </div>
             </div>
-          </section>
+
+            {/* Access scope */}
+            <div className="sp-card">
+              <div className="sp-card__header">
+                <span className="sp-card__icon">🛡️</span>
+                <h2 className="sp-card__title">Admin Access Scope</h2>
+              </div>
+              <div className="sp-card__body">
+                {[
+                  { icon: '🏢', text: 'Add, edit and remove campus resources' },
+                  { icon: '📅', text: 'Approve or reject all booking requests' },
+                  { icon: '👥', text: 'View and manage all system users' },
+                  { icon: '🔧', text: 'Oversee maintenance and support tickets' },
+                ].map((item, i) => (
+                  <div key={i} className="sp-scope-item">
+                    <span className="sp-scope-item__icon">{item.icon}</span>
+                    <span className="sp-scope-item__text">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Change password */}
+            <div className="sp-card sp-card--wide">
+              <div className="sp-card__header">
+                <span className="sp-card__icon">🔒</span>
+                <h2 className="sp-card__title">Change Password</h2>
+              </div>
+              <div className="sp-card__body">
+                <form onSubmit={handlePasswordSubmit} className="sp-pw-form">
+                  <div className="sp-pw-fields">
+                    <div className="sp-pw-group">
+                      <label className="sp-pw-label">Current Password</label>
+                      <input className="sp-pw-input" type="password" value={currentPassword}
+                        onChange={e => setCurrentPassword(e.target.value)} required placeholder="Enter current password" />
+                    </div>
+                    <div className="sp-pw-group">
+                      <label className="sp-pw-label">New Password</label>
+                      <input className="sp-pw-input" type="password" value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)} required placeholder="Min. 6 characters" />
+                    </div>
+                    <div className="sp-pw-group">
+                      <label className="sp-pw-label">Confirm New Password</label>
+                      <input className="sp-pw-input" type="password" value={confirm}
+                        onChange={e => setConfirm(e.target.value)} required placeholder="Repeat new password" />
+                    </div>
+                  </div>
+                  {msg && <div className="sp-pw-success">{msg}</div>}
+                  {err && <div className="sp-pw-error">{err}</div>}
+                  <button type="submit" className="sp-pw-btn" disabled={loading}>
+                    {loading ? 'Updating…' : 'Update Password'}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div className="profile-footer-actions">
-           <button className="btn-secondary-glass" onClick={() => navigate('/admin/dashboard')}>
-             Return to Workspace
-           </button>
-        </div>
-      </div>
-
-      <style>{`
-        .admin-profile-root {
-          min-height: 100vh;
-          background: #050508;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 2rem;
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          color: #fff;
-        }
-        .profile-container-glass {
-          width: 100%;
-          max-width: 800px;
-          background: rgba(13, 12, 20, 0.4);
-          border: 1px solid rgba(255,255,255,0.05);
-          backdrop-filter: blur(20px);
-          border-radius: 40px;
-          padding: 4rem;
-          animation: profileSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes profileSlide {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .profile-header { text-align: center; margin-bottom: 4rem; }
-        .profile-avatar-large {
-          width: 80px;
-          height: 80px;
-          background: linear-gradient(135deg, #8b5cf6, #d946ef);
-          border-radius: 24px;
-          margin: 0 auto 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
-          font-weight: 900;
-          box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
-        }
-        .profile-header h1 { font-size: 2.25rem; font-weight: 900; margin-bottom: 0.5rem; }
-        .profile-header p { color: #64748b; font-size: 1rem; }
-
-        .profile-sections { display: flex; flex-direction: column; gap: 3rem; }
-        .p-section-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.1em; margin-bottom: 1.5rem; }
-        
-        .p-info-row { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .p-info-row label { color: #64748b; font-weight: 600; }
-        .p-info-row span { font-weight: 700; }
-        
-        .p-role-badge { background: rgba(139, 92, 246, 0.1); color: #c084fc; padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; border: 1px solid rgba(139, 92, 246, 0.2); }
-
-        .p-permissions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        .p-perm-item { display: flex; gap: 1rem; background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .p-p-icon { font-size: 1.5rem; }
-        .p-p-name { font-weight: 800; margin-bottom: 4px; }
-        .p-p-desc { font-size: 0.8rem; color: #64748b; line-height: 1.4; }
-
-        .profile-footer-actions { margin-top: 4rem; display: flex; justify-content: center; }
-        .btn-secondary-glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #fff; padding: 14px 30px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
-        .btn-secondary-glass:hover { background: rgba(255,255,255,0.08); transform: translateY(-2px); }
-      `}</style>
+      </main>
     </div>
   );
-};
-
-export default AdminProfilePage;
+}
