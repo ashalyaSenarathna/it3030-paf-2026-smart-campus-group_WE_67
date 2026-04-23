@@ -245,8 +245,20 @@
 /* ── Booking Records Grid ── */
 .ub-records-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+}
+
+@media (max-width: 1100px) {
+  .ub-records-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ub-records-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .ub-booking-card {
@@ -1010,9 +1022,21 @@
 .bookings-masonry,
 .bookings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   margin-top: 4rem;
+}
+
+@media (max-width: 1200px) {
+  .bookings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 850px) {
+  .bookings-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Glass Card System (Supports both new and old classes) */
