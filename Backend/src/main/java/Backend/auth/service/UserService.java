@@ -67,6 +67,14 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    public Optional<User> findById(String id) {
+        return userRepository.findById(id);
+    }
+
+    public java.util.List<User> findAllTechnicians() {
+        return userRepository.findByRolesContaining(Role.ROLE_TECHNICIAN);
+    }
+
     public void updatePassword(User user, String rawPassword) {
         user.setPassword(passwordEncoder.encode(rawPassword));
         userRepository.save(user);
