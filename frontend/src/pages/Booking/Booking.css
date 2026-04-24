@@ -307,6 +307,13 @@
   box-shadow: inset 8px 0 25px -12px rgba(71, 85, 105, 0.25);
 }
 
+.s-border-expired {
+  border-left: 4px solid #f43f5e !important;
+  box-shadow: inset 8px 0 25px -12px rgba(244, 63, 94, 0.3);
+}
+
+
+
 /* Spotlight Effect */
 .ub-card-spotlight {
   position: absolute;
@@ -438,6 +445,15 @@
   color: #94a3b8;
   border-color: rgba(100, 116, 139, 0.4);
 }
+
+.tag-expired {
+  background: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+  border: 1px solid rgba(244, 63, 94, 0.28);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.1);
+}
+
+
 
 .ub-card-id {
   font-size: 0.7rem;

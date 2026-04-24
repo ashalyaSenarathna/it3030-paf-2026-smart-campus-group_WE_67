@@ -108,6 +108,28 @@ const AdminDashboard = ({ user, onLogout }) => {
     return isNaN(d.getTime()) ? 'Invalid Date' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   };
 
+  const isExpired = (b) => {
+    if ((b.status || '').toUpperCase() !== 'APPROVED') return false;
+    try {
+      let endDateTime;
+      if (Array.isArray(b.date)) {
+        const [y, m, d] = b.date;
+        const endTimeArr = Array.isArray(b.endTime) ? b.endTime : [0, 0];
+        const [h, min] = endTimeArr;
+        endDateTime = new Date(y, m - 1, d, h, min);
+      } else {
+        endDateTime = new Date(b.date);
+        const endTimeStr = typeof b.endTime === 'string' ? b.endTime : '00:00';
+        const [h, min] = endTimeStr.split(':');
+        endDateTime.setHours(parseInt(h) || 0, parseInt(min) || 0, 0, 0);
+      }
+      return endDateTime < new Date();
+    } catch (e) {
+      return false;
+    }
+  };
+
+
   const fetchAllData = async () => {
     setIsLoading(true);
     setDebugMessage('Syncing with backend...');
@@ -694,11 +716,14 @@ const AdminDashboard = ({ user, onLogout }) => {
               {filteredBookings.map((b, idx) => {
                 const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Unknown Facility';
                 const resourceObj = resources.find(r => String(r.id) === String(b.resourceId));
-                const statusLower = (b.status || '').toLowerCase();
+                const expired = isExpired(b);
+                const displayStatus = expired ? 'EXPIRED' : b.status;
+                const statusLower = displayStatus.toLowerCase();
                 return (
                   <div
                     key={b.id}
                     className={`bk-premium-card bk-status-${statusLower}`}
+
                     style={{ '--anim-delay': `${idx * 0.06}s` }}
                   >
                     {/* Gloss reflection */}
@@ -715,8 +740,9 @@ const AdminDashboard = ({ user, onLogout }) => {
                       </div>
                       <span className={`bk-badge-v2 bk-badge-${statusLower}`}>
                         <span className="bk-badge-dot"></span>
-                        {b.status}
+                        {displayStatus}
                       </span>
+
                     </div>
 
                     {/* User info */}
@@ -1430,6 +1456,8 @@ const AdminDashboard = ({ user, onLogout }) => {
         .bk-status-approved.bk-premium-card { border-left-color: #34d399; }
         .bk-status-rejected.bk-premium-card { border-left-color: #f87171; }
         .bk-status-cancelled.bk-premium-card { border-left-color: #475569; }
+        .bk-status-expired.bk-premium-card { border-left-color: #f43f5e; opacity: 0.8; }
+
         .bk-card-shine { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%); pointer-events: none; }
 
         /* Card Top Row */
@@ -1444,7 +1472,9 @@ const AdminDashboard = ({ user, onLogout }) => {
         .bk-avatar-approved { background: linear-gradient(135deg, rgba(52,211,153,0.25), rgba(52,211,153,0.1)); color: #34d399; }
         .bk-avatar-rejected { background: linear-gradient(135deg, rgba(248,113,113,0.25), rgba(248,113,113,0.1)); color: #f87171; }
         .bk-avatar-cancelled { background: linear-gradient(135deg, rgba(148,163,184,0.15), rgba(148,163,184,0.05)); color: #94a3b8; }
+        .bk-avatar-expired { background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(244, 63, 94, 0.05)); color: #f43f5e; }
         .bk-p-title-block { flex: 1; min-width: 0; }
+
         .bk-p-resource-name { font-size: 1.1rem; font-weight: 800; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
         .bk-p-resource-type { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #0ea5e9; margin-top: 3px; }
 
@@ -1456,6 +1486,8 @@ const AdminDashboard = ({ user, onLogout }) => {
         .bk-badge-approved { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.28); }
         .bk-badge-rejected { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.28); }
         .bk-badge-cancelled { background: rgba(148,163,184,0.07); color: #94a3b8; border: 1px solid rgba(148,163,184,0.18); }
+        .bk-badge-expired { background: rgba(244, 63, 94, 0.12); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.28); }
+
 
         /* User row */
         .bk-p-user-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid rgba(255,255,255,0.04); }
