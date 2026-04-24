@@ -215,8 +215,15 @@ function ResourceCatalogue() {
               <p className="resource-description">{resource.description || 'No description provided.'}</p>
               <div className="resource-meta">
                 <span className="type-tag">{resource.type}</span>
-                <span className="capacity-tag">👥 {resource.capacity} Seats</span>
-                <span className="location-tag">📍 {resource.location}</span>
+                <span className="capacity-tag">
+                  {(resource.type === 'Equipment' || resource.type === 'Sports Equipment') ? '📦 ' : '👥 '}
+                  {resource.capacity}
+                  {(resource.type === 'Equipment' || resource.type === 'Sports Equipment') ? '' : ' Seats'}
+                </span>
+                <span className="location-tag">
+                  {(resource.type === 'Equipment' || resource.type === 'Sports Equipment') ? '🚚 ' : '📍 '}
+                  {resource.location}
+                </span>
               </div>
               <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div className={`resource-status-badge ${(resource.status || '').toLowerCase()}`}>

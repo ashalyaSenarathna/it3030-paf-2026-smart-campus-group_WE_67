@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 
+// Import background images for the slideshow
+import bg2 from '../assets/background2.png';
+import bg3 from '../assets/Background3.png';
+import bg4 from '../assets/Background4.png';
+
 function Home({ user, onLogout }) {
   const navigate = useNavigate();
+  const [bgIndex, setBgIndex] = useState(0);
+  const backgrounds = [bg2, bg3, bg4];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgIndex((prevIndex) => (prevIndex + 1) % backgrounds.length);
+    }, 6000); // Change image every 6 seconds
+
+    return () => clearInterval(interval);
+  }, [backgrounds.length]);
 
   const handleLogout = async () => {
     try {
@@ -54,7 +69,10 @@ function Home({ user, onLogout }) {
   ];
 
   return (
-    <main className="home-page">
+    <main 
+      className="home-page"
+      style={{ backgroundImage: `url(${backgrounds[bgIndex]})` }}
+    >
       {/* Animated background blobs */}
       <div className="bg-blob blob-1" aria-hidden="true"></div>
       <div className="bg-blob blob-2" aria-hidden="true"></div>
