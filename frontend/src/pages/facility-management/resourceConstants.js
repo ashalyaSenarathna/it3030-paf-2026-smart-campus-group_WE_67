@@ -18,6 +18,7 @@ export const RESOURCE_STATUSES = [
   'Available',
   'Occupied',
   'Maintenance',
+  'OUT_OF_SERVICE'
 ];
 
 export const RESOURCE_TYPE_ICONS = {
