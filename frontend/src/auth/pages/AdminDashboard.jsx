@@ -16,17 +16,19 @@ const CAMPUS_LOCATIONS = [
 ];
 
 const TABS = {
-  ANALYTICS: 'Analytics',
+  USERS: 'User Management',
   RESOURCES: 'Manage Resources',
   BOOKINGS: 'Booking Management',
-  USERS: 'User Management',
   MAINTENANCE: 'Maintenance & Support'
 };
 
 
+
 const AdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(TABS.ANALYTICS);
+  const [activeTab, setActiveTab] = useState(TABS.BOOKINGS);
+  const [bookingSubTab, setBookingSubTab] = useState('LIST'); // 'LIST' or 'ANALYTICS'
+
 
 
   // State for data
@@ -594,186 +596,209 @@ const AdminDashboard = ({ user, onLogout }) => {
         <p>Review, approve, and monitor all campus facility reservation requests.</p>
       </header>
 
-      {/* ── Premium Stats Row ── */}
-      <div className="bk-stats-row">
-        <div className="bk-stat-tile bk-tile-total">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">📋</div>
-          <div className="bk-tile-value">{bookingStats.total}</div>
-          <div className="bk-tile-label">Total Bookings</div>
-        </div>
-        <div className="bk-stat-tile bk-tile-pending">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">⏳</div>
-          <div className="bk-tile-value" style={{ color: '#fbbf24' }}>{bookingStats.pending}</div>
-          <div className="bk-tile-label">Pending Review</div>
-          {bookingStats.pending > 0 && <div className="bk-tile-urgent-dot"></div>}
-        </div>
-        <div className="bk-stat-tile bk-tile-approved">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">✅</div>
-          <div className="bk-tile-value" style={{ color: '#34d399' }}>{bookingStats.approved}</div>
-          <div className="bk-tile-label">Approved</div>
-        </div>
-        <div className="bk-stat-tile bk-tile-rejected">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">❌</div>
-          <div className="bk-tile-value" style={{ color: '#f87171' }}>{bookingStats.rejected}</div>
-          <div className="bk-tile-label">Rejected</div>
-        </div>
+      {/* ── Sub-Tab Navigation ── */}
+      <div className="bk-sub-nav">
+        <button 
+          className={`bk-sub-nav-btn ${bookingSubTab === 'LIST' ? 'active' : ''}`}
+          onClick={() => setBookingSubTab('LIST')}
+        >
+          <span className="btn-icon">📋</span> Active Requests
+        </button>
+        <button 
+          className={`bk-sub-nav-btn ${bookingSubTab === 'ANALYTICS' ? 'active' : ''}`}
+          onClick={() => setBookingSubTab('ANALYTICS')}
+        >
+          <span className="btn-icon">📊</span> Usage Analytics
+        </button>
       </div>
 
-      {/* ── Search + Filter Bar ── */}
-      <div className="bk-control-bar">
-        <div className="bk-search-glass">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input
-            type="text"
-            placeholder="Search by facility or user..."
-            value={bookingSearch}
-            onChange={(e) => setBookingSearch(e.target.value)}
-            className="booking-search-input"
-          />
-        </div>
-        <div className="bk-filter-row">
-          {[['All','All','#8b5cf6'], ['PENDING','⏳ Pending','#fbbf24'], ['APPROVED','✅ Approved','#34d399'], ['REJECTED','❌ Rejected','#f87171'], ['CANCELLED','🚫 Cancelled','#94a3b8']].map(([val, label, color]) => (
-            <button
-              key={val}
-              className={`bk-filter-pill-v2 ${bookingFilter === val ? 'active' : ''}`}
-              style={bookingFilter === val ? { '--pill-color': color } : {}}
-              onClick={() => setBookingFilter(val)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Results meta ── */}
-      <div className="booking-results-meta">
-        Showing <strong>{filteredBookings.length}</strong> of {bookings.length} reservations
-        {bookingSearch && <span> · searching for "<em>{bookingSearch}</em>"</span>}
-        {bookingSearch && <button className="bk-inline-clear" onClick={() => setBookingSearch('')}>✕ clear</button>}
-      </div>
-
-      {/* ── Booking Cards ── */}
-      {filteredBookings.length === 0 ? (
-        <div className="bk-empty-state">
-          <div className="bk-empty-orb"></div>
-          <div className="bk-empty-icon">🗓️</div>
-          <h3>{bookingSearch ? `No results for "${bookingSearch}"` : "No reservations found"}</h3>
-          <p>{bookingSearch ? `We couldn't find any bookings starting with the characters you typed.` : "Try adjusting your search or filter criteria."}</p>
-          {bookingSearch && (
-            <button className="bk-clear-btn" onClick={() => setBookingSearch('')}>Clear Search</button>
-          )}
-        </div>
+      {bookingSubTab === 'ANALYTICS' ? (
+        renderAnalytics()
       ) : (
-        <div className="bk-cards-grid">
-          {filteredBookings.map((b, idx) => {
-            const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Unknown Facility';
-            const resourceObj = resources.find(r => String(r.id) === String(b.resourceId));
-            const statusLower = (b.status || '').toLowerCase();
-            return (
-              <div
-                key={b.id}
-                className={`bk-premium-card bk-status-${statusLower}`}
-                style={{ '--anim-delay': `${idx * 0.06}s` }}
-              >
-                {/* Gloss reflection */}
-                <div className="bk-card-shine"></div>
+        <>
+          {/* ── Premium Stats Row ── */}
+          <div className="bk-stats-row">
+            <div className="bk-stat-tile bk-tile-total">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">📋</div>
+              <div className="bk-tile-value">{bookingStats.total}</div>
+              <div className="bk-tile-label">Total Bookings</div>
+            </div>
+            <div className="bk-stat-tile bk-tile-pending">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">⏳</div>
+              <div className="bk-tile-value" style={{ color: '#fbbf24' }}>{bookingStats.pending}</div>
+              <div className="bk-tile-label">Pending Review</div>
+              {bookingStats.pending > 0 && <div className="bk-tile-urgent-dot"></div>}
+            </div>
+            <div className="bk-stat-tile bk-tile-approved">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">✅</div>
+              <div className="bk-tile-value" style={{ color: '#34d399' }}>{bookingStats.approved}</div>
+              <div className="bk-tile-label">Approved</div>
+            </div>
+            <div className="bk-stat-tile bk-tile-rejected">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">❌</div>
+              <div className="bk-tile-value" style={{ color: '#f87171' }}>{bookingStats.rejected}</div>
+              <div className="bk-tile-label">Rejected</div>
+            </div>
+          </div>
 
-                {/* Top row: avatar + name + status badge */}
-                <div className="bk-premium-top">
-                  <div className={`bk-p-avatar bk-avatar-${statusLower}`}>
-                    {resourceName.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="bk-p-title-block">
-                    <div className="bk-p-resource-name">{resourceName}</div>
-                    {resourceObj?.type && <div className="bk-p-resource-type">{resourceObj.type}</div>}
-                  </div>
-                  <span className={`bk-badge-v2 bk-badge-${statusLower}`}>
-                    <span className="bk-badge-dot"></span>
-                    {b.status}
-                  </span>
-                </div>
+          {/* ── Search + Filter Bar ── */}
+          <div className="bk-control-bar">
+            <div className="bk-search-glass">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input
+                type="text"
+                placeholder="Search by facility or user..."
+                value={bookingSearch}
+                onChange={(e) => setBookingSearch(e.target.value)}
+                className="booking-search-input"
+              />
+            </div>
+            <div className="bk-filter-row">
+              {[['All','All','#8b5cf6'], ['PENDING','⏳ Pending','#fbbf24'], ['APPROVED','✅ Approved','#34d399'], ['REJECTED','❌ Rejected','#f87171'], ['CANCELLED','🚫 Cancelled','#94a3b8']].map(([val, label, color]) => (
+                <button
+                  key={val}
+                  className={`bk-filter-pill-v2 ${bookingFilter === val ? 'active' : ''}`}
+                  style={bookingFilter === val ? { '--pill-color': color } : {}}
+                  onClick={() => setBookingFilter(val)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* User info */}
-                <div className="bk-p-user-row">
-                  <span className="bk-p-user-icon">👤</span>
-                  <span className="bk-p-user-id">{b.userId || 'Unknown User'}</span>
-                </div>
+          {/* ── Results meta ── */}
+          <div className="booking-results-meta">
+            Showing <strong>{filteredBookings.length}</strong> of {bookings.length} reservations
+            {bookingSearch && <span> · searching for "<em>{bookingSearch}</em>"</span>}
+            {bookingSearch && <button className="bk-inline-clear" onClick={() => setBookingSearch('')}>✕ clear</button>}
+          </div>
 
-                {/* Detail chips grid */}
-                <div className="bk-p-chips">
-                  <div className="bk-p-chip">
-                    <span className="bk-p-chip-icon">📅</span>
-                    <div>
-                      <div className="bk-p-chip-label">Date</div>
-                      <div className="bk-p-chip-val">{formatDate(b.date)}</div>
-                    </div>
-                  </div>
-                  <div className="bk-p-chip">
-                    <span className="bk-p-chip-icon">🕐</span>
-                    <div>
-                      <div className="bk-p-chip-label">Time Slot</div>
-                      <div className="bk-p-chip-val">{formatTime(b.startTime)} — {formatTime(b.endTime)}</div>
-                    </div>
-                  </div>
-                  {b.purpose && (
-                    <div className="bk-p-chip bk-p-chip-wide">
-                      <span className="bk-p-chip-icon">📝</span>
-                      <div>
-                        <div className="bk-p-chip-label">Purpose</div>
-                        <div className="bk-p-chip-val bk-p-purpose">{b.purpose}</div>
+          {/* ── Booking Cards ── */}
+          {filteredBookings.length === 0 ? (
+            <div className="bk-empty-state">
+              <div className="bk-empty-orb"></div>
+              <div className="bk-empty-icon">🗓️</div>
+              <h3>{bookingSearch ? `No results for "${bookingSearch}"` : "No reservations found"}</h3>
+              <p>{bookingSearch ? `We couldn't find any bookings starting with the characters you typed.` : "Try adjusting your search or filter criteria."}</p>
+              {bookingSearch && (
+                <button className="bk-clear-btn" onClick={() => setBookingSearch('')}>Clear Search</button>
+              )}
+            </div>
+          ) : (
+            <div className="bk-cards-grid">
+              {filteredBookings.map((b, idx) => {
+                const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Unknown Facility';
+                const resourceObj = resources.find(r => String(r.id) === String(b.resourceId));
+                const statusLower = (b.status || '').toLowerCase();
+                return (
+                  <div
+                    key={b.id}
+                    className={`bk-premium-card bk-status-${statusLower}`}
+                    style={{ '--anim-delay': `${idx * 0.06}s` }}
+                  >
+                    {/* Gloss reflection */}
+                    <div className="bk-card-shine"></div>
+
+                    {/* Top row: avatar + name + status badge */}
+                    <div className="bk-premium-top">
+                      <div className={`bk-p-avatar bk-avatar-${statusLower}`}>
+                        {resourceName.charAt(0).toUpperCase()}
                       </div>
-                    </div>
-                  )}
-                  {b.adminReason && b.status === 'REJECTED' && (
-                    <div className="bk-p-chip bk-p-chip-wide bk-chip-reason">
-                      <span className="bk-p-chip-icon">🚫</span>
-                      <div>
-                        <div className="bk-p-chip-label">Rejection Reason</div>
-                        <div className="bk-p-chip-val">{b.adminReason}</div>
+                      <div className="bk-p-title-block">
+                        <div className="bk-p-resource-name">{resourceName}</div>
+                        {resourceObj?.type && <div className="bk-p-resource-type">{resourceObj.type}</div>}
                       </div>
+                      <span className={`bk-badge-v2 bk-badge-${statusLower}`}>
+                        <span className="bk-badge-dot"></span>
+                        {b.status}
+                      </span>
                     </div>
-                  )}
-                </div>
 
-                {/* Action footer */}
-                {(b.status === 'PENDING' || b.status === 'APPROVED' || b.status === 'REJECTED') && (
-                  <div className="bk-p-actions">
-                    {b.status === 'PENDING' && (
-                      <>
+                    {/* User info */}
+                    <div className="bk-p-user-row">
+                      <span className="bk-p-user-icon">👤</span>
+                      <span className="bk-p-user-id">{b.userId || 'Unknown User'}</span>
+                    </div>
+
+                    {/* Detail chips grid */}
+                    <div className="bk-p-chips">
+                      <div className="bk-p-chip">
+                        <span className="bk-p-chip-icon">📅</span>
+                        <div>
+                          <div className="bk-p-chip-label">Date</div>
+                          <div className="bk-p-chip-val">{formatDate(b.date)}</div>
+                        </div>
+                      </div>
+                      <div className="bk-p-chip">
+                        <span className="bk-p-chip-icon">🕐</span>
+                        <div>
+                          <div className="bk-p-chip-label">Time Slot</div>
+                          <div className="bk-p-chip-val">{formatTime(b.startTime)} — {formatTime(b.endTime)}</div>
+                        </div>
+                      </div>
+                      {b.purpose && (
+                        <div className="bk-p-chip bk-p-chip-wide">
+                          <span className="bk-p-chip-icon">📝</span>
+                          <div>
+                            <div className="bk-p-chip-label">Purpose</div>
+                            <div className="bk-p-chip-val bk-p-purpose">{b.purpose}</div>
+                          </div>
+                        </div>
+                      )}
+                      {b.adminReason && b.status === 'REJECTED' && (
+                        <div className="bk-p-chip bk-p-chip-wide bk-chip-reason">
+                          <span className="bk-p-chip-icon">🚫</span>
+                          <div>
+                            <div className="bk-p-chip-label">Rejection Reason</div>
+                            <div className="bk-p-chip-val">{b.adminReason}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action footer */}
+                    {(b.status === 'PENDING' || b.status === 'APPROVED' || b.status === 'REJECTED') && (
+                      <div className="bk-p-actions">
+                        {b.status === 'PENDING' && (
+                          <>
+                            <button
+                              className="bk-p-btn bk-p-btn-approve"
+                              onClick={() => handleBookingAction(b.id, 'APPROVE')}
+                            >
+                              <span>✓</span> Approve
+                            </button>
+                            <button
+                              className="bk-p-btn bk-p-btn-reject"
+                              onClick={() => handleOpenRejectModal(b)}
+                            >
+                              <span>✕</span> Reject
+                            </button>
+                          </>
+                        )}
                         <button
-                          className="bk-p-btn bk-p-btn-approve"
-                          onClick={() => handleBookingAction(b.id, 'APPROVE')}
+                          className="bk-p-btn bk-p-btn-delete"
+                          title="Delete Booking"
+                          onClick={() => handleBookingAction(b.id, 'CANCEL')}
                         >
-                          <span>✓</span> Approve
+                          🗑
                         </button>
-                        <button
-                          className="bk-p-btn bk-p-btn-reject"
-                          onClick={() => handleOpenRejectModal(b)}
-                        >
-                          <span>✕</span> Reject
-                        </button>
-                      </>
+                      </div>
                     )}
-                    <button
-                      className="bk-p-btn bk-p-btn-delete"
-                      title="Delete Booking"
-                      onClick={() => handleBookingAction(b.id, 'CANCEL')}
-                    >
-                      🗑
-                    </button>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
+
 
   const renderUsers = () => {
     const filteredUsers = users.filter(u =>
@@ -907,12 +932,12 @@ const AdminDashboard = ({ user, onLogout }) => {
         </div>
         <nav className="sidebar-nav-container">
           {[
-            { id: TABS.ANALYTICS, icon: '📊', label: 'Analytics' },
+            { id: TABS.USERS, icon: '👥', label: 'Community' },
             { id: TABS.RESOURCES, icon: '🏢', label: 'Resources' },
             { id: TABS.BOOKINGS, icon: '📅', label: 'Bookings' },
-            { id: TABS.USERS, icon: '👥', label: 'Users' },
             { id: TABS.MAINTENANCE, icon: '🛠️', label: 'Support' }
           ].map((tab) => (
+
 
             <div
               key={tab.id}
@@ -932,11 +957,11 @@ const AdminDashboard = ({ user, onLogout }) => {
       </aside>
 
       <main className="main-viewport-glass">
-        {activeTab === TABS.ANALYTICS && renderAnalytics()}
+        {activeTab === TABS.USERS && renderUsers()}
         {activeTab === TABS.RESOURCES && renderResources()}
         {activeTab === TABS.BOOKINGS && renderBookings()}
-        {activeTab === TABS.USERS && renderUsers()}
         {activeTab === TABS.MAINTENANCE && (
+
 
           <div className="tab-pane animate-in">
             <header className="tab-header">
@@ -1500,7 +1525,15 @@ const AdminDashboard = ({ user, onLogout }) => {
           .analytics-card.wide { grid-column: span 1; }
           .analytics-summary-row { grid-template-columns: 1fr; }
         }
+
+        /* ── Bookings Sub-Nav Styles ── */
+        .bk-sub-nav { display: flex; gap: 1rem; margin-bottom: 2.5rem; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 16px; width: fit-content; border: 1px solid rgba(255,255,255,0.05); }
+        .bk-sub-nav-btn { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border: none; background: transparent; color: #64748b; font-weight: 700; cursor: pointer; border-radius: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; font-size: 0.9rem; }
+        .bk-sub-nav-btn:hover { color: #e2e8f0; background: rgba(255,255,255,0.03); }
+        .bk-sub-nav-btn.active { background: #8b5cf6; color: #fff; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+        .btn-icon { font-size: 1.1rem; }
       `}</style>
+
 
     </div>
   );
