@@ -62,9 +62,7 @@ function ResourceCatalogue() {
       const q = query.trim().toLowerCase();
       const matchesQuery =
         q.length === 0 ||
-        (resource.name     && resource.name.toLowerCase().includes(q)) ||
-        (resource.id       && resource.id.toLowerCase().includes(q)) ||
-        (resource.location && resource.location.toLowerCase().includes(q));
+        (resource.name && resource.name.toLowerCase().startsWith(q));
       const matchesType   = typeFilter === 'All' || resource.type === typeFilter;
       const matchesStatus = statusFilter === 'All' || resource.status === statusFilter;
       return matchesQuery && matchesType && matchesStatus;
@@ -109,7 +107,7 @@ function ResourceCatalogue() {
             id="resource-search"
             className="catalogue-search"
             type="text"
-            placeholder="Search by name, location, or ID…"
+            placeholder="Search by name…"
             aria-label="Search resources"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

@@ -239,7 +239,7 @@ const AdminDashboard = ({ user, onLogout }) => {
       }
     }
   };
-  
+
   const handleToggleStatus = async (resource) => {
     const newStatus = resource.status === 'Available' ? 'OUT_OF_SERVICE' : 'Available';
     try {
@@ -434,7 +434,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   const filteredResources = resources.filter(r => {
-    const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.id?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = r.name.toLowerCase().startsWith(searchQuery.toLowerCase());
     const matchesType = resourceFilter === 'All' || r.type === resourceFilter;
     const matchesStatus = resourceStatusFilter === 'All' || r.status === resourceStatusFilter;
     return matchesSearch && matchesType && matchesStatus;
@@ -473,7 +473,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             <span className="search-icon-glass">🔍</span>
             <input
               type="text"
-              placeholder="Search by name or id..."
+              placeholder="Search by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -532,8 +532,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                   <td><span className={`status-dot-pill status-${(r.status || '').toLowerCase()}`}>{r.status}</span></td>
                   <td>
                     <div className="action-row">
-                      <button 
-                        className={`tab-icon-btn ${r.status === 'Available' ? 'status-active' : ''}`} 
+                      <button
+                        className={`tab-icon-btn ${r.status === 'Available' ? 'status-active' : ''}`}
                         onClick={() => handleToggleStatus(r)}
                         title={r.status === 'Available' ? 'Set to OUT_OF_SERVICE' : 'Set to Available'}
                       >
@@ -609,7 +609,7 @@ const AdminDashboard = ({ user, onLogout }) => {
       {/* ── Search + Filter Bar ── */}
       <div className="bk-control-bar">
         <div className="bk-search-glass">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
           <input
             type="text"
             placeholder="Search by facility or user..."
@@ -619,7 +619,7 @@ const AdminDashboard = ({ user, onLogout }) => {
           />
         </div>
         <div className="bk-filter-row">
-          {[['All','All','#8b5cf6'], ['PENDING','⏳ Pending','#fbbf24'], ['APPROVED','✅ Approved','#34d399'], ['REJECTED','❌ Rejected','#f87171'], ['CANCELLED','🚫 Cancelled','#94a3b8']].map(([val, label, color]) => (
+          {[['All', 'All', '#8b5cf6'], ['PENDING', '⏳ Pending', '#fbbf24'], ['APPROVED', '✅ Approved', '#34d399'], ['REJECTED', '❌ Rejected', '#f87171'], ['CANCELLED', '🚫 Cancelled', '#94a3b8']].map(([val, label, color]) => (
             <button
               key={val}
               className={`bk-filter-pill-v2 ${bookingFilter === val ? 'active' : ''}`}
