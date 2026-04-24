@@ -13,5 +13,6 @@ export const RESOURCE_STATUSES = [
   'Available',
   'Maintenance',
   'Occupied',
-  'Reserved'
+  'Reserved',
+  'OUT_OF_SERVICE'
 ];

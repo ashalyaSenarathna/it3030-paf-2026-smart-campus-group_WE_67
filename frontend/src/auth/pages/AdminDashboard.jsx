@@ -239,6 +239,17 @@ const AdminDashboard = ({ user, onLogout }) => {
       }
     }
   };
+  
+  const handleToggleStatus = async (resource) => {
+    const newStatus = resource.status === 'Available' ? 'OUT_OF_SERVICE' : 'Available';
+    try {
+      await resourceApi.update(resource.id, { ...resource, status: newStatus });
+      showNotification(`Resource set to ${newStatus}`);
+      fetchAllData();
+    } catch (err) {
+      showNotification('Status update failed');
+    }
+  };
 
   const handleOpenRejectModal = (booking) => {
     setRejectingBooking(booking);
@@ -521,6 +532,13 @@ const AdminDashboard = ({ user, onLogout }) => {
                   <td><span className={`status-dot-pill status-${(r.status || '').toLowerCase()}`}>{r.status}</span></td>
                   <td>
                     <div className="action-row">
+                      <button 
+                        className={`tab-icon-btn ${r.status === 'Available' ? 'status-active' : ''}`} 
+                        onClick={() => handleToggleStatus(r)}
+                        title={r.status === 'Available' ? 'Set to OUT_OF_SERVICE' : 'Set to Available'}
+                      >
+                        {r.status === 'Available' ? '✅' : '🚫'}
+                      </button>
                       <button className="tab-icon-btn" onClick={() => handleOpenModal(r)}>✏️</button>
                       <button className="tab-icon-btn delete" onClick={() => handleDeleteResource(r.id)}>🗑️</button>
                     </div>
@@ -1213,6 +1231,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         .status-dot-pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 100px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .status-dot-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
         .status-available { background: rgba(52, 211, 153, 0.1); color: #34d399; }
+        .status-out_of_service { background: rgba(248, 113, 113, 0.1); color: #f87171; }
         .status-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
         .status-rejected { background: rgba(248, 113, 113, 0.1); color: #f87171; }
         .status-approved { background: rgba(52, 211, 153, 0.1); color: #34d399; }
@@ -1228,6 +1247,8 @@ const AdminDashboard = ({ user, onLogout }) => {
         .tab-icon-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
         .tab-icon-btn.approve:hover { background: rgba(52, 211, 153, 0.2); }
         .tab-icon-btn.reject:hover { background: rgba(248, 113, 113, 0.2); }
+        .tab-icon-btn.status-active { border-color: rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.05); }
+        .tab-icon-btn.status-active:hover { background: rgba(52, 211, 153, 0.15); border-color: rgba(52, 211, 153, 0.5); }
 
         .btn-add-glow { background: #8b5cf6; color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3); transition: all 0.3s; }
         .btn-add-glow:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.5); }

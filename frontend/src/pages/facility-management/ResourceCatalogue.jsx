@@ -10,6 +10,7 @@ const STATUS_OPTIONS = [
   { value: 'Available',   label: 'Available',    color: '#065f46', bg: '#d1fae5' },
   { value: 'Occupied',    label: 'Occupied',     color: '#92400e', bg: '#fef3c7' },
   { value: 'Maintenance', label: 'Maintenance',  color: '#991b1b', bg: '#fee2e2' },
+  { value: 'OUT_OF_SERVICE', label: 'Out of Service', color: '#991b1b', bg: '#fee2e2' },
 ];
 
 const SORT_OPTIONS = [
@@ -229,7 +230,7 @@ function ResourceCatalogue() {
                 <div className={`resource-status-badge ${(resource.status || '').toLowerCase()}`}>
                   {resource.status}
                 </div>
-                {resource.status !== 'Maintenance' && (
+                {resource.status !== 'Maintenance' && resource.status !== 'OUT_OF_SERVICE' && (
                   <button 
                     className="clear-filters-btn-lg" 
                     onClick={() => {
