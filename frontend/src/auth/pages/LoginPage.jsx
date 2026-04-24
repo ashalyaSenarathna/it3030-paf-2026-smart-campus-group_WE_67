@@ -65,13 +65,13 @@ export default function LoginPage({ user, onLoginSuccess }) {
         <div className="login-header">
           <Link to="/" className="back-link">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             <span>Back to Home</span>
           </Link>
           <h2 className="login-app-name">Smart Campus</h2>
         </div>
-        
+
         <div className="login-form-wrapper">
           <h3 className="login-title">Welcome Back!</h3>
           <p className="login-subtitle">Sign in to manage your campus resources</p>
@@ -136,10 +136,10 @@ export default function LoginPage({ user, onLoginSuccess }) {
 
           <button className="btn-google" onClick={handleGoogleLogin}>
             <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.23 3.6l6.88-6.88C35.91 2.3 30.36 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.99 6.2C12.52 13.47 17.82 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.5 24.55c0-1.64-.15-3.22-.43-4.73H24v8.95h12.66c-.55 2.96-2.22 5.47-4.73 7.16l7.36 5.72C43.73 37.58 46.5 31.58 46.5 24.55z"/>
-              <path fill="#FBBC05" d="M10.55 28.58a14.5 14.5 0 0 1 0-9.16l-7.99-6.2A24 24 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.99-6.2z"/>
-              <path fill="#34A853" d="M24 48c6.36 0 11.7-2.1 15.6-5.69l-7.36-5.72c-2.05 1.38-4.67 2.19-8.24 2.19-6.18 0-11.48-3.97-13.45-9.92l-7.99 6.2C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.23 3.6l6.88-6.88C35.91 2.3 30.36 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.99 6.2C12.52 13.47 17.82 9.5 24 9.5z" />
+              <path fill="#4285F4" d="M46.5 24.55c0-1.64-.15-3.22-.43-4.73H24v8.95h12.66c-.55 2.96-2.22 5.47-4.73 7.16l7.36 5.72C43.73 37.58 46.5 31.58 46.5 24.55z" />
+              <path fill="#FBBC05" d="M10.55 28.58a14.5 14.5 0 0 1 0-9.16l-7.99-6.2A24 24 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.99-6.2z" />
+              <path fill="#34A853" d="M24 48c6.36 0 11.7-2.1 15.6-5.69l-7.36-5.72c-2.05 1.38-4.67 2.19-8.24 2.19-6.18 0-11.48-3.97-13.45-9.92l-7.99 6.2C6.51 42.62 14.62 48 24 48z" />
             </svg>
             Login with Google
           </button>
