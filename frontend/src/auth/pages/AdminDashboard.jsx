@@ -833,14 +833,16 @@ const AdminDashboard = ({ user, onLogout }) => {
       u.username?.toLowerCase().includes(userSearch.toLowerCase())
     );
 
+    const getRoleName = (r) => typeof r === 'string' ? r : (r?.name || r?.authority || '');
+
     const userStats = {
-      admin: users.filter(u => u.roles?.some(r => r.name === 'ROLE_ADMIN' || r.name === 'ADMIN')).length,
-      student: users.filter(u => u.roles?.some(r => r.name === 'ROLE_STUDENT' || r.name === 'STUDENT')).length,
-      tech: users.filter(u => u.roles?.some(r => r.name === 'ROLE_TECHNICIAN' || r.name === 'TECHNICIAN')).length,
+      admin: users.filter(u => u.roles?.some(r => getRoleName(r).toUpperCase().includes('ADMIN'))).length,
+      student: users.filter(u => u.roles?.some(r => getRoleName(r).toUpperCase().includes('STUDENT'))).length,
+      tech: users.filter(u => u.roles?.some(r => getRoleName(r).toUpperCase().includes('TECH'))).length,
     };
 
-    // Corrected stats logic
     const studentCount = userStats.student;
+
 
     return (
       <div className="tab-pane animate-in">
@@ -850,24 +852,41 @@ const AdminDashboard = ({ user, onLogout }) => {
           <p>View and manage all members of the Smart Campus.</p>
         </header>
 
-        <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
-          <div className="stat-card">
-            <div className="label">Total Members</div>
-            <div className="value">{users.length}</div>
+        <div className="users-stats-row">
+          <div className="u-stat-card u-card-total">
+            <div className="u-card-glow"></div>
+            <div className="u-card-icon">👥</div>
+            <div className="u-card-info">
+              <div className="u-card-value">{users.length}</div>
+              <div className="u-card-label">Total Members</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="label">Students</div>
-            <div className="value" style={{ color: '#34d399' }}>{studentCount}</div>
+          <div className="u-stat-card u-card-student">
+            <div className="u-card-glow"></div>
+            <div className="u-card-icon">🎓</div>
+            <div className="u-card-info">
+              <div className="u-card-value">{studentCount}</div>
+              <div className="u-card-label">Students</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="label">Technicians</div>
-            <div className="value" style={{ color: '#fbbf24' }}>{userStats.tech}</div>
+          <div className="u-stat-card u-card-tech">
+            <div className="u-card-glow"></div>
+            <div className="u-card-icon">🛠️</div>
+            <div className="u-card-info">
+              <div className="u-card-value">{userStats.tech}</div>
+              <div className="u-card-label">Technicians</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="label">Administrators</div>
-            <div className="value" style={{ color: '#a855f7' }}>{userStats.admin}</div>
+          <div className="u-stat-card u-card-admin">
+            <div className="u-card-glow"></div>
+            <div className="u-card-icon">🛡️</div>
+            <div className="u-card-info">
+              <div className="u-card-value">{userStats.admin}</div>
+              <div className="u-card-label">Admins</div>
+            </div>
           </div>
         </div>
+
 
         <div className="action-bar-premium">
           <div className="action-left-group" style={{ maxWidth: '400px' }}>
@@ -919,14 +938,20 @@ const AdminDashboard = ({ user, onLogout }) => {
                       <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.email}</div>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        {u.roles?.map(r => (
-                          <span key={r.id} className={`status-dot-pill role-badge role-${r.name?.toLowerCase().replace('role_', '')}`}>
-                            {r.name?.replace('ROLE_', '')}
-                          </span>
-                        ))}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {u.roles?.map((r, idx) => {
+                          const rawName = typeof r === 'string' ? r : (r?.name || r?.authority || 'USER');
+                          const cleanName = rawName.replace('ROLE_', '').replace('_', ' ');
+                          const cssClass = rawName.toLowerCase().replace('role_', '');
+                          return (
+                            <span key={idx} className={`status-dot-pill role-badge role-${cssClass}`}>
+                              {cleanName}
+                            </span>
+                          );
+                        })}
                       </div>
                     </td>
+
                     <td>
                       <span className="type-tag">{u.authProvider || 'Local'}</span>
                     </td>
@@ -1309,10 +1334,30 @@ const AdminDashboard = ({ user, onLogout }) => {
         .status-approved { background: rgba(52, 211, 153, 0.1); color: #34d399; }
         .status-cancelled { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
 
-        .role-badge { border: 1px solid rgba(255,255,255,0.05); }
-        .role-admin { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-        .role-student { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
-        .role-technician { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
+        .role-badge { border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; cursor: default; }
+        .role-badge:hover { transform: translateY(-1px); filter: brightness(1.2); }
+        .role-admin { background: rgba(168, 85, 247, 0.1); color: #a855f7; border-color: rgba(168, 85, 247, 0.2); }
+        .role-student { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; border-color: rgba(14, 165, 233, 0.2); }
+        .role-technician, .role-tech { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); }
+        .role-user { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border-color: rgba(148, 163, 184, 0.2); }
+        
+        /* Community Stats Row */
+        .users-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
+        .u-stat-card { position: relative; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 1.5rem; display: flex; align-items: center; gap: 1.25rem; overflow: hidden; backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .u-stat-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .u-card-glow { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); pointer-events: none; }
+        .u-card-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.08); }
+        .u-card-info { display: flex; flex-direction: column; }
+        .u-card-value { font-size: 1.75rem; font-weight: 900; color: #fff; line-height: 1.1; }
+        .u-card-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; margin-top: 4px; }
+        .u-card-total .u-card-icon { color: #8b5cf6; }
+        .u-card-student .u-card-icon { color: #10b981; }
+        .u-card-tech .u-card-icon { color: #fbbf24; }
+        .u-card-admin .u-card-icon { color: #a855f7; }
+        @media (max-width: 1024px) { .users-stats-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .users-stats-row { grid-template-columns: 1fr; } }
+
+
 
         .action-row { display: flex; gap: 8px; }
         .tab-icon-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
