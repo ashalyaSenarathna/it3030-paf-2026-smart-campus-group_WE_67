@@ -45,18 +45,18 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Rejection Modal states
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectingBooking, setRejectingBooking] = useState(null);
   const [tempReason, setTempReason] = useState('');
 
-  const defaultForm = { 
-    name: '', 
-    type: 'Lecture Hall', 
-    capacity: '', 
-    location: '', 
-    description: '', 
+  const defaultForm = {
+    name: '',
+    type: 'Lecture Hall',
+    capacity: '',
+    location: '',
+    description: '',
     status: 'Available',
     availableFrom: '08:00',
     availableTo: '18:00'
@@ -926,8 +926,8 @@ const AdminDashboard = ({ user, onLogout }) => {
               </p>
               <div className="f-group full">
                 <label>Rejection Reason</label>
-                <textarea 
-                  required 
+                <textarea
+                  required
                   rows="4"
                   value={tempReason}
                   onChange={e => setTempReason(e.target.value)}
@@ -945,15 +945,15 @@ const AdminDashboard = ({ user, onLogout }) => {
                 />
               </div>
               <div className="modal-footer" style={{ marginTop: '2rem', display: 'flex', gap: '10px' }}>
-                <button 
-                  className="btn-cancel-modal" 
+                <button
+                  className="btn-cancel-modal"
                   onClick={() => setIsRejectModalOpen(false)}
                   style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#94a3b8', borderRadius: '12px', cursor: 'pointer', fontWeight: 700 }}
                 >
                   Cancel
                 </button>
-                <button 
-                  className="btn-add-premium" 
+                <button
+                  className="btn-add-premium"
                   onClick={handleConfirmReject}
                   style={{ flex: 2, padding: '12px', background: '#f87171', border: 'none', color: '#fff', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, boxShadow: '0 4px 15px rgba(248,113,113,0.3)' }}
                 >
@@ -985,15 +985,15 @@ const AdminDashboard = ({ user, onLogout }) => {
               </div>
               <div className="f-group">
                 <label>{formData.type === 'Equipment' ? 'Quantity' : 'Capacity'}</label>
-                <input 
-                  type="number" 
-                  required 
-                  value={formData.capacity} 
+                <input
+                  type="number"
+                  required
+                  value={formData.capacity}
                   placeholder="0"
                   onChange={e => {
                     const val = e.target.value;
                     setFormData({ ...formData, capacity: val === '' ? '' : parseInt(val) });
-                  }} 
+                  }}
                 />
               </div>
               <div className="f-group full" style={{ position: 'relative' }}>
@@ -1098,20 +1098,20 @@ const AdminDashboard = ({ user, onLogout }) => {
               </div>
               <div className="f-group" style={{ opacity: formData.status === 'Available' ? 1 : 0.5 }}>
                 <label>{formData.type === 'Equipment' ? 'Available From' : 'Opening Time'} {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
-                <input 
-                  type="time" 
+                <input
+                  type="time"
                   disabled={formData.status !== 'Available'}
-                  value={formData.availableFrom} 
-                  onChange={e => setFormData({ ...formData, availableFrom: e.target.value })} 
+                  value={formData.availableFrom}
+                  onChange={e => setFormData({ ...formData, availableFrom: e.target.value })}
                 />
               </div>
               <div className="f-group" style={{ opacity: formData.status === 'Available' ? 1 : 0.5 }}>
                 <label>{formData.type === 'Equipment' ? 'Available Until' : 'Closing Time'} {formData.status !== 'Available' && <small>(N/A for {formData.status})</small>}</label>
-                <input 
-                  type="time" 
+                <input
+                  type="time"
                   disabled={formData.status !== 'Available'}
-                  value={formData.availableTo} 
-                  onChange={e => setFormData({ ...formData, availableTo: e.target.value })} 
+                  value={formData.availableTo}
+                  onChange={e => setFormData({ ...formData, availableTo: e.target.value })}
                 />
               </div>
               <div className="modal-f-actions">

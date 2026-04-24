@@ -10,8 +10,12 @@
 
 .home-page {
   min-height: 100vh;
-  background: #0f0e17 url('../assets/background2.png') no-repeat center center fixed;
+  background-color: #0f0e17;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
   background-size: cover;
+  transition: background-image 1.5s ease-in-out;
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;

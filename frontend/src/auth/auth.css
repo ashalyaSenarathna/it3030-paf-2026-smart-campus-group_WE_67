@@ -45,24 +45,39 @@ body {
 
 .login-container::before,
 .role-profile-page::before {
-  width: 550px; height: 550px;
+  width: 550px;
+  height: 550px;
   background: radial-gradient(circle, #7c3aed, transparent 70%);
-  top: -10%; right: -5%;
+  top: -10%;
+  right: -5%;
   animation: authPulse 14s ease-in-out infinite alternate;
 }
 
 .login-container::after,
 .role-profile-page::after {
-  width: 450px; height: 450px;
+  width: 450px;
+  height: 450px;
   background: radial-gradient(circle, #0ea5e9, transparent 70%);
-  bottom: -8%; left: -5%;
+  bottom: -8%;
+  left: -5%;
   animation: authPulse 14s ease-in-out infinite alternate-reverse;
 }
 
 @keyframes authPulse {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.2; }
-  50%  { transform: translate(20px, -30px) scale(1.08); opacity: 0.32; }
-  100% { transform: translate(-15px, 15px) scale(0.96); opacity: 0.22; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: translate(20px, -30px) scale(1.08);
+    opacity: 0.32;
+  }
+
+  100% {
+    transform: translate(-15px, 15px) scale(0.96);
+    opacity: 0.22;
+  }
 }
 
 .login-container {
@@ -101,11 +116,9 @@ body {
   bottom: -640px;
   border-radius: 50%;
   background:
-    repeating-radial-gradient(
-      circle at center,
+    repeating-radial-gradient(circle at center,
       rgba(255, 255, 255, 0.2) 0 1px,
-      transparent 1px 64px
-    );
+      transparent 1px 64px);
   opacity: 0.42;
   pointer-events: none;
 }
@@ -396,6 +409,7 @@ body {
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -463,16 +477,20 @@ body {
 }
 
 .card::before {
-  width: 550px; height: 550px;
+  width: 550px;
+  height: 550px;
   background: radial-gradient(circle, #7c3aed, transparent 70%);
-  top: -10%; right: -5%;
+  top: -10%;
+  right: -5%;
   animation: authPulse 14s ease-in-out infinite alternate;
 }
 
 .card::after {
-  width: 450px; height: 450px;
+  width: 450px;
+  height: 450px;
   background: radial-gradient(circle, #0ea5e9, transparent 70%);
-  bottom: -8%; left: -5%;
+  bottom: -8%;
+  left: -5%;
   animation: authPulse 14s ease-in-out infinite alternate-reverse;
 }
 
@@ -669,6 +687,7 @@ body {
 }
 
 @media (max-width: 640px) {
+
   .login-left,
   .login-right,
   .card,
