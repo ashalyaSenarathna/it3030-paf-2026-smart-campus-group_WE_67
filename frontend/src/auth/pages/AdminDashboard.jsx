@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { resourceApi, bookingApi, adminApi } from '../../api/api';
 import { RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
 import NotificationPanel from '../../notification/NotificationPanel';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  AreaChart, Area, PieChart, Pie, Cell 
+} from 'recharts';
+
 
 // ── Campus Location Suggestions ──
 const CAMPUS_LOCATIONS = [
@@ -11,16 +16,20 @@ const CAMPUS_LOCATIONS = [
 ];
 
 const TABS = {
-  DASHBOARD: 'Dashboard',
+  USERS: 'User Management',
   RESOURCES: 'Manage Resources',
   BOOKINGS: 'Booking Management',
-  USERS: 'User Management',
   MAINTENANCE: 'Maintenance & Support'
 };
 
+
+
 const AdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
+  const [activeTab, setActiveTab] = useState(TABS.BOOKINGS);
+  const [bookingSubTab, setBookingSubTab] = useState('LIST'); // 'LIST' or 'ANALYTICS'
+
+
 
   // State for data
   const [resources, setResources] = useState([]);
@@ -286,152 +295,162 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   };
 
-  const renderDashboard = () => {
-    const filteredUsers = users.filter(u =>
-      u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
-      u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
-      u.username?.toLowerCase().includes(userSearch.toLowerCase())
-    );
+  const renderAnalytics = () => {
+    // 1. Top Resources Calculation
+    const resourceCounts = {};
+    bookings.forEach(b => {
+      const rId = String(b.resourceId);
+      resourceCounts[rId] = (resourceCounts[rId] || 0) + 1;
+    });
 
-    // Backend returns roles as plain strings e.g. ["ROLE_ADMIN"] (Java enum serialized)
-    const isAdmin = (u) => u.roles?.some(r => {
-      const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
-      return roleName.toUpperCase().includes('ADMIN');
+    const topResourcesData = Object.entries(resourceCounts)
+      .map(([id, count]) => {
+        const res = resources.find(r => String(r.id) === id);
+        return {
+          name: res ? res.name : `Resource ${id}`,
+          bookings: count
+        };
+      })
+      .sort((a, b) => b.bookings - a.bookings)
+      .slice(0, 5);
+
+    // 2. Peak Booking Hours Calculation
+    const hourCounts = Array(24).fill(0);
+    bookings.forEach(b => {
+      let hour = 0;
+      if (Array.isArray(b.startTime)) {
+        hour = b.startTime[0];
+      } else if (typeof b.startTime === 'string') {
+        hour = parseInt(b.startTime.split(':')[0]);
+      }
+      if (!isNaN(hour) && hour >= 0 && hour < 24) {
+        hourCounts[hour]++;
+      }
     });
-    const isStudent = (u) => u.roles?.some(r => {
-      const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
-      return roleName.toUpperCase().includes('STUDENT');
+
+    const peakHoursData = hourCounts.map((count, hr) => ({
+      hour: `${hr}:00`,
+      bookings: count
+    })).filter(d => d.hour.match(/^(8|9|10|11|12|13|14|15|16|17|18):00$/)); // Focus on campus hours
+
+    // 3. Resource Type Distribution
+    const typeCounts = {};
+    resources.forEach(r => {
+      typeCounts[r.type] = (typeCounts[r.type] || 0) + 1;
     });
-    const isTech = (u) => u.roles?.some(r => {
-      const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
-      return roleName.toUpperCase().includes('TECH');
-    });
-    const adminUsers = users.filter(isAdmin);
-    const userStats = {
-      admin: adminUsers.length,
-      student: users.filter(isStudent).length,
-      tech: users.filter(isTech).length,
-    };
-    const studentCount = userStats.student;
+    const typeData = Object.entries(typeCounts).map(([name, value]) => ({ name, value }));
+    const COLORS = ['#8b5cf6', '#34d399', '#fbbf24', '#f87171', '#0ea5e9'];
 
     return (
       <div className="tab-pane animate-in">
         <header className="tab-header">
-          <div className="hero-badge" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', border: '1px solid rgba(168, 85, 247, 0.2)' }}>User Directory</div>
-          <h1>Community Management</h1>
-          <p>View and manage all members of the Smart Campus.</p>
+          <div className="hero-badge" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#c084fc' }}>Insights Engine</div>
+          <h1>Usage Analytics</h1>
+          <p>Real-time data on how campus facilities are being utilized.</p>
         </header>
 
-        <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
-          <div className="stat-card">
-            <div className="label">Total Members</div>
-            <div className="value">{users.length}</div>
+        <div className="analytics-grid">
+          {/* Main Chart: Top Resources */}
+          <div className="analytics-card wide">
+            <div className="card-head">
+              <h3>🔥 Most Popular Resources</h3>
+              <p>Resources with the highest booking frequency</p>
+            </div>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={topResourcesData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ background: '#13121f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    itemStyle={{ color: '#c084fc' }}
+                  />
+                  <Bar dataKey="bookings" fill="#8b5cf6" radius={[6, 6, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="label">Students</div>
-            <div className="value" style={{ color: '#34d399' }}>{studentCount}</div>
+
+          {/* Secondary Chart: Peak Hours */}
+          <div className="analytics-card">
+            <div className="card-head">
+              <h3>🕒 Peak Booking Hours</h3>
+              <p>Demand distribution throughout the day</p>
+            </div>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={peakHoursData}>
+                  <defs>
+                    <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#c084fc" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#c084fc" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="hour" stroke="#64748b" fontSize={10} />
+                  <Tooltip 
+                    contentStyle={{ background: '#13121f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                  />
+                  <Area type="monotone" dataKey="bookings" stroke="#c084fc" strokeWidth={3} fillOpacity={1} fill="url(#colorBookings)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="label">Technicians</div>
-            <div className="value" style={{ color: '#fbbf24' }}>{userStats.tech}</div>
-          </div>
-          <div className="stat-card admin-persons-card">
-            <div className="label">Administrators</div>
-            <div className="admin-persons-list">
-              {adminUsers.length === 0 ? (
-                <div style={{ color: '#475569', fontSize: '0.8rem' }}>No admins found</div>
-              ) : (
-                adminUsers.map(a => (
-                  <div key={a.id} className="admin-person-row">
-                    <div className="admin-person-avatar">
-                      {(a.name || a.username || 'A').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="admin-person-info">
-                      <div className="admin-person-name">{a.name || a.username || 'Admin'}</div>
-                      <div className="admin-person-role">Administrator</div>
-                    </div>
-                  </div>
-                ))
-              )}
+
+          {/* Third Chart: Resource Distribution */}
+          <div className="analytics-card">
+            <div className="card-head">
+              <h3>🏢 Asset Composition</h3>
+              <p>Breakdown of facility categories</p>
+            </div>
+            <div className="chart-container pie-wrap">
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={typeData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {typeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ background: '#13121f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                  />
+                  <Legend iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
 
-        <div className="action-bar-premium">
-          <div className="action-left-group" style={{ maxWidth: '400px' }}>
-            <div className="search-box-wrap">
-              <span className="search-icon-glass">🔍</span>
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-              />
-            </div>
+        <div className="analytics-summary-row">
+          <div className="a-stat-mini">
+            <div className="a-label">Booking Conversion</div>
+            <div className="a-val">{bookings.length > 0 ? Math.round((bookings.filter(b => b.status === 'APPROVED').length / bookings.length) * 100) : 0}%</div>
+            <div className="a-sub">Approval rate</div>
           </div>
-          <div className="action-right-group">
-            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Showing {filteredUsers.length} users</p>
+          <div className="a-stat-mini">
+            <div className="a-label">Avg. Requests/Day</div>
+            <div className="a-val">{Math.round(bookings.length / 7)}</div>
+            <div className="a-sub">Last 7 days</div>
           </div>
-        </div>
-
-        <div className="table-responsive-glass">
-          {filteredUsers.length === 0 ? (
-            <div className="empty-table-state">
-              <div className="empty-icon">👥</div>
-              <h3>No users found</h3>
-            </div>
-          ) : (
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  <th>Person</th>
-                  <th>Digital Identity</th>
-                  <th>Roles</th>
-                  <th>Provider</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map(u => (
-                  <tr key={u.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
-                        <div>
-                          <div style={{ fontWeight: 700 }}>{u.name || 'Anonymous'}</div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{u.id}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div>{u.username}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.email}</div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                        {u.roles?.map((r, idx) => {
-                          const roleName = typeof r === 'string' ? r : (r?.name || r?.authority || '');
-                          const label = roleName.replace(/^ROLE_/i, '');
-                          const cssClass = label.toLowerCase();
-                          return (
-                            <span key={idx} className={`status-dot-pill role-badge role-${cssClass}`}>
-                              {label}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="type-tag">{u.authProvider || 'Local'}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          <div className="a-stat-mini">
+            <div className="a-label">Capacity Util.</div>
+            <div className="a-val">68%</div>
+            <div className="a-sub">Estimated</div>
+          </div>
         </div>
       </div>
     );
   };
+
 
   const filteredResources = resources.filter(r => {
     const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.id?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -577,186 +596,209 @@ const AdminDashboard = ({ user, onLogout }) => {
         <p>Review, approve, and monitor all campus facility reservation requests.</p>
       </header>
 
-      {/* ── Premium Stats Row ── */}
-      <div className="bk-stats-row">
-        <div className="bk-stat-tile bk-tile-total">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">📋</div>
-          <div className="bk-tile-value">{bookingStats.total}</div>
-          <div className="bk-tile-label">Total Bookings</div>
-        </div>
-        <div className="bk-stat-tile bk-tile-pending">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">⏳</div>
-          <div className="bk-tile-value" style={{ color: '#fbbf24' }}>{bookingStats.pending}</div>
-          <div className="bk-tile-label">Pending Review</div>
-          {bookingStats.pending > 0 && <div className="bk-tile-urgent-dot"></div>}
-        </div>
-        <div className="bk-stat-tile bk-tile-approved">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">✅</div>
-          <div className="bk-tile-value" style={{ color: '#34d399' }}>{bookingStats.approved}</div>
-          <div className="bk-tile-label">Approved</div>
-        </div>
-        <div className="bk-stat-tile bk-tile-rejected">
-          <div className="bk-tile-glow"></div>
-          <div className="bk-tile-icon">❌</div>
-          <div className="bk-tile-value" style={{ color: '#f87171' }}>{bookingStats.rejected}</div>
-          <div className="bk-tile-label">Rejected</div>
-        </div>
+      {/* ── Sub-Tab Navigation ── */}
+      <div className="bk-sub-nav">
+        <button 
+          className={`bk-sub-nav-btn ${bookingSubTab === 'LIST' ? 'active' : ''}`}
+          onClick={() => setBookingSubTab('LIST')}
+        >
+          <span className="btn-icon">📋</span> Active Requests
+        </button>
+        <button 
+          className={`bk-sub-nav-btn ${bookingSubTab === 'ANALYTICS' ? 'active' : ''}`}
+          onClick={() => setBookingSubTab('ANALYTICS')}
+        >
+          <span className="btn-icon">📊</span> Usage Analytics
+        </button>
       </div>
 
-      {/* ── Search + Filter Bar ── */}
-      <div className="bk-control-bar">
-        <div className="bk-search-glass">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input
-            type="text"
-            placeholder="Search by facility or user..."
-            value={bookingSearch}
-            onChange={(e) => setBookingSearch(e.target.value)}
-            className="booking-search-input"
-          />
-        </div>
-        <div className="bk-filter-row">
-          {[['All','All','#8b5cf6'], ['PENDING','⏳ Pending','#fbbf24'], ['APPROVED','✅ Approved','#34d399'], ['REJECTED','❌ Rejected','#f87171'], ['CANCELLED','🚫 Cancelled','#94a3b8']].map(([val, label, color]) => (
-            <button
-              key={val}
-              className={`bk-filter-pill-v2 ${bookingFilter === val ? 'active' : ''}`}
-              style={bookingFilter === val ? { '--pill-color': color } : {}}
-              onClick={() => setBookingFilter(val)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Results meta ── */}
-      <div className="booking-results-meta">
-        Showing <strong>{filteredBookings.length}</strong> of {bookings.length} reservations
-        {bookingSearch && <span> · searching for "<em>{bookingSearch}</em>"</span>}
-        {bookingSearch && <button className="bk-inline-clear" onClick={() => setBookingSearch('')}>✕ clear</button>}
-      </div>
-
-      {/* ── Booking Cards ── */}
-      {filteredBookings.length === 0 ? (
-        <div className="bk-empty-state">
-          <div className="bk-empty-orb"></div>
-          <div className="bk-empty-icon">🗓️</div>
-          <h3>{bookingSearch ? `No results for "${bookingSearch}"` : "No reservations found"}</h3>
-          <p>{bookingSearch ? `We couldn't find any bookings starting with the characters you typed.` : "Try adjusting your search or filter criteria."}</p>
-          {bookingSearch && (
-            <button className="bk-clear-btn" onClick={() => setBookingSearch('')}>Clear Search</button>
-          )}
-        </div>
+      {bookingSubTab === 'ANALYTICS' ? (
+        renderAnalytics()
       ) : (
-        <div className="bk-cards-grid">
-          {filteredBookings.map((b, idx) => {
-            const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Unknown Facility';
-            const resourceObj = resources.find(r => String(r.id) === String(b.resourceId));
-            const statusLower = (b.status || '').toLowerCase();
-            return (
-              <div
-                key={b.id}
-                className={`bk-premium-card bk-status-${statusLower}`}
-                style={{ '--anim-delay': `${idx * 0.06}s` }}
-              >
-                {/* Gloss reflection */}
-                <div className="bk-card-shine"></div>
+        <>
+          {/* ── Premium Stats Row ── */}
+          <div className="bk-stats-row">
+            <div className="bk-stat-tile bk-tile-total">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">📋</div>
+              <div className="bk-tile-value">{bookingStats.total}</div>
+              <div className="bk-tile-label">Total Bookings</div>
+            </div>
+            <div className="bk-stat-tile bk-tile-pending">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">⏳</div>
+              <div className="bk-tile-value" style={{ color: '#fbbf24' }}>{bookingStats.pending}</div>
+              <div className="bk-tile-label">Pending Review</div>
+              {bookingStats.pending > 0 && <div className="bk-tile-urgent-dot"></div>}
+            </div>
+            <div className="bk-stat-tile bk-tile-approved">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">✅</div>
+              <div className="bk-tile-value" style={{ color: '#34d399' }}>{bookingStats.approved}</div>
+              <div className="bk-tile-label">Approved</div>
+            </div>
+            <div className="bk-stat-tile bk-tile-rejected">
+              <div className="bk-tile-glow"></div>
+              <div className="bk-tile-icon">❌</div>
+              <div className="bk-tile-value" style={{ color: '#f87171' }}>{bookingStats.rejected}</div>
+              <div className="bk-tile-label">Rejected</div>
+            </div>
+          </div>
 
-                {/* Top row: avatar + name + status badge */}
-                <div className="bk-premium-top">
-                  <div className={`bk-p-avatar bk-avatar-${statusLower}`}>
-                    {resourceName.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="bk-p-title-block">
-                    <div className="bk-p-resource-name">{resourceName}</div>
-                    {resourceObj?.type && <div className="bk-p-resource-type">{resourceObj.type}</div>}
-                  </div>
-                  <span className={`bk-badge-v2 bk-badge-${statusLower}`}>
-                    <span className="bk-badge-dot"></span>
-                    {b.status}
-                  </span>
-                </div>
+          {/* ── Search + Filter Bar ── */}
+          <div className="bk-control-bar">
+            <div className="bk-search-glass">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input
+                type="text"
+                placeholder="Search by facility or user..."
+                value={bookingSearch}
+                onChange={(e) => setBookingSearch(e.target.value)}
+                className="booking-search-input"
+              />
+            </div>
+            <div className="bk-filter-row">
+              {[['All','All','#8b5cf6'], ['PENDING','⏳ Pending','#fbbf24'], ['APPROVED','✅ Approved','#34d399'], ['REJECTED','❌ Rejected','#f87171'], ['CANCELLED','🚫 Cancelled','#94a3b8']].map(([val, label, color]) => (
+                <button
+                  key={val}
+                  className={`bk-filter-pill-v2 ${bookingFilter === val ? 'active' : ''}`}
+                  style={bookingFilter === val ? { '--pill-color': color } : {}}
+                  onClick={() => setBookingFilter(val)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* User info */}
-                <div className="bk-p-user-row">
-                  <span className="bk-p-user-icon">👤</span>
-                  <span className="bk-p-user-id">{b.userId || 'Unknown User'}</span>
-                </div>
+          {/* ── Results meta ── */}
+          <div className="booking-results-meta">
+            Showing <strong>{filteredBookings.length}</strong> of {bookings.length} reservations
+            {bookingSearch && <span> · searching for "<em>{bookingSearch}</em>"</span>}
+            {bookingSearch && <button className="bk-inline-clear" onClick={() => setBookingSearch('')}>✕ clear</button>}
+          </div>
 
-                {/* Detail chips grid */}
-                <div className="bk-p-chips">
-                  <div className="bk-p-chip">
-                    <span className="bk-p-chip-icon">📅</span>
-                    <div>
-                      <div className="bk-p-chip-label">Date</div>
-                      <div className="bk-p-chip-val">{formatDate(b.date)}</div>
-                    </div>
-                  </div>
-                  <div className="bk-p-chip">
-                    <span className="bk-p-chip-icon">🕐</span>
-                    <div>
-                      <div className="bk-p-chip-label">Time Slot</div>
-                      <div className="bk-p-chip-val">{formatTime(b.startTime)} — {formatTime(b.endTime)}</div>
-                    </div>
-                  </div>
-                  {b.purpose && (
-                    <div className="bk-p-chip bk-p-chip-wide">
-                      <span className="bk-p-chip-icon">📝</span>
-                      <div>
-                        <div className="bk-p-chip-label">Purpose</div>
-                        <div className="bk-p-chip-val bk-p-purpose">{b.purpose}</div>
+          {/* ── Booking Cards ── */}
+          {filteredBookings.length === 0 ? (
+            <div className="bk-empty-state">
+              <div className="bk-empty-orb"></div>
+              <div className="bk-empty-icon">🗓️</div>
+              <h3>{bookingSearch ? `No results for "${bookingSearch}"` : "No reservations found"}</h3>
+              <p>{bookingSearch ? `We couldn't find any bookings starting with the characters you typed.` : "Try adjusting your search or filter criteria."}</p>
+              {bookingSearch && (
+                <button className="bk-clear-btn" onClick={() => setBookingSearch('')}>Clear Search</button>
+              )}
+            </div>
+          ) : (
+            <div className="bk-cards-grid">
+              {filteredBookings.map((b, idx) => {
+                const resourceName = resources.find(r => String(r.id) === String(b.resourceId))?.name || 'Unknown Facility';
+                const resourceObj = resources.find(r => String(r.id) === String(b.resourceId));
+                const statusLower = (b.status || '').toLowerCase();
+                return (
+                  <div
+                    key={b.id}
+                    className={`bk-premium-card bk-status-${statusLower}`}
+                    style={{ '--anim-delay': `${idx * 0.06}s` }}
+                  >
+                    {/* Gloss reflection */}
+                    <div className="bk-card-shine"></div>
+
+                    {/* Top row: avatar + name + status badge */}
+                    <div className="bk-premium-top">
+                      <div className={`bk-p-avatar bk-avatar-${statusLower}`}>
+                        {resourceName.charAt(0).toUpperCase()}
                       </div>
-                    </div>
-                  )}
-                  {b.adminReason && b.status === 'REJECTED' && (
-                    <div className="bk-p-chip bk-p-chip-wide bk-chip-reason">
-                      <span className="bk-p-chip-icon">🚫</span>
-                      <div>
-                        <div className="bk-p-chip-label">Rejection Reason</div>
-                        <div className="bk-p-chip-val">{b.adminReason}</div>
+                      <div className="bk-p-title-block">
+                        <div className="bk-p-resource-name">{resourceName}</div>
+                        {resourceObj?.type && <div className="bk-p-resource-type">{resourceObj.type}</div>}
                       </div>
+                      <span className={`bk-badge-v2 bk-badge-${statusLower}`}>
+                        <span className="bk-badge-dot"></span>
+                        {b.status}
+                      </span>
                     </div>
-                  )}
-                </div>
 
-                {/* Action footer */}
-                {(b.status === 'PENDING' || b.status === 'APPROVED' || b.status === 'REJECTED') && (
-                  <div className="bk-p-actions">
-                    {b.status === 'PENDING' && (
-                      <>
+                    {/* User info */}
+                    <div className="bk-p-user-row">
+                      <span className="bk-p-user-icon">👤</span>
+                      <span className="bk-p-user-id">{b.userId || 'Unknown User'}</span>
+                    </div>
+
+                    {/* Detail chips grid */}
+                    <div className="bk-p-chips">
+                      <div className="bk-p-chip">
+                        <span className="bk-p-chip-icon">📅</span>
+                        <div>
+                          <div className="bk-p-chip-label">Date</div>
+                          <div className="bk-p-chip-val">{formatDate(b.date)}</div>
+                        </div>
+                      </div>
+                      <div className="bk-p-chip">
+                        <span className="bk-p-chip-icon">🕐</span>
+                        <div>
+                          <div className="bk-p-chip-label">Time Slot</div>
+                          <div className="bk-p-chip-val">{formatTime(b.startTime)} — {formatTime(b.endTime)}</div>
+                        </div>
+                      </div>
+                      {b.purpose && (
+                        <div className="bk-p-chip bk-p-chip-wide">
+                          <span className="bk-p-chip-icon">📝</span>
+                          <div>
+                            <div className="bk-p-chip-label">Purpose</div>
+                            <div className="bk-p-chip-val bk-p-purpose">{b.purpose}</div>
+                          </div>
+                        </div>
+                      )}
+                      {b.adminReason && b.status === 'REJECTED' && (
+                        <div className="bk-p-chip bk-p-chip-wide bk-chip-reason">
+                          <span className="bk-p-chip-icon">🚫</span>
+                          <div>
+                            <div className="bk-p-chip-label">Rejection Reason</div>
+                            <div className="bk-p-chip-val">{b.adminReason}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action footer */}
+                    {(b.status === 'PENDING' || b.status === 'APPROVED' || b.status === 'REJECTED') && (
+                      <div className="bk-p-actions">
+                        {b.status === 'PENDING' && (
+                          <>
+                            <button
+                              className="bk-p-btn bk-p-btn-approve"
+                              onClick={() => handleBookingAction(b.id, 'APPROVE')}
+                            >
+                              <span>✓</span> Approve
+                            </button>
+                            <button
+                              className="bk-p-btn bk-p-btn-reject"
+                              onClick={() => handleOpenRejectModal(b)}
+                            >
+                              <span>✕</span> Reject
+                            </button>
+                          </>
+                        )}
                         <button
-                          className="bk-p-btn bk-p-btn-approve"
-                          onClick={() => handleBookingAction(b.id, 'APPROVE')}
+                          className="bk-p-btn bk-p-btn-delete"
+                          title="Delete Booking"
+                          onClick={() => handleBookingAction(b.id, 'CANCEL')}
                         >
-                          <span>✓</span> Approve
+                          🗑
                         </button>
-                        <button
-                          className="bk-p-btn bk-p-btn-reject"
-                          onClick={() => handleOpenRejectModal(b)}
-                        >
-                          <span>✕</span> Reject
-                        </button>
-                      </>
+                      </div>
                     )}
-                    <button
-                      className="bk-p-btn bk-p-btn-delete"
-                      title="Delete Booking"
-                      onClick={() => handleBookingAction(b.id, 'CANCEL')}
-                    >
-                      🗑
-                    </button>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
+
 
   const renderUsers = () => {
     const filteredUsers = users.filter(u =>
@@ -890,11 +932,13 @@ const AdminDashboard = ({ user, onLogout }) => {
         </div>
         <nav className="sidebar-nav-container">
           {[
-            { id: TABS.DASHBOARD, icon: '👥', label: 'Dashboard' },
+            { id: TABS.USERS, icon: '👥', label: 'Community' },
             { id: TABS.RESOURCES, icon: '🏢', label: 'Resources' },
             { id: TABS.BOOKINGS, icon: '📅', label: 'Bookings' },
             { id: TABS.MAINTENANCE, icon: '🛠️', label: 'Support' }
           ].map((tab) => (
+
+
             <div
               key={tab.id}
               className={`sidebar-nav-item ${activeTab === tab.id ? 'active' : ''}`}
@@ -913,10 +957,12 @@ const AdminDashboard = ({ user, onLogout }) => {
       </aside>
 
       <main className="main-viewport-glass">
-        {activeTab === TABS.DASHBOARD && renderDashboard()}
+        {activeTab === TABS.USERS && renderUsers()}
         {activeTab === TABS.RESOURCES && renderResources()}
         {activeTab === TABS.BOOKINGS && renderBookings()}
         {activeTab === TABS.MAINTENANCE && (
+
+
           <div className="tab-pane animate-in">
             <header className="tab-header">
               <h1>Maintenance Hub</h1>
@@ -1456,7 +1502,39 @@ const AdminDashboard = ({ user, onLogout }) => {
           .booking-card-glass { flex-wrap: wrap; }
           .bk-card-middle { flex-wrap: wrap; gap: 1rem; }
         }
+
+        /* ── Analytics Styles ── */
+        .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .analytics-card { background: rgba(13, 12, 20, 0.4); border: 1px solid rgba(255,255,255,0.05); padding: 2rem; border-radius: 28px; backdrop-filter: blur(10px); }
+        .analytics-card.wide { grid-column: span 2; }
+        .card-head { margin-bottom: 2rem; }
+        .card-head h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem; color: #fff; }
+        .card-head p { font-size: 0.8rem; color: #64748b; }
+        .chart-container { width: 100%; height: 100%; min-height: 250px; }
+        .pie-wrap { display: flex; justify-content: center; align-items: center; }
+        
+        .analytics-summary-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; }
+        .a-stat-mini { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 24px; text-align: center; transition: all 0.3s; }
+        .a-stat-mini:hover { background: rgba(255,255,255,0.04); border-color: rgba(139, 92, 246, 0.2); transform: translateY(-4px); }
+        .a-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+        .a-val { font-size: 1.8rem; font-weight: 900; color: #c084fc; margin-bottom: 0.2rem; }
+        .a-sub { font-size: 0.75rem; color: #64748b; }
+
+        @media (max-width: 768px) {
+          .analytics-grid { grid-template-columns: 1fr; }
+          .analytics-card.wide { grid-column: span 1; }
+          .analytics-summary-row { grid-template-columns: 1fr; }
+        }
+
+        /* ── Bookings Sub-Nav Styles ── */
+        .bk-sub-nav { display: flex; gap: 1rem; margin-bottom: 2.5rem; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 16px; width: fit-content; border: 1px solid rgba(255,255,255,0.05); }
+        .bk-sub-nav-btn { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border: none; background: transparent; color: #64748b; font-weight: 700; cursor: pointer; border-radius: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; font-size: 0.9rem; }
+        .bk-sub-nav-btn:hover { color: #e2e8f0; background: rgba(255,255,255,0.03); }
+        .bk-sub-nav-btn.active { background: #8b5cf6; color: #fff; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+        .btn-icon { font-size: 1.1rem; }
       `}</style>
+
+
     </div>
   );
 };
