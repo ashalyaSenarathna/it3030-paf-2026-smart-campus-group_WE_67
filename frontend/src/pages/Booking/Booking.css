@@ -245,32 +245,132 @@
 /* ── Booking Records Grid ── */
 .ub-records-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+}
+
+@media (max-width: 1100px) {
+  .ub-records-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ub-records-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .ub-booking-card {
   position: relative;
   overflow: hidden;
-  background: rgba(13, 12, 20, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 26px;
-  padding: 1.75rem;
-  backdrop-filter: blur(15px);
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  background: rgba(13, 12, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
+  padding: 2rem;
+  backdrop-filter: blur(25px);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
   animation: ubFadeInUp 0.6s ease-out forwards;
   opacity: 0;
   animation-delay: var(--entry-delay, 0s);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .ub-booking-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  transform: translateY(-12px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.6);
+  background: rgba(18, 17, 28, 0.9);
+}
+
+/* --- Enhanced Status Borders & Vibrant Effects --- */
+.s-border-pending {
+  border-left: 4px solid rgba(217, 119, 6, 0.7) !important;
+  box-shadow: inset 8px 0 25px -12px rgba(217, 119, 6, 0.25);
+}
+
+.s-border-approved {
+  border-left: 4px solid rgba(5, 150, 105, 0.7) !important;
+  box-shadow: inset 8px 0 25px -12px rgba(5, 150, 105, 0.25);
+}
+
+.s-border-rejected {
+  border-left: 4px solid rgba(220, 38, 38, 0.7) !important;
+  box-shadow: inset 8px 0 25px -12px rgba(220, 38, 38, 0.25);
+}
+
+.s-border-cancelled {
+  border-left: 4px solid rgba(71, 85, 105, 0.7) !important;
+  box-shadow: inset 8px 0 25px -12px rgba(71, 85, 105, 0.25);
+}
+
+/* Spotlight Effect */
+.ub-card-spotlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08), transparent 40%);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.ub-booking-card:hover .ub-card-spotlight {
+  opacity: 1;
+}
+
+/* Live Pulse Animation */
+.is-live-pulse {
+  animation: ubLivePulse 3s infinite alternate !important;
+}
+
+@keyframes ubLivePulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  50% { box-shadow: 0 0 40px 0 rgba(16, 185, 129, 0.25); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Live Badge & Indicators */
+.ub-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ub-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #10b981;
+  animation: pulse-live 1.5s infinite;
+}
+
+@keyframes pulse-live {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .ub-card-shine {
@@ -313,27 +413,30 @@
 }
 
 .tag-pending {
-  background: rgba(251, 191, 36, 0.1);
+  background: rgba(251, 191, 36, 0.15);
   color: #fbbf24;
-  border-color: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.1);
 }
 
 .tag-approved {
-  background: rgba(52, 211, 153, 0.1);
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.2);
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
 }
 
 .tag-rejected {
-  background: rgba(248, 113, 113, 0.1);
-  color: #f87171;
-  border-color: rgba(248, 113, 113, 0.2);
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
 }
 
 .tag-cancelled {
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(100, 116, 139, 0.15);
   color: #94a3b8;
-  border-color: rgba(148, 163, 184, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
 }
 
 .ub-card-id {
@@ -1010,9 +1113,21 @@
 .bookings-masonry,
 .bookings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   margin-top: 4rem;
+}
+
+@media (max-width: 1200px) {
+  .bookings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 850px) {
+  .bookings-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Glass Card System (Supports both new and old classes) */
@@ -1802,9 +1917,9 @@
 /* ── All Bookings Filter Bar ── */
 .all-filter-shelf {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
   background: rgba(13, 12, 20, 0.4);
   padding: 1.25rem 2rem;
   border-radius: 24px;
@@ -1852,7 +1967,33 @@
 
 .ub-shelf-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 5px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ub-shelf-actions .ub-pill-btn {
+  border-radius: 11px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 7px 18px;
+  font-size: 0.72rem;
+  color: #64748b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ub-shelf-actions .ub-pill-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ub-shelf-actions .ub-pill-btn.is-active {
+  background: rgba(139, 92, 246, 0.12);
+  color: #c084fc;
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .ub-select-premium {

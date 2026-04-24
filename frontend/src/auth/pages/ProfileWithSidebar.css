@@ -1,0 +1,254 @@
+/* =====================================================
+   PROFILE WITH SIDEBAR — Technician Profile
+   Light sidebar matching AdminDashboard updated style
+   ===================================================== */
+
+.pws-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f4ff;
+  color: #1a1730;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Sidebar ── */
+.pws-sidebar {
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #e5e2f5;
+  box-shadow: 2px 0 12px rgba(124, 58, 237, 0.06);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+}
+
+.pws-sidebar__brand {
+  padding: 0 2rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3rem;
+  color: #1a1730;
+}
+
+.pws-brand-dot {
+  width: 10px;
+  height: 10px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #8b5cf6;
+  flex-shrink: 0;
+}
+
+/* User info */
+.pws-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 1.5rem 1.5rem;
+  border-bottom: 1px solid #f0eeff;
+  margin-bottom: 1rem;
+}
+.pws-sidebar__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #8b5cf6, #d946ef);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+}
+.pws-sidebar__uname {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a1730;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pws-sidebar__urole {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+/* Nav */
+.pws-sidebar__nav {
+  flex: 1;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.pws-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.pws-nav-item:hover {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+.pws-nav-item--active {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+.pws-nav-item__icon { font-size: 1rem; width: 20px; text-align: center; }
+
+/* Footer */
+.pws-sidebar__footer {
+  padding: 0 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0eeff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.pws-sidebar__footer .notif-wrapper { display: flex; justify-content: center; }
+.pws-sidebar__footer .notif-bell {
+  width: 100% !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  font-size: 1rem !important;
+  color: #6b7280 !important;
+  background: transparent !important;
+}
+.pws-sidebar__footer .notif-bell:hover,
+.pws-sidebar__footer .notif-bell--active {
+  background: #f5f3ff !important;
+  color: #7c3aed !important;
+}
+.pws-sidebar__footer .notif-panel {
+  right: auto;
+  left: 110%;
+  bottom: 0;
+  top: auto;
+}
+
+.pws-logout-btn {
+  width: 100%;
+  background: rgba(239, 68, 68, 0.05);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+.pws-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ── Main ── */
+.pws-main {
+  flex: 1;
+  overflow-y: auto;
+  height: 100vh;
+  position: relative;
+  background: #f5f4ff;
+  padding: 3rem 6%;
+}
+
+.pws-main .sp-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Fix card text colors for light background */
+.pws-main .sp-hero {
+  background: #ffffff;
+  border: 1px solid #e5e2f5;
+  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.08);
+}
+.pws-main .sp-name { color: #1a1730; }
+.pws-main .sp-eyebrow { color: #7c3aed; }
+.pws-main .sp-email { color: #6b7280; }
+.pws-main .sp-role-badge {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+}
+.pws-main .sp-role-dot { background: #7c3aed; box-shadow: 0 0 6px #7c3aed; }
+
+.pws-main .sp-card {
+  background: #ffffff;
+  border: 1px solid #e5e2f5;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.06);
+}
+.pws-main .sp-card:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.12);
+}
+.pws-main .sp-card__header { border-bottom: 1px solid #f0eeff; }
+.pws-main .sp-card__title { color: #1a1730; }
+
+.pws-main .sp-field__label { color: #9ca3af; }
+.pws-main .sp-field__value { color: #1a1730; }
+.pws-main .sp-field__value--badge {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #7c3aed;
+}
+.pws-main .sp-divider { background: #f3f0ff; }
+
+.pws-main .sp-scope-item { border-bottom-color: #f3f0ff; }
+.pws-main .sp-scope-item__icon { background: #f5f3ff; }
+.pws-main .sp-scope-item__text { color: #4b5563; }
+
+.pws-main .sp-pw-label { color: #9ca3af; }
+.pws-main .sp-pw-input {
+  background: #faf9ff;
+  border-color: #e5e2f5;
+  color: #1a1730;
+}
+.pws-main .sp-pw-input::placeholder { color: #c4b5fd; opacity: 0.6; }
+.pws-main .sp-pw-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  background: #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .pws-sidebar { width: 80px; }
+  .pws-sidebar__brand span,
+  .pws-sidebar__user,
+  .pws-nav-item__label,
+  .pws-sidebar__footer .pws-logout-btn { display: none; }
+  .pws-nav-item { justify-content: center; padding: 15px; }
+}
+
+@media (max-width: 640px) {
+  .pws-layout { flex-direction: column; }
+  .pws-sidebar { width: 100%; height: auto; position: static; }
+  .pws-sidebar__nav { flex-direction: row; flex-wrap: wrap; }
+  .pws-main { height: auto; padding: 1.25rem; }
+}

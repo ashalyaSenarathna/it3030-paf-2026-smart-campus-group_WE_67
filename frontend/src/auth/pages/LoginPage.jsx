@@ -78,7 +78,7 @@ export default function LoginPage({ user, onLoginSuccess }) {
 
           <form onSubmit={handleSubmit} className="login-form" autoComplete="off">
             <div className="form-group">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username">USERNAME</label>
               <input
                 id="username"
                 type="text"
@@ -94,7 +94,7 @@ export default function LoginPage({ user, onLoginSuccess }) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">PASSWORD</label>
               <div className="password-input-wrap">
                 <input
                   id="password"
@@ -113,15 +113,14 @@ export default function LoginPage({ user, onLoginSuccess }) {
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M3 3l18 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                      <path d="M10.7 6.3A10.8 10.8 0 0 1 12 6c5.5 0 9.5 4.2 10.8 6-0.5 0.7-1.5 2-3 3.3M6.1 9.4A15.3 15.3 0 0 0 1.2 12c1.4 1.9 5.3 6 10.8 6 1.8 0 3.5-0.4 4.9-1.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M14.1 14.1A3 3 0 0 1 9.9 9.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M1.2 12C2.6 10.1 6.5 6 12 6s9.4 4.1 10.8 6C21.4 13.9 17.5 18 12 18S2.6 13.9 1.2 12Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </button>
@@ -146,8 +145,8 @@ export default function LoginPage({ user, onLoginSuccess }) {
           </button>
 
           <div className="login-footer-link">
-            <a href="#">Forgot password?</a>
-            <span> Click here</span>
+            <span>Forgot password?</span>
+            <a href="#"> Click here</a>
           </div>
         </div>
       </div>

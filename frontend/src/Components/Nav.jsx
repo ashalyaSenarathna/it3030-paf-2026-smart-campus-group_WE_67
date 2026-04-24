@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import NotificationPanel from '../notification/NotificationPanel';
 import './Nav.css';
 
 const Nav = ({ user, onLogout }) => {
@@ -16,12 +17,6 @@ const Nav = ({ user, onLogout }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Hide the navbar on these routes to avoid layout conflicts with sidebars / auth
-  const hiddenRoutes = ['/login', '/admin/dashboard', '/tech/dashboard', '/facility-management/admin', '/bookings/admin'];
-  if (hiddenRoutes.includes(location.pathname)) {
-    return null;
-  }
 
   const handleLogout = () => {
     if (onLogout) onLogout();
@@ -60,6 +55,11 @@ const Nav = ({ user, onLogout }) => {
                 <Link to="/admin/dashboard" className={`global-nav-item ${isActive('/admin/dashboard') ? 'global-nav-item--active' : ''}`}>Admin</Link>
               </li>
             )}
+            {isAdmin && (
+              <li>
+                <Link to="/profile/admin" className={`global-nav-item ${isActive('/profile/admin') ? 'global-nav-item--active' : ''}`}>Profile</Link>
+              </li>
+            )}
             {isStudent && (
               <li>
                 <Link to="/profile/student" className={`global-nav-item ${isActive('/profile/student') ? 'global-nav-item--active' : ''}`}>Profile</Link>
@@ -72,6 +72,9 @@ const Nav = ({ user, onLogout }) => {
             )}
             <li>
               <button className="global-nav-item global-logout-btn" onClick={handleLogout}>Logout</button>
+            </li>
+            <li style={{ display: 'flex', alignItems: 'center' }}>
+              <NotificationPanel user={user} />
             </li>
           </>
         ) : (

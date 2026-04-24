@@ -7,7 +7,7 @@ import './Booking.css';
 const AllBookings = ({ user }) => {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
-  const [resources, setResources] = useState({});
+  const [resources, setResources] = useState([]);
   const [resourceDetails, setResourceDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,17 +67,7 @@ const AllBookings = ({ user }) => {
           resourceApi.getAll()
         ]);
 
-        const resourceMap = {};
-        resourcesRes.data.forEach(r => {
-          resourceMap[r.id] = {
-            name: r.name,
-            location: r.location,
-            type: r.type
-          };
-        });
-
-        setResources(resourceMap);
-        setResourceDetails(resourcesRes.data);
+        setResources(resourcesRes.data);
 
         // Show all bookings, but maybe prioritize Approved ones for a public view
         // Filtering out CANCELLED/REJECTED for the public "Bookings" view to keep it clean
@@ -109,14 +99,12 @@ const AllBookings = ({ user }) => {
 
     if (searchTerm.trim() !== '') {
       result = result.filter(b => {
-        const resourceName = resources[b.resourceId]?.name?.toLowerCase() || '';
-        const resourceLocation = resources[b.resourceId]?.location?.toLowerCase() || '';
-        const bookingPurpose = (b.purpose || '').toLowerCase();
+        const resource = resources.find(r => 
+          String(r.id || r._id || '').toLowerCase() === String(b.resourceId || '').toLowerCase()
+        );
+        const resName = (resource?.name || '').toLowerCase();
         const lowerSearch = searchTerm.toLowerCase();
-        
-        return resourceName.includes(lowerSearch) || 
-               resourceLocation.includes(lowerSearch) || 
-               bookingPurpose.includes(lowerSearch);
+        return resName.startsWith(lowerSearch);
       });
     }
 
@@ -171,7 +159,7 @@ const AllBookings = ({ user }) => {
               <span className="ub-search-icon">🔍</span>
               <input
                 type="text"
-                placeholder="Find facility or location..."
+                placeholder="Search by facility name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -229,7 +217,7 @@ const AllBookings = ({ user }) => {
         ) : (
           <div className="ub-records-grid">
             {filteredBookings.map((booking, index) => {
-              const res = resources[booking.resourceId] || { name: 'Campus Facility', location: 'University', type: 'Facility' };
+              const res = resources.find(r => String(r.id || r._id) === String(booking.resourceId)) || { name: 'Campus Facility', location: 'University', type: 'Facility' };
               const status = (booking.status || 'PENDING').toUpperCase();
               const live = isLive(booking.date, booking.startTime, booking.endTime);
 
