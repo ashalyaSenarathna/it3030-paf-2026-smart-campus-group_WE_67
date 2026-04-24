@@ -460,6 +460,7 @@
 .status-dot.available   { background: #34d399; box-shadow: 0 0 8px rgba(52, 211, 153, 0.6); }
 .status-dot.occupied    { background: #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.6); }
 .status-dot.maintenance { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.6); }
+.status-dot.out_of_service { background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.6); }
 
 .resource-card h2 {
   font-size: 1.2rem;
@@ -517,6 +518,7 @@
 .resource-status-badge.available   { background: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.2); }
 .resource-status-badge.occupied    { background: rgba(251, 191, 36, 0.12); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
 .resource-status-badge.maintenance { background: rgba(248, 113, 113, 0.12); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
+.resource-status-badge.out_of_service { background: rgba(248, 113, 113, 0.12); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
 
 /* ===================== LOADING + EMPTY ===================== */
 .catalogue-loading {
