@@ -475,7 +475,7 @@ const AdminDashboard = ({ user, onLogout }) => {
 
 
   const filteredResources = resources.filter(r => {
-    const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.id?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = r.name.toLowerCase().startsWith(searchQuery.toLowerCase());
     const matchesType = resourceFilter === 'All' || r.type === resourceFilter;
     const matchesStatus = resourceStatusFilter === 'All' || r.status === resourceStatusFilter;
     return matchesSearch && matchesType && matchesStatus;
@@ -514,7 +514,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             <span className="search-icon-glass">🔍</span>
             <input
               type="text"
-              placeholder="Search by name or id..."
+              placeholder="Search by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
