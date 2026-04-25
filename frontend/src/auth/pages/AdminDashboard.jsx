@@ -996,7 +996,16 @@ const AdminDashboard = ({ user, onLogout }) => {
             <form onSubmit={handleSaveResource} className="modal-form-grid">
               <div className="f-group full">
                 <label>Resource Name</label>
-                <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Auditorium A" />
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                    setFormData({ ...formData, name: val });
+                  }}
+                  placeholder="e.g. Auditorium A"
+                />
               </div>
               <div className="f-group">
                 <label>Category</label>
@@ -1025,7 +1034,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                     required
                     value={formData.location}
                     placeholder="e.g. IT Admin Room"
-                    onChange={e => setFormData({ ...formData, location: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value.replace(/[^a-zA-Z0-9\s,]/g, '');
+                      setFormData({ ...formData, location: val });
+                    }}
                   />
                 ) : (
                   <>
@@ -1037,7 +1049,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                       value={formData.location}
                       placeholder="Type 'M' for Main Building or 'N' for New Building..."
                       onChange={e => {
-                        const val = e.target.value;
+                        const val = e.target.value.replace(/[^a-zA-Z0-9\s,]/g, '');
                         setFormData({ ...formData, location: val });
                         if (val.trim().length > 0) {
                           const filtered = CAMPUS_LOCATIONS.filter(loc =>
