@@ -53,6 +53,28 @@ const UserBookings = ({ user, onLogout }) => {
     return isNaN(d.getTime()) ? 'Invalid Date' : d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
   };
 
+  const isExpired = (b) => {
+    if ((b.status || '').toUpperCase() !== 'APPROVED') return false;
+    try {
+      let endDateTime;
+      if (Array.isArray(b.date)) {
+        const [y, m, d] = b.date;
+        const endTimeArr = Array.isArray(b.endTime) ? b.endTime : [0, 0];
+        const [h, min] = endTimeArr;
+        endDateTime = new Date(y, m - 1, d, h, min);
+      } else {
+        endDateTime = new Date(b.date);
+        const endTimeStr = typeof b.endTime === 'string' ? b.endTime : '00:00';
+        const [h, min] = endTimeStr.split(':');
+        endDateTime.setHours(parseInt(h) || 0, parseInt(min) || 0, 0, 0);
+      }
+      return endDateTime < new Date();
+    } catch (e) {
+      return false;
+    }
+  };
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -211,21 +233,27 @@ const UserBookings = ({ user, onLogout }) => {
           <div className="ub-records-grid">
             {filteredBookings.map((booking, index) => {
               const rName = resources[booking.resourceId] || 'Campus Facility';
+              const expired = isExpired(booking);
+              const displayStatus = expired ? 'EXPIRED' : (booking.status || 'PENDING').toUpperCase();
               const status = (booking.status || 'PENDING').toUpperCase();
+
               return (
                 <div
                   key={booking.id}
-                  className={`ub-booking-card s-border-${status.toLowerCase()}`}
-                  style={{ '--entry-delay': `${index * 0.08}s` }}
+                  className={`ub-booking-card s-border-${displayStatus.toLowerCase()}`}
+                  style={{ '--entry-delay': `${index * 0.08}s`, opacity: expired ? 0.8 : 1 }}
                 >
+
+
                   <div className="ub-card-shine"></div>
                   
                   {/* Card Header */}
                   <div className="ub-card-header">
-                    <span className={`ub-status-tag tag-${status.toLowerCase()}`}>
+                    <span className={`ub-status-tag tag-${displayStatus.toLowerCase()}`}>
                       <span className="ub-tag-dot"></span>
-                      {status}
+                      {displayStatus}
                     </span>
+
                     <span className="ub-card-id">#{booking.id.toString().slice(-6)}</span>
                   </div>
 

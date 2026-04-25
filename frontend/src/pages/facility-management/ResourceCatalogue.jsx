@@ -107,7 +107,7 @@ function ResourceCatalogue() {
             id="resource-search"
             className="catalogue-search"
             type="text"
-            placeholder="Search by name…"
+            placeholder="Search by name..."
             aria-label="Search resources"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
