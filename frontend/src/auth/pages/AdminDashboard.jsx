@@ -1093,7 +1093,17 @@ const AdminDashboard = ({ user, onLogout }) => {
             <form onSubmit={handleSaveResource} className="modal-form-grid">
               <div className="f-group full">
                 <label>Resource Name</label>
-                <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Auditorium A" />
+                <input 
+                  type="text" 
+                  required 
+                  value={formData.name} 
+                  onChange={e => {
+                    // Prevent digits and common special characters (# wage eewa)
+                    const sanitizedValue = e.target.value.replace(/[0-9#@!$%^&*()_+={}\[\]:;"'<>,.?/|\\~`]/g, '');
+                    setFormData({ ...formData, name: sanitizedValue });
+                  }} 
+                  placeholder="e.g. Auditorium A" 
+                />
               </div>
               <div className="f-group">
                 <label>Category</label>
@@ -1122,7 +1132,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                     required
                     value={formData.location}
                     placeholder="e.g. IT Admin Room"
-                    onChange={e => setFormData({ ...formData, location: e.target.value })}
+                    onChange={e => {
+                      const sanitized = e.target.value.replace(/[#@!$%^&*()_+={}\[\]:;"'<>,?\/|\\~`]/g, '');
+                      setFormData({ ...formData, location: sanitized });
+                    }}
                   />
                 ) : (
                   <>
@@ -1134,7 +1147,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                       value={formData.location}
                       placeholder="Type 'M' for Main Building or 'N' for New Building..."
                       onChange={e => {
-                        const val = e.target.value;
+                        const val = e.target.value.replace(/[#@!$%^&*()_+={}\[\]:;"'<>,?\/|\\~`]/g, '');
                         setFormData({ ...formData, location: val });
                         if (val.trim().length > 0) {
                           const filtered = CAMPUS_LOCATIONS.filter(loc =>
