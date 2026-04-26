@@ -83,7 +83,7 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
     <div className="ub-modal-overlay" onClick={onClose}>
       <div className="ub-modal-content" onClick={e => e.stopPropagation()}>
         <div className="ub-modal-glow"></div>
-        
+
         {/* Header */}
         <div className="ub-modal-header">
           <div className="ub-modal-title-stack">
@@ -105,7 +105,7 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
               <div className="shelf-slots">
                 {existingBookings.map(b => (
                   <span key={b.id} className="ub-slot-pill">
-                    {Array.isArray(b.startTime) ? `${b.startTime[0]}:${b.startTime[1].toString().padStart(2, '0')}` : b.startTime.substring(0, 5)} - 
+                    {Array.isArray(b.startTime) ? `${b.startTime[0]}:${b.startTime[1].toString().padStart(2, '0')}` : b.startTime.substring(0, 5)} -
                     {Array.isArray(b.endTime) ? `${b.endTime[0]}:${b.endTime[1].toString().padStart(2, '0')}` : b.endTime.substring(0, 5)}
                   </span>
                 ))}
@@ -129,17 +129,17 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
               <label className="ub-field-label">Select Date</label>
               <div className="ub-input-wrapper">
                 <span className="ub-input-icon">📅</span>
-                <input 
-                  type="date" 
-                  name="date" 
-                  required 
-                  value={formData.date} 
-                  onChange={handleChange} 
-                  min={new Date().toISOString().split('T')[0]} 
+                <input
+                  type="date"
+                  name="date"
+                  required
+                  value={formData.date}
+                  onChange={handleChange}
+                  min={new Date().toISOString().split('T')[0]}
                 />
               </div>
             </div>
-            
+
             {/* Time Fields */}
             <div className="ub-field-group">
               <label className="ub-field-label">Start Time</label>
@@ -162,35 +162,35 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
                 <label className="ub-field-label">Expected Participants (Capacity: {resource.capacity})</label>
                 <div className="ub-input-wrapper">
                   <span className="ub-input-icon">👥</span>
-                  <input 
-                    type="number" 
-                    name="expectedAttendees" 
-                    min="1" 
-                    max={resource.capacity} 
-                    required 
-                    value={formData.expectedAttendees} 
-                    onChange={handleChange} 
+                  <input
+                    type="number"
+                    name="expectedAttendees"
+                    min="1"
+                    max={resource.capacity}
+                    required
+                    value={formData.expectedAttendees}
+                    onChange={handleChange}
                   />
                   <div className="ub-capacity-bar">
-                    <div 
-                      className="ub-capacity-progress" 
+                    <div
+                      className="ub-capacity-progress"
                       style={{ width: `${Math.min(100, (formData.expectedAttendees / resource.capacity) * 100)}%` }}
                     ></div>
                   </div>
                 </div>
               </div>
             )}
-            
+
             {/* Purpose */}
             <div className="ub-field-group full">
               <label className="ub-field-label">Purpose of Booking</label>
               <div className="ub-input-wrapper">
-                <textarea 
-                  name="purpose" 
-                  rows="3" 
-                  required 
-                  placeholder="Describe the nature of your event or meeting..." 
-                  value={formData.purpose} 
+                <textarea
+                  name="purpose"
+                  rows="3"
+                  required
+                  placeholder="Describe the nature of your event or meeting..."
+                  value={formData.purpose}
                   onChange={handleChange}
                 ></textarea>
               </div>
@@ -199,8 +199,8 @@ const RequestBookingModal = ({ resource, user, onClose, onSuccess, existingBooki
 
           <div className="ub-modal-footer">
             <button type="button" className="ub-btn-ghost" onClick={onClose}>Dismiss</button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={`ub-btn-action ${hasConflict || isTimeInvalid ? 'is-disabled' : ''}`}
               disabled={loading || hasConflict || isTimeInvalid}
             >

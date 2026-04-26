@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller for managing resources like labs, equipment, etc.
+ * Base URL: /api/resources
+ */
 @RestController
 @RequestMapping("/api/resources")
 @CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"}, allowCredentials = "true")
@@ -25,11 +29,13 @@ public class ResourceController {
     @Autowired
     private BookingRepository bookingRepository;
 
+    // [GET] /api/resources - Get a list of all resources
     @GetMapping
     public List<Resource> getAllResources() {
         return resourceService.getAllResources();
     }
 
+    // [GET] /api/resources/{id} - Get a single resource by its ID
     @GetMapping("/{id}")
     public ResponseEntity<Resource> getResourceById(@PathVariable("id") String id) {
         return resourceService.getResourceById(id)
@@ -37,6 +43,7 @@ public class ResourceController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // [POST] /api/resources - Add a new resource
     @PostMapping
     public Resource createResource(@RequestBody Resource resource) {
         Resource saved = resourceService.createResource(resource);
@@ -48,6 +55,7 @@ public class ResourceController {
         return saved;
     }
 
+    // [PUT] /api/resources/{id} - Update an existing resource's details
     @PutMapping("/{id}")
     public ResponseEntity<Resource> updateResource(@PathVariable("id") String id, @RequestBody Resource resourceDetails) {
         Resource updated = resourceService.updateResource(id, resourceDetails);
@@ -62,6 +70,7 @@ public class ResourceController {
         return ResponseEntity.notFound().build();
     }
 
+    // [DELETE] /api/resources/{id} - Delete a resource and notify affected users
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteResource(@PathVariable String id) {
         try {

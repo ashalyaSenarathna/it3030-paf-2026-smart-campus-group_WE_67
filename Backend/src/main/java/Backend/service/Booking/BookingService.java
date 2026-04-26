@@ -17,14 +17,13 @@ public class BookingService {
     public Booking createBooking(Booking booking) {
         // --- LAYER: Failsafe Manual Check (Paranoid Mode) ---
         List<Booking> allDayBookings = bookingRepository.findByResourceIdAndDateAndStatusIn(
-                booking.getResourceId(), 
-                booking.getDate(), 
-                java.util.Arrays.asList("PENDING", "APPROVED")
-        );
+                booking.getResourceId(),
+                booking.getDate(),
+                java.util.Arrays.asList("PENDING", "APPROVED"));
 
         for (Booking existing : allDayBookings) {
-            if (isOverlapping(booking.getStartTime(), booking.getEndTime(), 
-                             existing.getStartTime(), existing.getEndTime())) {
+            if (isOverlapping(booking.getStartTime(), booking.getEndTime(),
+                    existing.getStartTime(), existing.getEndTime())) {
                 throw new RuntimeException("Scheduling conflict: This time is already reserved by another booking.");
             }
         }
@@ -67,7 +66,7 @@ public class BookingService {
     public Booking updateBooking(String id, Booking bookingDetails) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
-        
+
         // Only allow editing if pending or approved
         if (booking.getStatus() == BookingStatus.REJECTED || booking.getStatus() == BookingStatus.CANCELLED) {
             throw new RuntimeException("Cannot edit a booking that is " + booking.getStatus());
@@ -75,22 +74,23 @@ public class BookingService {
 
         // Check for conflicts if time/date/resource changed
         if (!booking.getResourceId().equals(bookingDetails.getResourceId()) ||
-            !booking.getDate().equals(bookingDetails.getDate()) ||
-            !booking.getStartTime().equals(bookingDetails.getStartTime()) ||
-            !booking.getEndTime().equals(bookingDetails.getEndTime())) {
-            
+                !booking.getDate().equals(bookingDetails.getDate()) ||
+                !booking.getStartTime().equals(bookingDetails.getStartTime()) ||
+                !booking.getEndTime().equals(bookingDetails.getEndTime())) {
+
             // --- LAYER: Failsafe Manual Check (Paranoid Mode) ---
             List<Booking> allDayBookings = bookingRepository.findByResourceIdAndDateAndStatusIn(
-                    bookingDetails.getResourceId(), 
-                    bookingDetails.getDate(), 
-                    java.util.Arrays.asList("PENDING", "APPROVED")
-            );
+                    bookingDetails.getResourceId(),
+                    bookingDetails.getDate(),
+                    java.util.Arrays.asList("PENDING", "APPROVED"));
 
             for (Booking existing : allDayBookings) {
-                if (existing.getId().equals(id)) continue; // Skip self
-                if (isOverlapping(bookingDetails.getStartTime(), bookingDetails.getEndTime(), 
-                                 existing.getStartTime(), existing.getEndTime())) {
-                    throw new RuntimeException("Scheduling conflict: This time is already reserved by another booking.");
+                if (existing.getId().equals(id))
+                    continue; // Skip self
+                if (isOverlapping(bookingDetails.getStartTime(), bookingDetails.getEndTime(),
+                        existing.getStartTime(), existing.getEndTime())) {
+                    throw new RuntimeException(
+                            "Scheduling conflict: This time is already reserved by another booking.");
                 }
             }
             // -----------------------------------------------------------
@@ -102,15 +102,15 @@ public class BookingService {
         booking.setEndTime(bookingDetails.getEndTime());
         booking.setPurpose(bookingDetails.getPurpose());
         booking.setExpectedAttendees(bookingDetails.getExpectedAttendees());
-        // Reset status to pending if it was approved and then edited? 
+        // Reset status to pending if it was approved and then edited?
         // For simplicity, let's keep it pending if edited.
         booking.setStatus(BookingStatus.PENDING);
-        
+
         return bookingRepository.save(booking);
     }
 
-    private boolean isOverlapping(java.time.LocalTime start1, java.time.LocalTime end1, 
-                                java.time.LocalTime start2, java.time.LocalTime end2) {
+    private boolean isOverlapping(java.time.LocalTime start1, java.time.LocalTime end1,
+            java.time.LocalTime start2, java.time.LocalTime end2) {
         // Interval (start1, end1) overlaps (start2, end2) if:
         // start1 < end2 AND end1 > start2
         return start1.isBefore(end2) && end1.isAfter(start2);

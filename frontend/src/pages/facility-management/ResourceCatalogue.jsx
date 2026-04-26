@@ -6,28 +6,28 @@ import RequestBookingModal from '../Booking/RequestBookingModal';
 import './ResourceCatalogue.css';
 import { RESOURCE_TYPE_ICONS, RESOURCE_TYPES, RESOURCE_STATUSES } from './resourceConstants';
 const STATUS_OPTIONS = [
-  { value: 'All',         label: 'All Statuses', color: '#6b7280', bg: '#f3f4f6' },
-  { value: 'Available',   label: 'Available',    color: '#065f46', bg: '#d1fae5' },
-  { value: 'Occupied',    label: 'Occupied',     color: '#92400e', bg: '#fef3c7' },
-  { value: 'Maintenance', label: 'Maintenance',  color: '#991b1b', bg: '#fee2e2' },
+  { value: 'All', label: 'All Statuses', color: '#6b7280', bg: '#f3f4f6' },
+  { value: 'Available', label: 'Available', color: '#065f46', bg: '#d1fae5' },
+  { value: 'Occupied', label: 'Occupied', color: '#92400e', bg: '#fef3c7' },
+  { value: 'Maintenance', label: 'Maintenance', color: '#991b1b', bg: '#fee2e2' },
   { value: 'OUT_OF_SERVICE', label: 'Out of Service', color: '#991b1b', bg: '#fee2e2' },
 ];
 
 const SORT_OPTIONS = [
-  { value: 'default',      label: 'Default Order' },
-  { value: 'name-asc',     label: 'Name (A → Z)' },
-  { value: 'name-desc',    label: 'Name (Z → A)' },
+  { value: 'default', label: 'Default Order' },
+  { value: 'name-asc', label: 'Name (A → Z)' },
+  { value: 'name-desc', label: 'Name (Z → A)' },
   { value: 'capacity-asc', label: 'Capacity (Low → High)' },
-  { value: 'capacity-desc',label: 'Capacity (High → Low)' },
+  { value: 'capacity-desc', label: 'Capacity (High → Low)' },
 ];
 
 function ResourceCatalogue() {
-  const [resources, setResources]     = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [query, setQuery]             = useState('');
-  const [typeFilter, setTypeFilter]   = useState('All');
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [sortBy, setSortBy]           = useState('default');
+  const [sortBy, setSortBy] = useState('default');
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
 
@@ -46,7 +46,7 @@ function ResourceCatalogue() {
       try {
         const user = await getCurrentUser();
         setCurrentUser(user);
-      } catch(e){}
+      } catch (e) { }
     }
     fetchUser();
     fetchResources();
@@ -63,15 +63,15 @@ function ResourceCatalogue() {
       const matchesQuery =
         q.length === 0 ||
         (resource.name && resource.name.toLowerCase().startsWith(q));
-      const matchesType   = typeFilter === 'All' || resource.type === typeFilter;
+      const matchesType = typeFilter === 'All' || resource.type === typeFilter;
       const matchesStatus = statusFilter === 'All' || resource.status === statusFilter;
       return matchesQuery && matchesType && matchesStatus;
     });
 
     switch (sortBy) {
-      case 'name-asc':      list = [...list].sort((a, b) => (a.name || '').localeCompare(b.name || '')); break;
-      case 'name-desc':     list = [...list].sort((a, b) => (b.name || '').localeCompare(a.name || '')); break;
-      case 'capacity-asc':  list = [...list].sort((a, b) => (a.capacity || 0) - (b.capacity || 0)); break;
+      case 'name-asc': list = [...list].sort((a, b) => (a.name || '').localeCompare(b.name || '')); break;
+      case 'name-desc': list = [...list].sort((a, b) => (b.name || '').localeCompare(a.name || '')); break;
+      case 'capacity-asc': list = [...list].sort((a, b) => (a.capacity || 0) - (b.capacity || 0)); break;
       case 'capacity-desc': list = [...list].sort((a, b) => (b.capacity || 0) - (a.capacity || 0)); break;
       default: break;
     }
@@ -189,7 +189,7 @@ function ResourceCatalogue() {
               {query && <span className="active-tag">🔍 "{query}"</span>}
               {typeFilter !== 'All' && <span className="active-tag">{RESOURCE_TYPE_ICONS[typeFilter] || '🏫'} {typeFilter}</span>}
               {statusFilter !== 'All' && <span className="active-tag">⚡ {statusFilter}</span>}
-              {sortBy !== 'default' && <span className="active-tag">↕ {SORT_OPTIONS.find(o=>o.value===sortBy)?.label}</span>}
+              {sortBy !== 'default' && <span className="active-tag">↕ {SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>}
             </div>
           )}
         </div>
@@ -229,8 +229,8 @@ function ResourceCatalogue() {
                   {resource.status}
                 </div>
                 {resource.status !== 'Maintenance' && resource.status !== 'OUT_OF_SERVICE' && (
-                  <button 
-                    className="clear-filters-btn-lg" 
+                  <button
+                    className="clear-filters-btn-lg"
                     onClick={() => {
                       if (!currentUser) alert("Please log in to book this resource.");
                       else setSelectedResource(resource);

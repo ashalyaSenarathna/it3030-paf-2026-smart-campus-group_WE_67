@@ -1098,8 +1098,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                   required 
                   value={formData.name} 
                   onChange={e => {
-                    // Prevent digits and common special characters (# wage eewa)
-                    const sanitizedValue = e.target.value.replace(/[0-9#@!$%^&*()_+={}\[\]:;"'<>,.?/|\\~`]/g, '');
+                    // Prevent common special characters (# wage eewa), but allow digits
+                    const sanitizedValue = e.target.value.replace(/[#@!$%^&*()_+={}\[\]:;"'<>,.?/|\\~`]/g, '');
                     setFormData({ ...formData, name: sanitizedValue });
                   }} 
                   placeholder="e.g. Auditorium A" 

@@ -21,22 +21,40 @@
   z-index: 0;
   opacity: 0.12;
 }
+
 .sp-glow--purple {
-  width: 600px; height: 600px;
+  width: 600px;
+  height: 600px;
   background: radial-gradient(circle, #7c3aed, transparent 70%);
-  top: -10%; right: -8%;
+  top: -10%;
+  right: -8%;
   animation: spPulse 14s ease-in-out infinite alternate;
 }
+
 .sp-glow--blue {
-  width: 500px; height: 500px;
+  width: 500px;
+  height: 500px;
   background: radial-gradient(circle, #0ea5e9, transparent 70%);
-  bottom: -10%; left: -6%;
+  bottom: -10%;
+  left: -6%;
   animation: spPulse 14s ease-in-out infinite alternate-reverse;
 }
+
 @keyframes spPulse {
-  0%   { transform: scale(1) translate(0,0); opacity: 0.1; }
-  50%  { transform: scale(1.1) translate(20px,-20px); opacity: 0.18; }
-  100% { transform: scale(0.95) translate(-10px,10px); opacity: 0.1; }
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.1;
+  }
+
+  50% {
+    transform: scale(1.1) translate(20px, -20px);
+    opacity: 0.18;
+  }
+
+  100% {
+    transform: scale(0.95) translate(-10px, 10px);
+    opacity: 0.1;
+  }
 }
 
 .sp-content {
@@ -67,6 +85,7 @@
   width: 80px;
   height: 80px;
 }
+
 .sp-avatar__initials {
   width: 80px;
   height: 80px;
@@ -82,6 +101,7 @@
   position: relative;
   z-index: 1;
 }
+
 .sp-avatar__ring {
   position: absolute;
   inset: -4px;
@@ -93,11 +113,16 @@
   mask-composite: exclude;
   animation: spRingSpin 6s linear infinite;
 }
+
 @keyframes spRingSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.sp-hero__text { flex: 1; }
+.sp-hero__text {
+  flex: 1;
+}
 
 .sp-eyebrow {
   display: block;
@@ -108,6 +133,7 @@
   color: #7c3aed;
   margin-bottom: 0.35rem;
 }
+
 .sp-name {
   margin: 0 0 0.3rem;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
@@ -115,6 +141,7 @@
   letter-spacing: -0.04em;
   color: #1a1730;
 }
+
 .sp-email {
   margin: 0;
   font-size: 0.9rem;
@@ -135,6 +162,7 @@
   letter-spacing: 0.04em;
   flex-shrink: 0;
 }
+
 .sp-role-dot {
   width: 7px;
   height: 7px;
@@ -143,9 +171,17 @@
   box-shadow: 0 0 6px #7c3aed;
   animation: spDotPulse 2s ease-in-out infinite;
 }
+
 @keyframes spDotPulse {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.35; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
 }
 
 /* ── Grid ── */
@@ -165,10 +201,12 @@
   animation: spFadeUp 0.55s ease both;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
+
 .sp-card:hover {
   border-color: rgba(124, 58, 237, 0.3);
   box-shadow: 0 8px 32px rgba(124, 58, 237, 0.12);
 }
+
 .sp-card--wide {
   grid-column: 1 / -1;
 }
@@ -180,7 +218,12 @@
   padding: 1.25rem 1.5rem 0.9rem;
   border-bottom: 1px solid #f0eeff;
 }
-.sp-card__icon { font-size: 1.15rem; line-height: 1; }
+
+.sp-card__icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
 .sp-card__title {
   margin: 0;
   font-size: 1rem;
@@ -189,7 +232,9 @@
   letter-spacing: -0.02em;
 }
 
-.sp-card__body { padding: 1.25rem 1.5rem; }
+.sp-card__body {
+  padding: 1.25rem 1.5rem;
+}
 
 /* Fields */
 .sp-field {
@@ -199,18 +244,21 @@
   gap: 1rem;
   padding: 0.55rem 0;
 }
+
 .sp-field__label {
   font-size: 0.8rem;
   color: #9ca3af;
   font-weight: 500;
   white-space: nowrap;
 }
+
 .sp-field__value {
   font-size: 0.9rem;
   color: #1a1730;
   font-weight: 600;
   text-align: right;
 }
+
 .sp-field__value--badge {
   padding: 3px 12px;
   border-radius: 999px;
@@ -219,6 +267,7 @@
   color: #7c3aed;
   font-size: 0.78rem;
 }
+
 .sp-divider {
   height: 1px;
   background: #f3f0ff;
@@ -233,7 +282,11 @@
   padding: 0.65rem 0;
   border-bottom: 1px solid #f3f0ff;
 }
-.sp-scope-item:last-child { border-bottom: none; }
+
+.sp-scope-item:last-child {
+  border-bottom: none;
+}
+
 .sp-scope-item__icon {
   font-size: 1rem;
   width: 32px;
@@ -245,6 +298,7 @@
   background: #f5f3ff;
   flex-shrink: 0;
 }
+
 .sp-scope-item__text {
   font-size: 0.875rem;
   color: #4b5563;
@@ -257,6 +311,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
+
 .sp-action-btn {
   display: flex;
   flex-direction: column;
@@ -270,13 +325,19 @@
   transition: all 0.22s ease;
   cursor: pointer;
 }
+
 .sp-action-btn:hover {
   background: #f0ebff;
   border-color: rgba(124, 58, 237, 0.35);
   transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
 }
-.sp-action-btn__icon { font-size: 1.5rem; line-height: 1; }
+
+.sp-action-btn__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
 .sp-action-btn__label {
   font-size: 0.78rem;
   font-weight: 600;
@@ -284,22 +345,51 @@
   text-align: center;
   line-height: 1.3;
 }
-.sp-action-btn:hover .sp-action-btn__label { color: #7c3aed; }
+
+.sp-action-btn:hover .sp-action-btn__label {
+  color: #7c3aed;
+}
 
 /* Animation */
 @keyframes spFadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .sp-root { padding: 1.25rem; }
-  .sp-hero { flex-wrap: wrap; gap: 1rem; }
-  .sp-role-badge { width: 100%; justify-content: center; }
-  .sp-grid { grid-template-columns: 1fr; }
-  .sp-card--wide { grid-column: 1; }
-  .sp-actions-grid { grid-template-columns: repeat(2, 1fr); }
+  .sp-root {
+    padding: 1.25rem;
+  }
+
+  .sp-hero {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .sp-role-badge {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sp-card--wide {
+    grid-column: 1;
+  }
+
+  .sp-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* ── Password change form (shared by all 3 profile pages) ── */
@@ -343,7 +433,10 @@
   width: 100%;
 }
 
-.sp-pw-input::placeholder { color: #c4b5fd; opacity: 0.6; }
+.sp-pw-input::placeholder {
+  color: #c4b5fd;
+  opacity: 0.6;
+}
 
 .sp-pw-input:focus {
   border-color: #7c3aed;
@@ -401,6 +494,12 @@
 }
 
 @media (max-width: 768px) {
-  .sp-pw-fields { max-width: 100%; }
-  .sp-pw-btn { width: 100%; max-width: 420px; }
+  .sp-pw-fields {
+    max-width: 100%;
+  }
+
+  .sp-pw-btn {
+    width: 100%;
+    max-width: 420px;
+  }
 }
